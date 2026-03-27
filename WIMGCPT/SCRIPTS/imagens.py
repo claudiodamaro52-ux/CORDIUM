@@ -138,7 +138,7 @@ def main():
 
     resolucao = obter_parametro(
         "resolutions",
-        f"{args.minwidth or 0}x{args.minheight or 0}" if args.minwidth or args.minheight else None,
+        f"{args.minwidth or 0}x{args.minheight or 0}" if (args.minwidth is not None or args.minheight is not None) else None,
         config,
         "Selecione resolução mínima:",
         ["640x480", "800x600", "1024x768", "1920x1080", "0x0"]
@@ -148,7 +148,7 @@ def main():
 
     limite = obter_parametro(
         "limits",
-        str(args.max) if args.max else None,
+        str(args.max) if args.max is not None else None,
         config,
         "Selecione limite de imagens:",
         ["10", "20", "50", "100", "0"]

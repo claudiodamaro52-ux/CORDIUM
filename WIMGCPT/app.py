@@ -46,8 +46,8 @@ def baixar():
 
     minw = data.get('minwidth',  0)
     minh = data.get('minheight', 0)
-    if minw: cmd += ['--minwidth',  str(minw)]
-    if minh: cmd += ['--minheight', str(minh)]
+    cmd += ['--minwidth',  str(minw)]
+    cmd += ['--minheight', str(minh)]
 
     def generate():
         try:
