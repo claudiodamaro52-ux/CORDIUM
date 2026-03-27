@@ -97,8 +97,10 @@ def gerar_nome_arquivo(prefixo, indice, extensao):
 # Extrai extensão da URL; se não houver, assume jpg
 # ---------------------------------------------------------
 def extrair_extensao(url):
-    partes = url.lower().split("?")[0].split(".")
-    if len(partes) < 2:
+    caminho = url.lower().split("?")[0]
+    nome = caminho.split("/")[-1]
+    partes = nome.split(".")
+    if len(partes) < 2 or not partes[-1]:
         return "jpg"
     return partes[-1]
 
