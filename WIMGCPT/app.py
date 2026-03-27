@@ -42,8 +42,7 @@ def baixar():
     ]
 
     tipos = data.get('types', '').strip()
-    if tipos:
-        cmd += ['--types', tipos]
+    cmd += ['--types', tipos]
 
     minw = data.get('minwidth',  0)
     minh = data.get('minheight', 0)
@@ -54,6 +53,7 @@ def baixar():
         try:
             proc = subprocess.Popen(
                 cmd,
+                stdin=subprocess.DEVNULL,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,

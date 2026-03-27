@@ -35,7 +35,7 @@ def menu_interativo(titulo, opcoes):
 # Caso contrário, ativa modo interativo com sugestões.
 # ---------------------------------------------------------
 def obter_parametro(nome, valor_cli, config, titulo, comuns=None):
-    if valor_cli:  # parâmetro já fornecido
+    if valor_cli is not None:  # parâmetro já fornecido (inclusive string vazia)
         return valor_cli
 
     print(f"\nParâmetro ausente: {nome}")
