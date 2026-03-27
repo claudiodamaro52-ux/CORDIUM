@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, request, Response
+from flask import Flask, send_from_directory, request, Response, send_file
 import subprocess, sys, os, json
 
 app = Flask(__name__)
@@ -6,6 +6,7 @@ app = Flask(__name__)
 BASE        = os.path.dirname(os.path.abspath(__file__))
 HTML_DIR    = os.path.join(BASE, 'HTML')
 SCRIPTS_DIR = os.path.join(BASE, 'SCRIPTS')
+DIST_DIR    = os.path.join(BASE, 'DIST')
 
 
 @app.route('/')
@@ -23,6 +24,11 @@ def suporte():
 @app.route('/coletor')
 def coletor():
     return send_from_directory(HTML_DIR, 'coletor.html')
+
+@app.route('/descarregar')
+def descarregar():
+    exe = os.path.join(DIST_DIR, 'Coletor_Imagens.exe')
+    return send_file(exe, as_attachment=True, download_name='Coletor_Imagens_v1.0.exe')
 
 
 @app.route('/api/baixar', methods=['POST'])
