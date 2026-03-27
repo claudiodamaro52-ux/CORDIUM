@@ -4,9 +4,10 @@ import subprocess, sys, os, json
 app = Flask(__name__)
 
 BASE        = os.path.dirname(os.path.abspath(__file__))
-HTML_DIR    = os.path.join(BASE, 'HTML')
-SCRIPTS_DIR = os.path.join(BASE, 'SCRIPTS')
-DIST_DIR    = os.path.join(BASE, 'DIST')
+WIMGCPT_DIR = os.path.join(BASE, 'WIMGCPT')
+HTML_DIR    = os.path.join(WIMGCPT_DIR, 'HTML')
+SCRIPTS_DIR = os.path.join(WIMGCPT_DIR, 'SCRIPTS')
+DIST_DIR    = os.path.join(WIMGCPT_DIR, 'DIST')
 
 
 @app.route('/')
