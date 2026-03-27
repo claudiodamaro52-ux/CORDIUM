@@ -134,9 +134,12 @@
             </div>
 
             <!-- Pasta destino -->
-            <div class="field full">
+            <div class="field full" id="fdpath-field">
                 <label for="fdpath">Pasta de destino</label>
-                <input type="text" id="fdpath" name="fdpath" placeholder="C:\Imagens\gatos" required>
+                <input type="text" id="fdpath" name="fdpath" placeholder="C:\Imagens\gatos">
+                <small id="fdpath-info" style="display:none; color:#1e88e5; margin-top:4px;">
+                    ☁️ Modo online: as imagens serão empacotadas em ZIP para download.
+                </small>
             </div>
 
             <!-- Prefixo -->
@@ -192,12 +195,41 @@
             <span id="status-txt">Aguardando...</span>
         </div>
         <div id="log-area"></div>
+        <a id="btn-zip" href="#" download style="display:none; margin-top:16px; text-align:center;">
+            <button class="btn" style="background:#1e88e5;">⬇ Baixar imagens (.zip)</button>
+        </a>
     </div>
 </div>
 
 <footer>© 2026 Cordium — Todos os direitos reservados.</footer>
 
 <script>
+    let isCloud = false;
+
+    // Detecta modo cloud/local ao carregar a página
+    (async () => {
+        try {
+            const res = await fetch('/api/modo');
+            const data = await res.json();
+            isCloud = data.cloud;
+            if (isCloud) {
+                const fdInput = document.getElementById('fdpath');
+                fdInput.value = '';
+                fdInput.disabled = true;
+                fdInput.placeholder = 'Não aplicável no modo online';
+                document.getElementById('fdpath-info').style.display = 'block';
+                // Google/Selenium não disponível no cloud
+                const engineSel = document.getElementById('engine');
+                for (const opt of engineSel.options) {
+                    if (opt.value === 'Google') {
+                        opt.disabled = true;
+                        opt.text += ' (indisponível online)';
+                    }
+                }
+            }
+        } catch (_) {}
+    })();
+
     // Mostrar/ocultar campo Scrolls conforme engine
     document.getElementById('engine').addEventListener('change', function () {
         document.getElementById('scrolls-field').style.display =
@@ -207,11 +239,12 @@
     document.getElementById('form').addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        const btn     = document.getElementById('btn-baixar');
-        const output  = document.getElementById('output');
-        const logArea = document.getElementById('log-area');
-        const spinner = document.getElementById('spinner');
+        const btn       = document.getElementById('btn-baixar');
+        const output    = document.getElementById('output');
+        const logArea   = document.getElementById('log-area');
+        const spinner   = document.getElementById('spinner');
         const statusTxt = document.getElementById('status-txt');
+        const btnZip    = document.getElementById('btn-zip');
 
         // Coleta dados do formulário
         const payload = {
@@ -230,6 +263,7 @@
 
         // Reset UI
         logArea.innerHTML = '';
+        btnZip.style.display = 'none';
         output.style.display = 'block';
         spinner.style.display = 'inline-block';
         statusTxt.textContent = 'Executando...';
@@ -261,7 +295,7 @@
 
                 buffer += decoder.decode(value, { stream: true });
                 const lines = buffer.split('\n');
-                buffer = lines.pop(); // guarda linha incompleta
+                buffer = lines.pop();
 
                 for (const line of lines) {
                     if (!line.startsWith('data: ')) continue;
@@ -272,9 +306,18 @@
                         }
                         if (data.done) {
                             const ok = data.code === 0;
-                            appendLine(ok ? '✔ Concluído com sucesso.' : `✖ Encerrado com código ${data.code}.`,
-                                       ok ? 'log-done' : 'log-error');
+                            const total = data.total ?? '';
+                            const msg = ok
+                                ? `✔ Concluído — ${total} imagem(ns) coletada(s).`
+                                : `✖ Encerrado com código ${data.code}.`;
+                            appendLine(msg, ok ? 'log-done' : 'log-error');
                             statusTxt.textContent = ok ? 'Concluído.' : 'Encerrado com erro.';
+
+                            // Cloud: exibe botão de download ZIP
+                            if (ok && data.zip_url) {
+                                btnZip.href = data.zip_url;
+                                btnZip.style.display = 'block';
+                            }
                         }
                         if (data.error) {
                             appendLine('Erro: ' + data.error, 'log-error');

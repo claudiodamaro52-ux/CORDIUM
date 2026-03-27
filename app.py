@@ -1,5 +1,5 @@
 from flask import Flask, send_from_directory, request, Response, send_file
-import subprocess, sys, os, json
+import subprocess, sys, os, json, tempfile, zipfile, uuid
 
 app = Flask(__name__)
 
@@ -9,6 +9,14 @@ HTML_DIR    = os.path.join(WIMGCPT_DIR, 'HTML')
 SCRIPTS_DIR = os.path.join(WIMGCPT_DIR, 'SCRIPTS')
 DIST_DIR    = os.path.join(WIMGCPT_DIR, 'DIST')
 
+# Render.com define a variável RENDER=true automaticamente
+IS_CLOUD = bool(os.environ.get('RENDER'))
+
+# Armazena zips gerados: task_id → caminho do .zip
+_zip_store = {}
+
+
+# ── Páginas ────────────────────────────────────────────────
 
 @app.route('/')
 def index():
@@ -34,29 +42,49 @@ def descarregar():
     return send_file(exe, as_attachment=True, download_name='Coletor_Imagens_v1.0.exe')
 
 
+# ── API ────────────────────────────────────────────────────
+
+@app.route('/api/modo')
+def modo():
+    """Informa ao frontend se está rodando em cloud ou local."""
+    return {'cloud': IS_CLOUD}
+
+
+@app.route('/api/zip/<task_id>')
+def download_zip(task_id):
+    """Serve o ZIP gerado após coleta em modo cloud."""
+    zip_path = _zip_store.get(task_id)
+    if not zip_path or not os.path.exists(zip_path):
+        return 'Arquivo não encontrado ou expirado.', 404
+    return send_file(zip_path, as_attachment=True, download_name='imagens_coletadas.zip')
+
+
 @app.route('/api/baixar', methods=['POST'])
 def baixar():
     data = request.json or {}
+
+    # Modo cloud: ignora pasta do usuário, usa diretório temporário no servidor
+    if IS_CLOUD:
+        pasta = tempfile.mkdtemp()
+        task_id = uuid.uuid4().hex[:8]
+    else:
+        pasta = data.get('fdpath', '')
+        task_id = None
 
     cmd = [
         sys.executable, 'imagens.py',
         '--engine',  data.get('engine',  'Bing'),
         '--mode',    data.get('mode',    'Todas'),
         '--url',     data.get('url',     ''),
-        '--fdpath',  data.get('fdpath',  ''),
+        '--fdpath',  pasta,
         '--prfx',    data.get('prfx',    'img'),
         '--max',     str(data.get('max',     20)),
         '--timeout', str(data.get('timeout', 10)),
         '--scrolls', str(data.get('scrolls',  5)),
+        '--types',   data.get('types',   '').strip(),
+        '--minwidth',  str(data.get('minwidth',  0)),
+        '--minheight', str(data.get('minheight', 0)),
     ]
-
-    tipos = data.get('types', '').strip()
-    cmd += ['--types', tipos]
-
-    minw = data.get('minwidth',  0)
-    minh = data.get('minheight', 0)
-    cmd += ['--minwidth',  str(minw)]
-    cmd += ['--minheight', str(minh)]
 
     def generate():
         try:
@@ -75,7 +103,23 @@ def baixar():
                 if line:
                     yield f"data: {json.dumps({'log': line})}\n\n"
             proc.wait()
-            yield f"data: {json.dumps({'done': True, 'code': proc.returncode})}\n\n"
+
+            # Modo cloud: zipar imagens e disponibilizar link de download
+            if IS_CLOUD and proc.returncode == 0:
+                arquivos = [f for f in os.listdir(pasta)
+                            if os.path.isfile(os.path.join(pasta, f))]
+                if arquivos:
+                    zip_path = pasta + '.zip'
+                    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+                        for f in arquivos:
+                            zf.write(os.path.join(pasta, f), f)
+                    _zip_store[task_id] = zip_path
+                    yield f"data: {json.dumps({'done': True, 'code': 0, 'zip_url': f'/api/zip/{task_id}', 'total': len(arquivos)})}\n\n"
+                else:
+                    yield f"data: {json.dumps({'done': True, 'code': 0, 'total': 0})}\n\n"
+            else:
+                yield f"data: {json.dumps({'done': True, 'code': proc.returncode})}\n\n"
+
         except Exception as e:
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
