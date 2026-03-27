@@ -1,0 +1,161 @@
+DIAGRAMA DE FLUXO COMPLETO DO SISTEMA pyImagens
+
+Perfeito, Claudio — vamos começar pelo **primeiro item** que você pediu:  
+# **1) DIAGRAMA DE FLUXO COMPLETO DO SISTEMA**
+
+Vou te entregar um diagrama claro, organizado e fiel ao funcionamento real do projeto modular que construímos.  
+Ele descreve o fluxo **do início ao fim**, incluindo:
+
+- leitura de parâmetros  
+- modo interativo  
+- histórico  
+- motores  
+- filtros  
+- downloads  
+- logs  
+
+E tudo isso de forma visual e fácil de entender.
+
+---
+
+# 🧭 **DIAGRAMA DE FLUXO — SISTEMA COMPLETO**
+
+Abaixo está o diagrama em formato textual estruturado (estilo fluxograma), ideal para documentação técnica ou para converter depois em uma ferramenta visual como Draw.io, Mermaid, Lucidchart, etc.
+
+---
+
+```
+                           ┌──────────────────────────┐
+                           │     INÍCIO DO SCRIPT     │
+                           └─────────────┬────────────┘
+                                         │
+                                         ▼
+                           ┌──────────────────────────┐
+                           │ Carregar config.json     │
+                           │ (histórico)              │
+                           └─────────────┬────────────┘
+                                         │
+                                         ▼
+                     ┌────────────────────────────────────────┐
+                     │ Ler parâmetros da linha de comando (CLI)│
+                     └───────────────────┬────────────────────┘
+                                         │
+                                         ▼
+                   ┌────────────────────────────────────────────┐
+                   │ Para cada parâmetro obrigatório:           │
+                   │   - Se veio via CLI → usar                 │
+                   │   - Se NÃO veio → modo interativo          │
+                   └───────────────────┬────────────────────────┘
+                                       │
+                                       ▼
+                     ┌────────────────────────────────────────┐
+                     │ Modo interativo:                       │
+                     │   - Mostrar valores comuns             │
+                     │   - Mostrar histórico recente          │
+                     │   - Permitir digitar manualmente       │
+                     │   - Permitir cancelar                  │
+                     └───────────────────┬────────────────────┘
+                                         │
+                                         ▼
+                           ┌──────────────────────────┐
+                           │ Todos os parâmetros OK   │
+                           └─────────────┬────────────┘
+                                         │
+                                         ▼
+                           ┌──────────────────────────┐
+                           │ Registrar início nos logs│
+                           └─────────────┬────────────┘
+                                         │
+                                         ▼
+                     ┌────────────────────────────────────────┐
+                     │ Escolher motor:                        │
+                     │   - Se engine = Bing → Motor Bing      │
+                     │   - Se engine = Google → Motor Google  │
+                     └───────────────────┬────────────────────┘
+                                         │
+                                         ▼
+        ┌────────────────────────────────────────────────────────────────────┐
+        │                           MOTOR BING                               │
+        │────────────────────────────────────────────────────────────────────│
+        │ - Fazer GET na página                                             │
+        │ - Extrair <img>                                                   │
+        │ - Coletar URLs                                                    │
+        │ - Aplicar filtros:                                                │
+        │       • duplicados                                                │
+        │       • tipos                                                     │
+        │       • resolução                                                 │
+        │       • limite                                                    │
+        │ - Criar pasta                                                     │
+        │ - Baixar imagens                                                  │
+        └────────────────────────────────────────────────────────────────────┘
+
+                                         │
+                                         ▼
+        ┌────────────────────────────────────────────────────────────────────┐
+        │                           MOTOR GOOGLE                             │
+        │────────────────────────────────────────────────────────────────────│
+        │ - Abrir Selenium headless                                          │
+        │ - Carregar página                                                  │
+        │ - Executar scrolls                                                 │
+        │ - Extrair <img>                                                    │
+        │ - Coletar URLs                                                     │
+        │ - Aplicar filtros:                                                │
+        │       • duplicados                                                │
+        │       • tipos                                                     │
+        │       • resolução                                                 │
+        │       • limite                                                    │
+        │ - Criar pasta                                                     │
+        │ - Baixar imagens                                                  │
+        └────────────────────────────────────────────────────────────────────┘
+
+                                         │
+                                         ▼
+                           ┌──────────────────────────┐
+                           │ Registrar histórico      │
+                           │ (config.json)            │
+                           └─────────────┬────────────┘
+                                         │
+                                         ▼
+                           ┌──────────────────────────┐
+                           │ Registrar fim nos logs   │
+                           └─────────────┬────────────┘
+                                         │
+                                         ▼
+                           ┌──────────────────────────┐
+                           │         FIM               │
+                           └──────────────────────────┘
+```
+
+---
+
+# 🎯 O que esse diagrama te permite fazer
+
+Com esse fluxo você consegue:
+
+- entender a arquitetura completa  
+- visualizar a interação entre módulos  
+- reimplementar o sistema em qualquer linguagem  
+- documentar o projeto para outras pessoas  
+- criar diagramas visuais em ferramentas gráficas  
+
+---
+
+# 🌟 Próximo item da sua lista
+
+Você pediu **três itens**:
+
+1. **Diagrama de fluxo** ✔ (entregue agora)  
+2. **Documentação técnica**  
+3. **Documentação para usuários finais**
+
+Posso seguir agora com o **item 2: documentação técnica completa**, incluindo:
+
+- visão geral da arquitetura  
+- explicação de cada módulo  
+- responsabilidades  
+- dependências  
+- fluxo interno  
+- decisões de design  
+- pontos de extensão  
+
+Posso enviar?

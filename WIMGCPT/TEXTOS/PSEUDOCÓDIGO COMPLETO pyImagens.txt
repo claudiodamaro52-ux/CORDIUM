@@ -1,0 +1,433 @@
+PSEUDOCÓDIGO COMPLETO pyImagens
+Perfeito, Claudio — agora vamos para a parte que realmente te dá **total autonomia**:  
+o **PSEUDOCÓDIGO COMPLETO, DETALHADO E EXPLICADO**, cobrindo todo o sistema modular que construímos.
+
+Esse pseudocódigo é **independente de linguagem**, então você poderá reimplementar tudo em:
+
+- C#
+- Java
+- Go
+- Rust
+- Node.js
+- PHP
+- C++
+- Ou qualquer outra linguagem que preferir
+
+Ele descreve:
+
+- O fluxo geral  
+- A lógica de cada módulo  
+- As interações entre eles  
+- O comportamento do modo interativo  
+- O uso do histórico  
+- A aplicação dos filtros  
+- O funcionamento dos motores Google e Bing  
+- O sistema de logs  
+
+E tudo isso de forma clara, estruturada e comentada.
+
+---
+
+# 🧠 **PSEUDOCÓDIGO COMPLETO DO SISTEMA**
+
+---
+
+# =========================================================
+# 1) MÓDULO DE LOGS (utils.py)
+# =========================================================
+
+```
+função registrar_log(mensagem):
+    timestamp ← data/hora atual formatada
+    linha ← timestamp + " " + mensagem
+
+    abrir arquivo "logs.txt" em modo append
+    escrever linha
+    fechar arquivo
+
+    imprimir mensagem no console
+```
+
+---
+
+# =========================================================
+# 2) MÓDULO DE HISTÓRICO (history.py)
+# =========================================================
+
+## ✔ Carregar histórico
+
+```
+função carregar_config():
+    se arquivo "config.json" não existir:
+        criar dicionário com listas vazias:
+            urls, folders, prefixes, types, resolutions, limits, engines, modes
+        salvar_config(dicionário)
+        retornar dicionário
+
+    tentar:
+        abrir config.json
+        ler JSON
+        retornar dicionário
+    se erro:
+        registrar_log("Erro ao ler config.json")
+        retornar dicionário vazio
+```
+
+---
+
+## ✔ Salvar histórico
+
+```
+função salvar_config(config):
+    abrir config.json em modo escrita
+    salvar config como JSON formatado
+```
+
+---
+
+## ✔ Adicionar item ao histórico
+
+```
+função adicionar_historico(config, chave, valor):
+    se valor for vazio:
+        retornar
+
+    lista ← config[chave]
+
+    se valor já estiver na lista:
+        remover valor da lista
+
+    inserir valor no início da lista
+
+    se tamanho da lista > 5:
+        truncar para 5 itens
+```
+
+---
+
+## ✔ Registrar execução completa
+
+```
+função registrar_execucao(config, parametros):
+    para cada chave em parametros:
+        adicionar_historico(config, chave, parametros[chave])
+
+    salvar_config(config)
+```
+
+---
+
+# =========================================================
+# 3) MÓDULO DE FILTROS (filters.py)
+# =========================================================
+
+## ✔ Filtro de tipos
+
+```
+função filtrar_por_tipos(lista_urls, tipos):
+    se tipos estiver vazio:
+        retornar lista_urls
+
+    lista_tipos ← dividir tipos por vírgula
+
+    nova_lista ← []
+
+    para cada url em lista_urls:
+        ext ← extrair extensão da url
+        se ext está em lista_tipos:
+            adicionar url em nova_lista
+        senão:
+            registrar_log("Ignorada: tipo não permitido")
+
+    retornar nova_lista
+```
+
+---
+
+## ✔ Filtro de resolução
+
+```
+função filtrar_por_resolucao(lista_urls, min_width, min_height):
+    se min_width = 0 e min_height = 0:
+        retornar lista_urls
+
+    nova_lista ← []
+
+    para cada url em lista_urls:
+        resolucao ← obter_resolucao(url)
+
+        se resolucao for nula:
+            registrar_log("Ignorada: não foi possível obter resolução")
+            continuar
+
+        largura, altura ← resolucao
+
+        se largura >= min_width E altura >= min_height:
+            adicionar url em nova_lista
+        senão:
+            registrar_log("Ignorada: resolução baixa")
+
+    retornar nova_lista
+```
+
+---
+
+## ✔ Limite de quantidade
+
+```
+função aplicar_limite(lista_urls, limite):
+    se limite = 0:
+        retornar lista_urls
+
+    retornar primeiros N itens da lista
+```
+
+---
+
+## ✔ Remover duplicados
+
+```
+função filtrar_duplicados(lista_urls):
+    conjunto_vistos ← vazio
+    nova_lista ← []
+
+    para cada url em lista_urls:
+        se url não está em conjunto_vistos:
+            adicionar url em nova_lista
+            adicionar url em conjunto_vistos
+
+    retornar nova_lista
+```
+
+---
+
+# =========================================================
+# 4) MÓDULO DE DOWNLOAD E UTILIDADES (utils.py)
+# =========================================================
+
+## ✔ Baixar imagem
+
+```
+função baixar_imagem(url, caminho, timeout):
+    tentar:
+        fazer GET(url)
+        salvar conteúdo no arquivo caminho
+        registrar_log("Baixada: caminho")
+        retornar verdadeiro
+    se erro:
+        registrar_log("Erro ao baixar")
+        retornar falso
+```
+
+---
+
+## ✔ Obter resolução
+
+```
+função obter_resolucao(url):
+    tentar:
+        fazer GET(url)
+        abrir imagem em memória
+        retornar (largura, altura)
+    se erro:
+        retornar nulo
+```
+
+---
+
+## ✔ Extrair extensão
+
+```
+função extrair_extensao(url):
+    se url não tiver ponto:
+        retornar "jpg"
+    retornar texto após o último ponto
+```
+
+---
+
+## ✔ Gerar nome de arquivo
+
+```
+função gerar_nome_arquivo(prefixo, indice, extensao):
+    retornar prefixo + "_" + indice formatado com 4 dígitos + "." + extensao
+```
+
+---
+
+# =========================================================
+# 5) MOTOR BING (engines.py)
+# =========================================================
+
+```
+função baixar_bing(url, pasta, prefixo, tipos, min_width, min_height, limite, timeout):
+
+    registrar_log("Iniciando motor Bing")
+
+    html ← GET(url)
+    soup ← parse HTML
+
+    lista_urls ← []
+
+    para cada tag <img> no HTML:
+        src ← atributo src ou data-src
+        se src começa com "http":
+            adicionar limpar_url(src) em lista_urls
+
+    registrar_log("Encontradas X imagens brutas")
+
+    lista_urls ← filtrar_duplicados(lista_urls)
+    lista_urls ← filtrar_por_tipos(lista_urls, tipos)
+    lista_urls ← filtrar_por_resolucao(lista_urls, min_width, min_height)
+    lista_urls ← aplicar_limite(lista_urls, limite)
+
+    criar pasta se não existir
+
+    para i de 1 até tamanho(lista_urls):
+        url_img ← lista_urls[i]
+        ext ← extrair_extensao(url_img)
+        nome ← gerar_nome_arquivo(prefixo, i, ext)
+        caminho ← pasta + "/" + nome
+        baixar_imagem(url_img, caminho)
+
+    registrar_log("Motor Bing finalizado")
+```
+
+---
+
+# =========================================================
+# 6) MOTOR GOOGLE (engines.py)
+# =========================================================
+
+```
+função baixar_google(url, pasta, prefixo, tipos, min_width, min_height, limite, timeout, scrolls):
+
+    registrar_log("Iniciando motor Google")
+
+    iniciar navegador headless
+
+    abrir url
+
+    repetir scrolls vezes:
+        rolar até o final da página
+        esperar carregar
+
+    elementos ← encontrar todas as tags <img>
+
+    lista_urls ← []
+
+    para cada elemento:
+        src ← atributo src
+        se src começa com "http":
+            adicionar limpar_url(src) em lista_urls
+
+    registrar_log("Encontradas X imagens brutas")
+
+    aplicar filtros (duplicados, tipos, resolução, limite)
+
+    criar pasta se não existir
+
+    para i de 1 até tamanho(lista_urls):
+        url_img ← lista_urls[i]
+        ext ← extrair_extensao(url_img)
+        nome ← gerar_nome_arquivo(prefixo, i, ext)
+        caminho ← pasta + "/" + nome
+        baixar_imagem(url_img, caminho)
+
+    fechar navegador
+
+    registrar_log("Motor Google finalizado")
+```
+
+---
+
+# =========================================================
+# 7) SCRIPT PRINCIPAL (imagens.py)
+# =========================================================
+
+```
+função main():
+
+    ler argumentos da linha de comando
+
+    config ← carregar_config()
+
+    para cada parâmetro:
+        se veio via CLI:
+            usar valor
+        senão:
+            mostrar menu interativo:
+                - valores comuns
+                - valores recentes do histórico
+                - digitar manualmente
+                - cancelar
+
+    converter resolução "WxH" em min_width e min_height
+
+    registrar_log("Iniciando coleta")
+
+    se engine = "Bing":
+        chamar baixar_bing(...)
+    senão:
+        chamar baixar_google(...)
+
+    registrar_execucao(config, todos os parâmetros usados)
+
+    registrar_log("Execução finalizada")
+```
+
+---
+
+# =========================================================
+# 8) FLUXO GERAL DO SISTEMA
+# =========================================================
+
+```
+INÍCIO
+
+carregar histórico
+
+ler parâmetros da CLI
+
+para cada parâmetro:
+    se CLI forneceu → usar
+    senão → modo interativo:
+        mostrar valores comuns
+        mostrar histórico recente
+        permitir digitar manualmente
+        permitir cancelar
+
+aplicar conversões (ex: resolução)
+
+registrar início nos logs
+
+se engine = Bing:
+    executar motor Bing
+senão:
+    executar motor Google
+
+registrar parâmetros no histórico
+
+registrar fim nos logs
+
+FIM
+```
+
+---
+
+# 🎯 **Pronto, Claudio — agora você tem:**
+
+- O **projeto completo**, modular e profissional  
+- Todos os arquivos explicados  
+- Exemplos de `.BAT`  
+- E agora o **pseudocódigo completo**, para reimplementar em qualquer linguagem  
+
+Se quiser, posso agora:
+
+- Gerar **diagramas de fluxo**  
+- Criar uma **documentação técnica**  
+- Criar uma **documentação para usuários finais**  
+- Criar uma **versão simplificada** do pseudocódigo  
+- Ou até te ajudar a reimplementar em outra linguagem  
+
+Só me dizer o que prefere continuar desenvolvendo.
