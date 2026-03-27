@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cordium - Coletor de Imagens</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, sans-serif; background: #f4f6f9; }
+
+        header {
+            background: #1e88e5; color: white;
+            padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        header h1 { margin: 0; }
+        nav a { color: white; margin-left: 20px; text-decoration: none; font-weight: bold; }
+
+        .container {
+            max-width: 820px; margin: 40px auto;
+            background: white; padding: 35px;
+            border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        h2 { color: #1e88e5; margin-top: 0; }
+        h3 { color: #1e88e5; margin-bottom: 10px; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .full { grid-column: 1 / -1; }
+
+        .field { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 13px; font-weight: bold; color: #444; }
+
+        input, select {
+            padding: 9px 12px; border: 1px solid #ccc;
+            border-radius: 6px; font-size: 14px; width: 100%;
+        }
+        input:focus, select:focus {
+            outline: none; border-color: #1e88e5;
+            box-shadow: 0 0 0 2px rgba(30,136,229,0.2);
+        }
+
+        .row-res { display: flex; gap: 8px; align-items: center; }
+        .row-res span { color: #888; }
+
+        .btn {
+            background: #43a047; color: white;
+            padding: 12px 28px; border: none;
+            border-radius: 8px; font-size: 16px;
+            cursor: pointer; width: 100%; margin-top: 8px;
+        }
+        .btn:hover { background: #2e7d32; }
+        .btn:disabled { background: #9e9e9e; cursor: not-allowed; }
+
+        /* Log area */
+        #output { margin-top: 30px; display: none; }
+
+        #log-area {
+            background: #1e1e1e; color: #d4d4d4;
+            font-family: monospace; font-size: 13px;
+            padding: 16px; border-radius: 8px;
+            height: 300px; overflow-y: auto;
+            white-space: pre-wrap; word-break: break-all;
+        }
+
+        .log-line { margin: 1px 0; }
+        .log-done  { color: #4caf50; font-weight: bold; }
+        .log-error { color: #f44336; }
+
+        .status-bar {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 8px; font-size: 13px; color: #555;
+        }
+        .spinner {
+            width: 16px; height: 16px;
+            border: 3px solid #ccc;
+            border-top-color: #1e88e5;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        footer {
+            background: #1e88e5; color: white;
+            text-align: center; padding: 20px; margin-top: 40px;
+        }
+
+        #scrolls-field { display: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Cordium</h1>
+    <nav>
+        <a href="/">Início</a>
+        <a href="/coletor">Coletor</a>
+        <a href="/suporte">Suporte</a>
+    </nav>
+</header>
+
+<div class="container">
+    <h2>Coletor de Imagens</h2>
+
+    <form id="form" autocomplete="off">
+        <div class="grid">
+
+            <!-- Engine -->
+            <div class="field">
+                <label for="engine">Motor de busca</label>
+                <select id="engine" name="engine">
+                    <option value="Bing">Bing</option>
+                    <option value="Google">Google (Selenium)</option>
+                </select>
+            </div>
+
+            <!-- Mode -->
+            <div class="field">
+                <label for="mode">Modo</label>
+                <select id="mode" name="mode">
+                    <option value="Todas">Todas as imagens</option>
+                    <option value="SoLivres">Somente livres (CC)</option>
+                </select>
+            </div>
+
+            <!-- URL -->
+            <div class="field full">
+                <label for="url">URL da pesquisa</label>
+                <input type="url" id="url" name="url" placeholder="https://www.bing.com/images/search?q=gatos" required>
+            </div>
+
+            <!-- Pasta destino -->
+            <div class="field full">
+                <label for="fdpath">Pasta de destino</label>
+                <input type="text" id="fdpath" name="fdpath" placeholder="C:\Imagens\gatos" required>
+            </div>
+
+            <!-- Prefixo -->
+            <div class="field">
+                <label for="prfx">Prefixo dos arquivos</label>
+                <input type="text" id="prfx" name="prfx" placeholder="gato" value="img">
+            </div>
+
+            <!-- Tipos -->
+            <div class="field">
+                <label for="types">Tipos permitidos</label>
+                <input type="text" id="types" name="types" placeholder="jpg,png,webp  (vazio = todos)">
+            </div>
+
+            <!-- Resolução mínima -->
+            <div class="field">
+                <label>Resolução mínima (px)</label>
+                <div class="row-res">
+                    <input type="number" id="minwidth"  name="minwidth"  placeholder="Largura" min="0" value="0" style="flex:1">
+                    <span>×</span>
+                    <input type="number" id="minheight" name="minheight" placeholder="Altura"  min="0" value="0" style="flex:1">
+                </div>
+            </div>
+
+            <!-- Limite -->
+            <div class="field">
+                <label for="max">Limite de imagens (0 = sem limite)</label>
+                <input type="number" id="max" name="max" min="0" value="20">
+            </div>
+
+            <!-- Timeout -->
+            <div class="field">
+                <label for="timeout">Timeout por imagem (segundos)</label>
+                <input type="number" id="timeout" name="timeout" min="1" value="10">
+            </div>
+
+            <!-- Scrolls (só Google) -->
+            <div class="field" id="scrolls-field">
+                <label for="scrolls">Scrolls na página (Google)</label>
+                <input type="number" id="scrolls" name="scrolls" min="1" value="5">
+            </div>
+
+        </div>
+
+        <button type="submit" class="btn" id="btn-baixar">⬇ Baixar Imagens</button>
+    </form>
+
+    <!-- Output -->
+    <div id="output">
+        <h3>Log de execução</h3>
+        <div class="status-bar">
+            <div class="spinner" id="spinner"></div>
+            <span id="status-txt">Aguardando...</span>
+        </div>
+        <div id="log-area"></div>
+    </div>
+</div>
+
+<footer>© 2026 Cordium — Todos os direitos reservados.</footer>
+
+<script>
+    // Mostrar/ocultar campo Scrolls conforme engine
+    document.getElementById('engine').addEventListener('change', function () {
+        document.getElementById('scrolls-field').style.display =
+            this.value === 'Google' ? 'block' : 'none';
+    });
+
+    document.getElementById('form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const btn     = document.getElementById('btn-baixar');
+        const output  = document.getElementById('output');
+        const logArea = document.getElementById('log-area');
+        const spinner = document.getElementById('spinner');
+        const statusTxt = document.getElementById('status-txt');
+
+        // Coleta dados do formulário
+        const payload = {
+            engine:    document.getElementById('engine').value,
+            mode:      document.getElementById('mode').value,
+            url:       document.getElementById('url').value,
+            fdpath:    document.getElementById('fdpath').value,
+            prfx:      document.getElementById('prfx').value,
+            types:     document.getElementById('types').value,
+            minwidth:  parseInt(document.getElementById('minwidth').value)  || 0,
+            minheight: parseInt(document.getElementById('minheight').value) || 0,
+            max:       parseInt(document.getElementById('max').value)       || 0,
+            timeout:   parseInt(document.getElementById('timeout').value)   || 10,
+            scrolls:   parseInt(document.getElementById('scrolls').value)   || 5,
+        };
+
+        // Reset UI
+        logArea.innerHTML = '';
+        output.style.display = 'block';
+        spinner.style.display = 'inline-block';
+        statusTxt.textContent = 'Executando...';
+        btn.disabled = true;
+        btn.textContent = '⏳ Baixando...';
+
+        function appendLine(text, cls = '') {
+            const div = document.createElement('div');
+            div.className = 'log-line ' + cls;
+            div.textContent = text;
+            logArea.appendChild(div);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        try {
+            const response = await fetch('/api/baixar', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // guarda linha incompleta
+
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    try {
+                        const data = JSON.parse(line.slice(6));
+                        if (data.log) {
+                            appendLine(data.log);
+                        }
+                        if (data.done) {
+                            const ok = data.code === 0;
+                            appendLine(ok ? '✔ Concluído com sucesso.' : `✖ Encerrado com código ${data.code}.`,
+                                       ok ? 'log-done' : 'log-error');
+                            statusTxt.textContent = ok ? 'Concluído.' : 'Encerrado com erro.';
+                        }
+                        if (data.error) {
+                            appendLine('Erro: ' + data.error, 'log-error');
+                            statusTxt.textContent = 'Erro.';
+                        }
+                    } catch (_) {}
+                }
+            }
+        } catch (err) {
+            appendLine('Erro de conexão: ' + err.message, 'log-error');
+            statusTxt.textContent = 'Falha na conexão.';
+        }
+
+        spinner.style.display = 'none';
+        btn.disabled = false;
+        btn.textContent = '⬇ Baixar Imagens';
+    });
+</script>
+</body>
+</html>
