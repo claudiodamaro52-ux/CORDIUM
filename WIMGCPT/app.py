@@ -28,6 +28,8 @@ def coletor():
 @app.route('/descarregar')
 def descarregar():
     exe = os.path.join(DIST_DIR, 'Coletor_Imagens.exe')
+    if not os.path.exists(exe):
+        return 'Instalador não disponível no momento.', 404
     return send_file(exe, as_attachment=True, download_name='Coletor_Imagens_v1.0.exe')
 
 
@@ -84,4 +86,6 @@ def baixar():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_ENV') == 'development'
+    app.run(host='0.0.0.0', port=port, debug=debug)
