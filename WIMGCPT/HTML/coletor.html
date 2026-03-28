@@ -12,6 +12,8 @@
             padding: 15px 30px;
             display: flex; justify-content: space-between; align-items: center;
         }
+        header .brand { display: flex; align-items: center; gap: 12px; }
+        header .brand img { height: 50px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
         header h1 { margin: 0; }
         nav a { color: white; margin-left: 20px; text-decoration: none; font-weight: bold; }
 
@@ -95,7 +97,10 @@
 <body>
 
 <header>
-    <h1>Cordium</h1>
+    <div class="brand">
+        <img src="/img/Logo_Cordium.png" alt="Cordium">
+        <h1>Cordium</h1>
+    </div>
     <nav>
         <a href="/">Início</a>
         <a href="/coletor">Coletor</a>

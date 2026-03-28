@@ -8,6 +8,7 @@ WIMGCPT_DIR = os.path.join(BASE, 'WIMGCPT')
 HTML_DIR    = os.path.join(WIMGCPT_DIR, 'HTML')
 SCRIPTS_DIR = os.path.join(WIMGCPT_DIR, 'SCRIPTS')
 DIST_DIR    = os.path.join(WIMGCPT_DIR, 'DIST')
+IMG_DIR     = os.path.join(WIMGCPT_DIR, 'IMG')
 
 # Render.com define a variável RENDER=true automaticamente
 IS_CLOUD = bool(os.environ.get('RENDER'))
@@ -17,6 +18,11 @@ _zip_store = {}
 
 
 # ── Páginas ────────────────────────────────────────────────
+
+@app.route('/img/<filename>')
+def imagem(filename):
+    return send_from_directory(IMG_DIR, filename)
+
 
 @app.route('/')
 def index():
