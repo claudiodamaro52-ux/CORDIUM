@@ -10,6 +10,9 @@ SCRIPTS_DIR = os.path.join(WIMGCPT_DIR, 'SCRIPTS')
 DIST_DIR    = os.path.join(WIMGCPT_DIR, 'DIST')
 IMG_DIR     = os.path.join(WIMGCPT_DIR, 'IMG')
 
+DEVJSON_DIR  = os.path.join(BASE, 'DEVJSON')
+DEVJSON_HTML = os.path.join(DEVJSON_DIR, 'HTML')
+
 # Render.com define a variável RENDER=true automaticamente
 IS_CLOUD = bool(os.environ.get('RENDER'))
 
@@ -47,6 +50,10 @@ def descarregar():
         return 'Instalador não disponível no momento.', 404
     return send_file(exe, as_attachment=True, download_name='Coletor_Imagens_v1.0.exe')
 
+
+@app.route('/devjson')
+def devjson():
+    return send_from_directory(DEVJSON_HTML, 'devjson.html')
 
 # ── API ────────────────────────────────────────────────────
 
@@ -140,3 +147,4 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_ENV') == 'development'
     app.run(host='0.0.0.0', port=port, debug=debug)
+
