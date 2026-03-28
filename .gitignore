@@ -1,2 +1,6 @@
 WIMGCPT/DIST/
 WIMGCPT/BUILD/
+WIMGCPT/SCRIPTS/config.json
+WIMGCPT/SCRIPTS/logs.txt
+__pycache__/
+*.pyc
