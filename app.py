@@ -143,6 +143,137 @@ def baixar():
     )
 
 
+@app.route('/api/coletar', methods=['POST'])
+def coletar():
+    """Recolhe URLs de imagens sem baixar; devolve JSON { imagens: [...] }."""
+    data = request.json or {}
+
+    # Ficheiro temporário onde o script gravará as URLs
+    fd, output_path = tempfile.mkstemp(suffix='.json')
+    os.close(fd)
+
+    cmd = [
+        sys.executable, 'coletar.py',
+        '--engine',    data.get('engine',  'Bing'),
+        '--url',       data.get('url',     ''),
+        '--max',       str(data.get('max',      20)),
+        '--timeout',   str(data.get('timeout',  10)),
+        '--scrolls',   str(data.get('scrolls',   5)),
+        '--types',     data.get('types',   '').strip(),
+        '--minwidth',  str(data.get('minwidth',  0)),
+        '--minheight', str(data.get('minheight', 0)),
+        '--output',    output_path,
+    ]
+
+    try:
+        proc = subprocess.run(
+            cmd,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding='utf-8',
+            errors='replace',
+            cwd=SCRIPTS_DIR
+        )
+
+        # Ler resultado gravado pelo script
+        try:
+            with open(output_path, 'r', encoding='utf-8') as f:
+                resultado = json.load(f)
+            return resultado
+        except Exception:
+            return {'imagens': []}
+
+    except Exception as e:
+        return {'imagens': [], 'erro': str(e)}, 500
+
+    finally:
+        try:
+            os.unlink(output_path)
+        except OSError:
+            pass
+
+
+@app.route('/api/baixar-selecionadas', methods=['POST'])
+def baixar_selecionadas():
+    """Baixa apenas as URLs selecionadas; devolve stream SSE com log + zip_url."""
+    data = request.json or {}
+    urls = data.get('urls', [])
+    prfx = data.get('prfx', 'img')
+    timeout = data.get('timeout', 10)
+
+    if not urls:
+        return {'erro': 'Nenhuma URL fornecida.'}, 400
+
+    # Pasta temporária para guardar as imagens baixadas
+    pasta = tempfile.mkdtemp()
+    task_id = uuid.uuid4().hex[:8]
+
+    # Ficheiro temporário com a lista de URLs
+    fd, urls_file = tempfile.mkstemp(suffix='.json')
+    os.close(fd)
+    with open(urls_file, 'w', encoding='utf-8') as f:
+        json.dump(urls, f)
+
+    cmd = [
+        sys.executable, 'baixar_urls.py',
+        '--urls-file', urls_file,
+        '--fdpath',    pasta,
+        '--prfx',      prfx,
+        '--timeout',   str(timeout),
+    ]
+
+    def generate():
+        try:
+            proc = subprocess.Popen(
+                cmd,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding='utf-8',
+                errors='replace',
+                cwd=SCRIPTS_DIR
+            )
+            for line in proc.stdout:
+                line = line.strip()
+                if line:
+                    yield f"data: {json.dumps({'log': line})}\n\n"
+            proc.wait()
+
+            # Zipar imagens e disponibilizar link de download
+            if proc.returncode == 0:
+                arquivos = [f for f in os.listdir(pasta)
+                            if os.path.isfile(os.path.join(pasta, f))]
+                if arquivos:
+                    zip_path = pasta + '.zip'
+                    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+                        for f in arquivos:
+                            zf.write(os.path.join(pasta, f), f)
+                    _zip_store[task_id] = zip_path
+                    yield f"data: {json.dumps({'done': True, 'code': 0, 'zip_url': f'/api/zip/{task_id}', 'total': len(arquivos)})}\n\n"
+                else:
+                    yield f"data: {json.dumps({'done': True, 'code': 0, 'total': 0})}\n\n"
+            else:
+                yield f"data: {json.dumps({'done': True, 'code': proc.returncode})}\n\n"
+
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
+        finally:
+            try:
+                os.unlink(urls_file)
+            except OSError:
+                pass
+
+    return Response(
+        generate(),
+        mimetype='text/event-stream',
+        headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'}
+    )
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_ENV') == 'development'
