@@ -6,6 +6,7 @@ Invocado pelo servidor Flask para o endpoint POST /api/baixar-selecionadas.
 import argparse
 import json
 import os
+import sys
 
 from utils import registrar_log, criar_pasta, baixar_imagem, extrair_extensao, gerar_nome_arquivo
 
@@ -30,11 +31,11 @@ def main():
             urls = json.load(f)
     except Exception as e:
         registrar_log(f"Erro ao ler ficheiro de URLs: {e}")
-        return
+        sys.exit(1)
 
     if not isinstance(urls, list):
         registrar_log("Formato inválido no ficheiro de URLs.")
-        return
+        sys.exit(1)
 
     registrar_log(f"Iniciando download de {len(urls)} imagem(ns) selecionada(s)...")
 

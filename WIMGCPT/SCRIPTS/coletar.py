@@ -5,6 +5,7 @@ Invocado pelo servidor Flask para o endpoint POST /api/coletar.
 
 import argparse
 import json
+import sys
 
 from engines import coletar_bing, coletar_google
 
@@ -38,8 +39,12 @@ def main():
             args.max, args.timeout, args.scrolls
         )
 
-    with open(args.output, "w", encoding="utf-8") as f:
-        json.dump({"imagens": urls}, f, ensure_ascii=False)
+    try:
+        with open(args.output, "w", encoding="utf-8") as f:
+            json.dump({"imagens": urls}, f, ensure_ascii=False)
+    except Exception as e:
+        print(f"Erro ao gravar resultado: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

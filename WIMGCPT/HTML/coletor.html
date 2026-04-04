@@ -455,9 +455,11 @@
 
         urls.forEach(function(url, idx) {
             const num = String(idx + 1).padStart(4, '0');
-            // Extensão para nome
+            // Extensão para nome — valida contra formatos de imagem conhecidos
+            const EXTS_IMAGEM = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'tif', 'svg'];
             const partes = url.split('?')[0].split('.');
-            const ext = partes.length >= 2 ? partes[partes.length - 1].toLowerCase() : 'jpg';
+            const extCandidata = partes.length >= 2 ? partes[partes.length - 1].toLowerCase() : '';
+            const ext = EXTS_IMAGEM.includes(extCandidata) ? extCandidata : 'jpg';
             const nome = 'img_' + num + '.' + ext;
 
             const card = document.createElement('div');
@@ -584,7 +586,7 @@
                         }
                         if (data.done) {
                             const ok = data.code === 0;
-                            const total = data.total != null ? data.total : '';
+                            const total = data.total != null ? data.total : 0;
                             const msg = ok
                                 ? '✔ Concluído — ' + total + ' imagem(ns) baixada(s).'
                                 : '✖ Encerrado com código ' + data.code + '.';
