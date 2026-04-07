@@ -1,0 +1,1 @@
+body = open(r"e:\PYTHON\CORDIUM\gen_body.html","r",encoding="utf-8").read(); path = r"e:\PYTHON\CORDIUM\DEVJSON\HTML\devjson.html"; h = open(path,"r",encoding="utf-8").read(); open(path,"w",encoding="utf-8").write(h+body); import os; print("OK",os.path.getsize(path))
