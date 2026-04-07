@@ -86,6 +86,109 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* ── Galeria ────────────────────────────────────────── */
+        #galeria-section { display: none; margin-top: 30px; }
+
+        #galeria-controles {
+            display: flex; align-items: center; gap: 12px;
+            flex-wrap: wrap; margin-bottom: 16px;
+        }
+        #galeria-controles .btn-ctrl {
+            background: #fff; color: #c9820a;
+            border: 2px solid #c9820a; border-radius: 6px;
+            padding: 6px 16px; font-size: 14px;
+            cursor: pointer; transition: background 0.2s;
+        }
+        #galeria-controles .btn-ctrl:hover { background: #fdf3e0; }
+        #total-encontradas { margin-left: auto; color: #555; font-size: 14px; }
+
+        #galeria {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+        @media (max-width: 900px) { #galeria { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 480px) { #galeria { grid-template-columns: 1fr; } }
+
+        .card {
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: #fff; cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid transparent;
+            position: relative;
+        }
+        .card:hover { transform: scale(1.03); box-shadow: 0 4px 16px rgba(0,0,0,0.18); }
+        .card.selecionado { border-color: #c9820a; background: #fdf3e0; }
+
+        .thumb-wrapper {
+            width: 100%; height: 150px; overflow: hidden;
+            position: relative;
+        }
+        .thumb {
+            width: 100%; height: 100%; object-fit: cover;
+            display: block;
+        }
+        .thumb-placeholder {
+            width: 100%; height: 100%;
+            background: #e0e0e0; display: flex;
+            align-items: center; justify-content: center;
+            font-size: 32px; color: #999;
+        }
+        .hover-icon {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.45); color: #fff;
+            border-radius: 50%; width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .card:hover .hover-icon { opacity: 1; }
+
+        .card-footer {
+            display: flex; align-items: center; gap: 8px;
+            padding: 6px 8px; font-size: 12px; color: #555;
+            background: #fafafa;
+        }
+        .card-check { width: 16px; height: 16px; cursor: pointer; accent-color: #c9820a; }
+        .img-nome { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* Botão "Baixar Selecionadas" */
+        #baixar-sel-wrap { margin-top: 16px; display: none; }
+
+        /* ── Lightbox ────────────────────────────────────────── */
+        #lightbox {
+            display: none; position: fixed;
+            inset: 0; z-index: 1000;
+            background: rgba(0,0,0,0.85);
+            align-items: center; justify-content: center;
+        }
+        #lightbox.ativo { display: flex; }
+        #lightbox .lb-img {
+            max-width: 90vw; max-height: 90vh;
+            object-fit: contain; border-radius: 4px;
+        }
+        #lightbox .lb-fechar {
+            position: fixed; top: 20px; right: 28px;
+            background: none; border: none;
+            color: #fff; font-size: 36px;
+            cursor: pointer; line-height: 1;
+        }
+
+        /* Loader de coleta */
+        #coletar-loader { display: none; text-align: center; margin-top: 24px; }
+        #coletar-loader .spinner-grande {
+            width: 40px; height: 40px;
+            border: 5px solid #e0d4c0;
+            border-top-color: #c9820a;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+        #coletar-loader p { color: #888; font-size: 14px; }
+
         footer {
             background: #1a0a02; color: white;
             text-align: center; padding: 20px; margin-top: 40px;
@@ -117,8 +220,8 @@
             <li>Acesse <a href="https://www.bing.com/images" target="_blank" style="color:#c9820a;">bing.com/images</a> e pesquise as imagens que deseja baixar</li>
             <li>Copie a URL da página de resultados do navegador</li>
             <li>Cole no campo <strong>URL da pesquisa</strong> abaixo</li>
-            <li>Preencha os demais campos (prefixo, limite, etc.) e clique em <strong>⬇ Baixar Imagens</strong></li>
-            <li>Aguarde o log concluir e clique em <strong>⬇ Baixar imagens (.zip)</strong> para salvar</li>
+            <li>Preencha os demais campos e clique em <strong>🔍 Pré-visualizar Imagens</strong></li>
+            <li>Analise as miniaturas, marque as que deseja e clique em <strong>⬇ Baixar Selecionadas</strong></li>
         </ol>
     </div>
 
@@ -200,10 +303,38 @@
 
         </div>
 
-        <button type="submit" class="btn" id="btn-baixar">⬇ Baixar Imagens</button>
+        <button type="submit" class="btn" id="btn-visualizar">🔍 Pré-visualizar Imagens</button>
     </form>
 
-    <!-- Output -->
+    <!-- Loader durante a coleta -->
+    <div id="coletar-loader">
+        <div class="spinner-grande"></div>
+        <p>A recolher imagens, aguarde…</p>
+    </div>
+
+    <!-- Secção da galeria -->
+    <div id="galeria-section">
+        <h3>Galeria de pré-visualização</h3>
+
+        <!-- Barra de controlo -->
+        <div id="galeria-controles">
+            <button class="btn-ctrl" id="btn-sel-tudo" type="button">Selecionar Tudo</button>
+            <button class="btn-ctrl" id="btn-limpar-sel" type="button">Limpar Seleção</button>
+            <span id="total-encontradas">0 imagens encontradas</span>
+        </div>
+
+        <!-- Grid de cards -->
+        <div id="galeria"></div>
+
+        <!-- Botão "Baixar Selecionadas" -->
+        <div id="baixar-sel-wrap">
+            <button class="btn" id="btn-baixar-sel" type="button">
+                ⬇ Baixar Selecionadas (<span id="count-sel">0</span>)
+            </button>
+        </div>
+    </div>
+
+    <!-- Output SSE (reutilizado pelo "Baixar Selecionadas") -->
     <div id="output">
         <h3>Log de execução</h3>
         <div class="status-bar">
@@ -219,10 +350,17 @@
 
 <footer>© 2026 Cordium — Todos os direitos reservados.</footer>
 
+<!-- Lightbox -->
+<div id="lightbox">
+    <button class="lb-fechar" id="lb-fechar" title="Fechar">✕</button>
+    <img class="lb-img" id="lb-img" src="" alt="">
+</div>
+
 <script>
     let isCloud = false;
+    let urlsColetadas = [];
 
-    // Detecta modo cloud/local ao carregar a página
+    // ── Detecta modo cloud/local ao carregar ──────────────────
     (async () => {
         try {
             const res = await fetch('/api/modo');
@@ -246,29 +384,25 @@
         } catch (_) {}
     })();
 
-    // Mostrar/ocultar campo Scrolls conforme engine
+    // ── Mostrar/ocultar campo Scrolls conforme engine ─────────
     document.getElementById('engine').addEventListener('change', function () {
         document.getElementById('scrolls-field').style.display =
             this.value === 'Google' ? 'block' : 'none';
     });
 
+    // ── Submissão do formulário → Pré-visualizar ──────────────
     document.getElementById('form').addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        const btn       = document.getElementById('btn-baixar');
-        const output    = document.getElementById('output');
-        const logArea   = document.getElementById('log-area');
-        const spinner   = document.getElementById('spinner');
-        const statusTxt = document.getElementById('status-txt');
-        const btnZip    = document.getElementById('btn-zip');
+        const btn = document.getElementById('btn-visualizar');
+        const loader = document.getElementById('coletar-loader');
+        const galeriaSection = document.getElementById('galeria-section');
+        const output = document.getElementById('output');
 
-        // Coleta dados do formulário
         const payload = {
             engine:    document.getElementById('engine').value,
             mode:      document.getElementById('mode').value,
             url:       document.getElementById('url').value,
-            fdpath:    document.getElementById('fdpath').value,
-            prfx:      document.getElementById('prfx').value,
             types:     document.getElementById('types').value,
             minwidth:  parseInt(document.getElementById('minwidth').value)  || 0,
             minheight: parseInt(document.getElementById('minheight').value) || 0,
@@ -278,24 +412,154 @@
         };
 
         // Reset UI
+        galeriaSection.style.display = 'none';
+        output.style.display = 'none';
+        loader.style.display = 'block';
+        btn.disabled = true;
+        btn.textContent = '⏳ Recolhendo…';
+
+        try {
+            const res = await fetch('/api/coletar', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            urlsColetadas = data.imagens || [];
+            construirGaleria(urlsColetadas);
+            galeriaSection.style.display = 'block';
+        } catch (err) {
+            alert('Erro ao recolher imagens: ' + err.message);
+        }
+
+        loader.style.display = 'none';
+        btn.disabled = false;
+        btn.textContent = '🔍 Pré-visualizar Imagens';
+    });
+
+    // ── Construir galeria ─────────────────────────────────────
+    function construirGaleria(urls) {
+        const galeria = document.getElementById('galeria');
+        const total = document.getElementById('total-encontradas');
+        const baixarWrap = document.getElementById('baixar-sel-wrap');
+
+        galeria.innerHTML = '';
+        total.textContent = urls.length + ' imagem(ns) encontrada(s)';
+        baixarWrap.style.display = 'none';
+        atualizarContador();
+
+        if (urls.length === 0) {
+            galeria.innerHTML = '<p style="color:#888; grid-column:1/-1;">Nenhuma imagem encontrada.</p>';
+            return;
+        }
+
+        urls.forEach(function(url, idx) {
+            const num = String(idx + 1).padStart(4, '0');
+            // Extensão para nome — valida contra formatos de imagem conhecidos
+            const EXTS_IMAGEM = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'tif', 'svg'];
+            const partes = url.split('?')[0].split('.');
+            const extCandidata = partes.length >= 2 ? partes[partes.length - 1].toLowerCase() : '';
+            const ext = EXTS_IMAGEM.includes(extCandidata) ? extCandidata : 'jpg';
+            const nome = 'img_' + num + '.' + ext;
+
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.url = url;
+            card.dataset.nome = nome;
+
+            card.innerHTML =
+                '<div class="thumb-wrapper">' +
+                    '<img class="thumb" src="' + escHtml(url) + '" alt="' + escHtml(nome) + '" ' +
+                         'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' +
+                    '<div class="thumb-placeholder" style="display:none">🖼️</div>' +
+                    '<div class="hover-icon">🔍</div>' +
+                '</div>' +
+                '<div class="card-footer">' +
+                    '<input type="checkbox" class="card-check" title="Selecionar">' +
+                    '<span class="img-nome" title="' + escHtml(nome) + '">' + escHtml(nome) + '</span>' +
+                '</div>';
+
+            // Clique na miniatura → lightbox
+            card.querySelector('.thumb-wrapper').addEventListener('click', function() {
+                abrirLightbox(url);
+            });
+
+            // Clique no checkbox → selecionar/desselecionar
+            const chk = card.querySelector('.card-check');
+            chk.addEventListener('change', function(ev) {
+                ev.stopPropagation();
+                card.classList.toggle('selecionado', chk.checked);
+                atualizarContador();
+            });
+
+            galeria.appendChild(card);
+        });
+    }
+
+    // ── Selecionar / limpar tudo ──────────────────────────────
+    document.getElementById('btn-sel-tudo').addEventListener('click', function() {
+        document.querySelectorAll('.card-check').forEach(function(chk) {
+            chk.checked = true;
+            chk.closest('.card').classList.add('selecionado');
+        });
+        atualizarContador();
+    });
+
+    document.getElementById('btn-limpar-sel').addEventListener('click', function() {
+        document.querySelectorAll('.card-check').forEach(function(chk) {
+            chk.checked = false;
+            chk.closest('.card').classList.remove('selecionado');
+        });
+        atualizarContador();
+    });
+
+    // ── Atualizar contador de selecionadas ────────────────────
+    function atualizarContador() {
+        const n = document.querySelectorAll('.card-check:checked').length;
+        document.getElementById('count-sel').textContent = n;
+        document.getElementById('baixar-sel-wrap').style.display = n > 0 ? 'block' : 'none';
+    }
+
+    // ── Baixar selecionadas ───────────────────────────────────
+    document.getElementById('btn-baixar-sel').addEventListener('click', async function() {
+        const selecionadas = Array.from(document.querySelectorAll('.card-check:checked'))
+            .map(function(chk) { return chk.closest('.card').dataset.url; });
+
+        if (selecionadas.length === 0) return;
+
+        const btn = document.getElementById('btn-baixar-sel');
+        const output = document.getElementById('output');
+        const logArea = document.getElementById('log-area');
+        const spinner = document.getElementById('spinner');
+        const statusTxt = document.getElementById('status-txt');
+        const btnZip = document.getElementById('btn-zip');
+
         logArea.innerHTML = '';
         btnZip.style.display = 'none';
         output.style.display = 'block';
         spinner.style.display = 'inline-block';
-        statusTxt.textContent = 'Executando...';
+        statusTxt.textContent = 'Baixando imagens selecionadas…';
         btn.disabled = true;
-        btn.textContent = '⏳ Baixando...';
 
-        function appendLine(text, cls = '') {
+        // Rolar para a área de log
+        output.scrollIntoView({ behavior: 'smooth' });
+
+        function appendLine(text, cls) {
             const div = document.createElement('div');
-            div.className = 'log-line ' + cls;
+            div.className = 'log-line ' + (cls || '');
             div.textContent = text;
             logArea.appendChild(div);
             logArea.scrollTop = logArea.scrollHeight;
         }
 
+        const payload = {
+            urls:    selecionadas,
+            prfx:    document.getElementById('prfx').value || 'img',
+            timeout: parseInt(document.getElementById('timeout').value) || 10,
+        };
+
         try {
-            const response = await fetch('/api/baixar', {
+            const response = await fetch('/api/baixar-selecionadas', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload)
@@ -322,14 +586,13 @@
                         }
                         if (data.done) {
                             const ok = data.code === 0;
-                            const total = data.total ?? '';
+                            const total = data.total != null ? data.total : 0;
                             const msg = ok
-                                ? `✔ Concluído — ${total} imagem(ns) coletada(s).`
-                                : `✖ Encerrado com código ${data.code}.`;
+                                ? '✔ Concluído — ' + total + ' imagem(ns) baixada(s).'
+                                : '✖ Encerrado com código ' + data.code + '.';
                             appendLine(msg, ok ? 'log-done' : 'log-error');
                             statusTxt.textContent = ok ? 'Concluído.' : 'Encerrado com erro.';
 
-                            // Cloud: exibe botão de download ZIP
                             if (ok && data.zip_url) {
                                 btnZip.href = data.zip_url;
                                 btnZip.style.display = 'block';
@@ -349,8 +612,40 @@
 
         spinner.style.display = 'none';
         btn.disabled = false;
-        btn.textContent = '⬇ Baixar Imagens';
     });
+
+    // ── Lightbox ──────────────────────────────────────────────
+    function abrirLightbox(url) {
+        const lb = document.getElementById('lightbox');
+        const img = document.getElementById('lb-img');
+        img.src = url;
+        lb.classList.add('ativo');
+    }
+
+    function fecharLightbox() {
+        const lb = document.getElementById('lightbox');
+        lb.classList.remove('ativo');
+        document.getElementById('lb-img').src = '';
+    }
+
+    document.getElementById('lb-fechar').addEventListener('click', fecharLightbox);
+
+    document.getElementById('lightbox').addEventListener('click', function(e) {
+        if (e.target === this) fecharLightbox();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') fecharLightbox();
+    });
+
+    // ── Utilitário: escapar HTML ──────────────────────────────
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
 </script>
 </body>
 </html>

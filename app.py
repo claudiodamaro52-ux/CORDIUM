@@ -1,5 +1,5 @@
 from flask import Flask, send_from_directory, request, Response, send_file
-import subprocess, sys, os, json, tempfile, zipfile, uuid
+import subprocess, sys, os, json, re, tempfile, zipfile, uuid, shutil
 
 app = Flask(__name__)
 
@@ -135,6 +135,162 @@ def baixar():
 
         except Exception as e:
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
+    return Response(
+        generate(),
+        mimetype='text/event-stream',
+        headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'}
+    )
+
+
+def _validar_engine(engine):
+    """Garante que o motor de busca é um dos valores permitidos."""
+    return engine if engine in ('Bing', 'Google') else 'Bing'
+
+
+def _sanitizar_prefixo(prfx):
+    """Remove caracteres não-seguros do prefixo (mantém letras, dígitos, _ e -)."""
+    return re.sub(r'[^\w\-]', '_', str(prfx or 'img'))[:64]
+
+
+@app.route('/api/coletar', methods=['POST'])
+def coletar():
+    """Recolhe URLs de imagens sem baixar; devolve JSON { imagens: [...] }."""
+    data = request.json or {}
+
+    engine    = _validar_engine(data.get('engine', 'Bing'))
+    url       = str(data.get('url', ''))
+    max_imgs  = max(0, int(data.get('max',      20) or 0))
+    timeout   = max(1, int(data.get('timeout',  10) or 10))
+    scrolls   = max(1, int(data.get('scrolls',   5) or 5))
+    types     = str(data.get('types', '') or '').strip()
+    minwidth  = max(0, int(data.get('minwidth',  0) or 0))
+    minheight = max(0, int(data.get('minheight', 0) or 0))
+
+    # Ficheiro temporário onde o script gravará as URLs
+    fd, output_path = tempfile.mkstemp(suffix='.json')
+    os.close(fd)
+
+    cmd = [
+        sys.executable, 'coletar.py',
+        '--engine',    engine,
+        '--url',       url,
+        '--max',       str(max_imgs),
+        '--timeout',   str(timeout),
+        '--scrolls',   str(scrolls),
+        '--types',     types,
+        '--minwidth',  str(minwidth),
+        '--minheight', str(minheight),
+        '--output',    output_path,
+    ]
+
+    try:
+        subprocess.run(
+            cmd,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding='utf-8',
+            errors='replace',
+            cwd=SCRIPTS_DIR
+        )
+
+        # Ler resultado gravado pelo script
+        try:
+            with open(output_path, 'r', encoding='utf-8') as f:
+                resultado = json.load(f)
+            return resultado
+        except Exception:
+            return {'imagens': []}
+
+    except Exception:
+        return {'imagens': []}, 500
+
+    finally:
+        try:
+            os.unlink(output_path)
+        except OSError:
+            pass
+
+
+@app.route('/api/baixar-selecionadas', methods=['POST'])
+def baixar_selecionadas():
+    """Baixa apenas as URLs selecionadas; devolve stream SSE com log + zip_url."""
+    data = request.json or {}
+    urls    = data.get('urls', [])
+    prfx    = _sanitizar_prefixo(data.get('prfx', 'img'))
+    timeout = max(1, int(data.get('timeout', 10) or 10))
+
+    if not urls:
+        return {'erro': 'Nenhuma URL fornecida.'}, 400
+
+    # Pasta temporária para guardar as imagens baixadas
+    pasta = tempfile.mkdtemp()
+    task_id = uuid.uuid4().hex[:8]
+
+    # Ficheiro temporário com a lista de URLs
+    fd, urls_file = tempfile.mkstemp(suffix='.json')
+    os.close(fd)
+    with open(urls_file, 'w', encoding='utf-8') as f:
+        json.dump(urls, f)
+
+    cmd = [
+        sys.executable, 'baixar_urls.py',
+        '--urls-file', urls_file,
+        '--fdpath',    pasta,
+        '--prfx',      prfx,
+        '--timeout',   str(timeout),
+    ]
+
+    def generate():
+        try:
+            proc = subprocess.Popen(
+                cmd,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding='utf-8',
+                errors='replace',
+                cwd=SCRIPTS_DIR
+            )
+            for line in proc.stdout:
+                line = line.strip()
+                if line:
+                    yield f"data: {json.dumps({'log': line})}\n\n"
+            proc.wait()
+
+            # Zipar imagens e disponibilizar link de download
+            if proc.returncode == 0:
+                arquivos = [f for f in os.listdir(pasta)
+                            if os.path.isfile(os.path.join(pasta, f))]
+                if arquivos:
+                    zip_path = pasta + '.zip'
+                    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+                        for f in arquivos:
+                            zf.write(os.path.join(pasta, f), f)
+                    _zip_store[task_id] = zip_path
+                    yield f"data: {json.dumps({'done': True, 'code': 0, 'zip_url': f'/api/zip/{task_id}', 'total': len(arquivos)})}\n\n"
+                else:
+                    yield f"data: {json.dumps({'done': True, 'code': 0, 'total': 0})}\n\n"
+            else:
+                yield f"data: {json.dumps({'done': True, 'code': proc.returncode})}\n\n"
+
+        except Exception:
+            yield f"data: {json.dumps({'error': 'Erro interno durante o download.'})}\n\n"
+
+        finally:
+            # Limpar ficheiro de URLs temporário
+            try:
+                os.unlink(urls_file)
+            except OSError:
+                pass
+            # Limpar pasta de imagens temporária e o ZIP gerado
+            try:
+                shutil.rmtree(pasta, ignore_errors=True)
+            except Exception:
+                pass
 
     return Response(
         generate(),
