@@ -3,12 +3,13 @@ import subprocess, sys, os, json, re, tempfile, zipfile, uuid, shutil
 
 app = Flask(__name__)
 
-BASE        = os.path.dirname(os.path.abspath(__file__))
-WIMGCPT_DIR = os.path.join(BASE, 'WIMGCPT')
-HTML_DIR    = os.path.join(WIMGCPT_DIR, 'HTML')
-SCRIPTS_DIR = os.path.join(WIMGCPT_DIR, 'SCRIPTS')
-DIST_DIR    = os.path.join(WIMGCPT_DIR, 'DIST')
-IMG_DIR     = os.path.join(WIMGCPT_DIR, 'IMG')
+BASE         = os.path.dirname(os.path.abspath(__file__))
+HTML_DIR     = os.path.join(BASE, 'HTML')
+COLETOR_DIR  = os.path.join(BASE, 'COLETOR')
+COLETOR_HTML = os.path.join(COLETOR_DIR, 'HTML')
+SCRIPTS_DIR  = os.path.join(COLETOR_DIR, 'SCRIPTS')
+DIST_DIR     = os.path.join(COLETOR_DIR, 'DIST')
+IMG_DIR      = os.path.join(BASE, 'WIMGCPT', 'IMG')
 
 DEVJSON_DIR  = os.path.join(BASE, 'DEVJSON')
 DEVJSON_HTML = os.path.join(DEVJSON_DIR, 'HTML')
@@ -45,7 +46,7 @@ def sobre():
 
 @app.route('/coletor')
 def coletor():
-    return send_from_directory(HTML_DIR, 'coletor.html')
+    return send_from_directory(COLETOR_HTML, 'coletor.html')
 
 @app.route('/descarregar')
 def descarregar():
@@ -158,7 +159,7 @@ def _sanitizar_prefixo(prfx):
 
 
 @app.route('/api/coletar', methods=['POST'])
-def coletar():
+def coletar_api():
     """Recolhe URLs de imagens sem baixar; devolve JSON { imagens: [...] }."""
     data = request.json or {}
 

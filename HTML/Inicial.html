@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cordium - Soluções Inteligentes</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #faf6f0;
+        }
+        header {
+            background: #1a0a02; color: white;
+            padding: 12px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        header .brand { display: flex; align-items: center; gap: 12px; }
+        header .brand img { height: 50px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        header .brand-name { color: white; font-size: 22px; font-weight: bold; text-decoration: none; margin: 0; }
+        header .nav-info a { color: white; margin-left: 20px; text-decoration: none; font-weight: bold; }
+        header .nav-info a:hover { color: #c9820a; }
+        .nav-tools {
+            background: #3d1f00; padding: 8px 30px;
+            display: flex; align-items: center; gap: 8px; font-size: 14px;
+        }
+        .nav-tools .tools-label { color: #c9820a; font-weight: bold; margin-right: 6px; }
+        .nav-tools a { color: white; text-decoration: none; font-weight: bold; padding: 4px 14px; border-radius: 4px; transition: background 0.2s; }
+        .nav-tools a:hover, .nav-tools a.ativo { background: #c9820a; }
+        .nav-tools .tools-sep { color: #c9820a; margin: 0 2px; }
+        .hero {
+            background: linear-gradient(to right, #1a0a02, #3d1f00);
+            color: white;
+            padding: 80px 30px;
+            text-align: center;
+        }
+        .hero h2 {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        .hero p {
+            font-size: 20px;
+            margin-bottom: 30px;
+        }
+        .btn {
+            background: #c9820a;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 18px;
+        }
+        .btn:hover {
+            background: #8b1400;
+        }
+        footer {
+            background: #1a0a02;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+        a {
+            color: #c9820a;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand">
+        <a href="/"><img src="/img/Logo_Cordium.png" alt="Cordium"></a>
+        <a class="brand-name" href="/">Cordium</a>
+    </div>
+    <nav class="nav-info">
+        <a href="/download">Download</a>
+        <a href="/sobre">Sobre</a>
+        <a href="/suporte">Suporte</a>
+    </nav>
+</header>
+<nav class="nav-tools">
+    <span class="tools-label">🛠 Ferramentas:</span>
+    <a href="/coletor">Coletor</a>
+    <span class="tools-sep">|</span>
+    <a href="/devjson">DevJSON</a>
+</nav>
+
+<section class="hero">
+    <img src="/img/Logo_Cordium.png" alt="Cordium Logo"
+         style="max-width:640px; width:90%; border-radius:12px; margin-bottom:24px; box-shadow:0 6px 24px rgba(0,0,0,0.6);">
+    <h2>Bem-vindo à Cordium</h2>
+    <p>Soluções inteligentes para automação, produtividade e tecnologia.</p>
+</section>
+
+<footer>
+    © 2026 Cordium — Todos os direitos reservados.
+</footer>
+
+</body>
+</html>

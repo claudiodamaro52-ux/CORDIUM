@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Sobre - Cordium</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #faf6f0; }
+        header {
+            background: #1a0a02; color: white;
+            padding: 12px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        header .brand { display: flex; align-items: center; gap: 12px; }
+        header .brand img { height: 50px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        header .brand-name { color: white; font-size: 22px; font-weight: bold; text-decoration: none; margin: 0; }
+        header .nav-info a { color: white; margin-left: 20px; text-decoration: none; font-weight: bold; }
+        header .nav-info a:hover { color: #c9820a; }
+        .nav-tools {
+            background: #3d1f00; padding: 8px 30px;
+            display: flex; align-items: center; gap: 8px; font-size: 14px;
+        }
+        .nav-tools .tools-label { color: #c9820a; font-weight: bold; margin-right: 6px; }
+        .nav-tools a { color: white; text-decoration: none; font-weight: bold; padding: 4px 14px; border-radius: 4px; transition: background 0.2s; }
+        .nav-tools a:hover, .nav-tools a.ativo { background: #c9820a; }
+        .nav-tools .tools-sep { color: #c9820a; margin: 0 2px; }
+        .container {
+            max-width: 900px; margin: 40px auto;
+            background: white; padding: 30px;
+            border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        h2 { color: #c9820a; }
+        h3 { color: #3d1f00; }
+        .btn {
+            display: inline-block; background: #c9820a; color: white;
+            padding: 12px 22px; border-radius: 8px; text-decoration: none;
+            font-size: 16px; margin: 8px 0 20px;
+        }
+        .btn:hover { background: #8b1400; }
+        footer { background: #1a0a02; color: white; text-align: center; padding: 20px; margin-top: 40px; }
+        a { color: #c9820a; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand">
+        <a href="/"><img src="/img/Logo_Cordium.png" alt="Cordium"></a>
+        <a class="brand-name" href="/">Cordium</a>
+    </div>
+    <nav class="nav-info">
+        <a href="/download">Download</a>
+        <a class="ativo" href="/sobre">Sobre</a>
+        <a href="/suporte">Suporte</a>
+    </nav>
+</header>
+<nav class="nav-tools">
+    <span class="tools-label">🛠 Ferramentas:</span>
+    <a href="/coletor">Coletor</a>
+    <span class="tools-sep">|</span>
+    <a href="/devjson">DevJSON</a>
+</nav>
+
+<div class="container">
+    <h2>Sobre a Cordium</h2>
+    <p>A Cordium é uma empresa focada em desenvolver ferramentas inteligentes que simplificam tarefas,
+    aumentam a produtividade e tornam a tecnologia mais acessível para todos.</p>
+
+    <h2>Nossos Produtos</h2>
+
+    <h3>Coletor de Imagens</h3>
+    <p>Software avançado para coletar imagens automaticamente do Google e Bing,
+    com filtros de resolução, tipos, limite e mais. Inclui:</p>
+    <ul>
+        <li>Pré-visualização em galeria antes do download</li>
+        <li>Download seletivo das imagens escolhidas</li>
+        <li>Histórico inteligente e logs detalhados</li>
+        <li>Interface simples e intuitiva</li>
+    </ul>
+    <a class="btn" href="/download">Baixar Agora</a>
+
+    <h3>DevJSON</h3>
+    <p>Ferramenta web para manipulação de arquivos JSON diretamente no navegador, sem instalação.
+    Normaliza, indenta, mescla, converte entre formatos e gera schemas.</p>
+    <a class="btn" href="/devjson">Abrir DevJSON</a>
+
+    <h2>Links Úteis</h2>
+    <ul>
+        <li><a href="/download">Página de Download</a></li>
+        <li><a href="/suporte">Suporte / FAQ</a></li>
+    </ul>
+</div>
+
+<footer>
+    © 2026 Cordium — Todos os direitos reservados.
+</footer>
+
+</body>
+</html>
