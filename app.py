@@ -39,6 +39,10 @@ def download():
 def suporte():
     return send_from_directory(HTML_DIR, 'faq.html')
 
+@app.route('/sobre')
+def sobre():
+    return send_from_directory(HTML_DIR, 'sobre.html')
+
 @app.route('/coletor')
 def coletor():
     return send_from_directory(HTML_DIR, 'coletor.html')
@@ -303,4 +307,3 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_ENV') == 'development'
     app.run(host='0.0.0.0', port=port, debug=debug)
-
