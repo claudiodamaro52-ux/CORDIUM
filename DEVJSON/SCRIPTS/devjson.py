@@ -96,6 +96,34 @@ def run(op, text, text2="", param=""):
                 result = "(Sem diferencas - JSONs identicos)"
                 msgs = ["JSONs identicos."]
 
+        elif op == "merge":
+            data1 = json.loads(text)
+            data2 = json.loads(text2)
+            resultado = merge_deep(data1, data2)
+            resultado = normalize_node(resultado)
+            result = json.dumps(resultado, indent=2, ensure_ascii=False)
+            msgs = [f"Mesclagem concluida. {len(resultado)} chave(s) no resultado."]
+
+        elif op == "flatten":
+            data = json.loads(text)
+            flat = flatten_obj(data)
+            flat = normalize_node(flat)
+            result = json.dumps(flat, indent=2, ensure_ascii=False)
+            msgs = [f"Flatten concluido. {len(flat)} chave(s) geradas."]
+
+        elif op == "unflatten":
+            data = json.loads(text)
+            nested = unflatten_obj(data)
+            nested = normalize_node(nested)
+            result = json.dumps(nested, indent=2, ensure_ascii=False)
+            msgs = [f"Unflatten concluido. {len(nested)} chave(s) de raiz."]
+
+        elif op == "schema":
+            data = json.loads(text)
+            schema = make_schema(data)
+            result = json.dumps(schema, indent=2, ensure_ascii=False)
+            msgs = ["Schema gerado."]
+
         else:
             msgs = [f"Operacao desconhecida: {op}"]
 
@@ -170,3 +198,62 @@ def _diff(a, b, path, out):
     else:
         if a != b:
             out.append(f"~ Alterado: {path}\n    - {json.dumps(a, ensure_ascii=False)}\n    + {json.dumps(b, ensure_ascii=False)}")
+
+
+def normalize_node(v):
+    """Garante que chaves e valores sejam strings (padrao Cordium)."""
+    if v is None:
+        return ""
+    if isinstance(v, list):
+        return [normalize_node(i) for i in v]
+    if isinstance(v, dict):
+        return {str(k): normalize_node(val) for k, val in v.items()}
+    return str(v)
+
+
+def merge_deep(a, b):
+    """Mescla dois dicts; b sobrescreve a em conflito. Arrays de b substituem os de a."""
+    if isinstance(a, dict) and isinstance(b, dict):
+        r = dict(a)
+        for k, v in b.items():
+            if k in r and isinstance(r[k], dict) and isinstance(v, dict):
+                r[k] = merge_deep(r[k], v)
+            else:
+                r[k] = v
+        return r
+    return b
+
+
+def flatten_obj(obj, prefix=""):
+    """Achata JSON aninhado em chaves com ponto."""
+    out = {}
+    for k, v in obj.items():
+        nova_chave = f"{prefix}.{k}" if prefix else k
+        if isinstance(v, dict):
+            out.update(flatten_obj(v, nova_chave))
+        else:
+            out[nova_chave] = "" if v is None else str(v)
+    return out
+
+
+def unflatten_obj(flat):
+    """Reconstroi JSON aninhado a partir de chaves com ponto."""
+    out = {}
+    for chave, valor in flat.items():
+        partes = chave.split(".")
+        atual = out
+        for parte in partes[:-1]:
+            if parte not in atual or not isinstance(atual[parte], dict):
+                atual[parte] = {}
+            atual = atual[parte]
+        atual[partes[-1]] = valor
+    return out
+
+
+def make_schema(v):
+    """Gera JSON Schema simples (sem required, sem $schema)."""
+    if isinstance(v, list):
+        return {"type": "array", "items": make_schema(v[0]) if v else {}}
+    if isinstance(v, dict):
+        return {"type": "object", "properties": {k: make_schema(val) for k, val in v.items()}}
+    return {"type": "string"}
