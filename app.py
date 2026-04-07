@@ -9,7 +9,7 @@ COLETOR_DIR  = os.path.join(BASE, 'COLETOR')
 COLETOR_HTML = os.path.join(COLETOR_DIR, 'HTML')
 SCRIPTS_DIR  = os.path.join(COLETOR_DIR, 'SCRIPTS')
 DIST_DIR     = os.path.join(COLETOR_DIR, 'DIST')
-IMG_DIR      = os.path.join(BASE, 'WIMGCPT', 'IMG')
+IMG_DIR      = os.path.join(BASE, 'IMG')
 
 DEVJSON_DIR  = os.path.join(BASE, 'DEVJSON')
 DEVJSON_HTML = os.path.join(DEVJSON_DIR, 'HTML')
