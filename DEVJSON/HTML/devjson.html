@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Formate JSON online, valide estrutura, minifique conteudo e converta JSON para CSV gratuitamente com a ferramenta da Cordium.">
+<meta name="description" content="Cole seu JSON e formate online em segundos. Valide, minifique e converta JSON para CSV em uma interface simples da Cordium.">
 <link rel="canonical" href="https://cordium.com.br/formatar-json">
 <meta property="og:title" content="Formatar JSON Online | Cordium">
 <meta property="og:description" content="Ferramenta gratuita para formatar JSON online, converter JSON para CSV e organizar dados com rapidez.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://cordium.com.br/formatar-json">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Formatar JSON Online","applicationCategory":"DeveloperApplication","operatingSystem":"Web","url":"https://cordium.com.br/formatar-json","description":"Ferramenta online para formatar JSON, validar estrutura, minificar e converter JSON para CSV."}</script>
-<title>Formatar JSON Online | JSON para CSV Gratis | Cordium</title>
+<title>Formatar JSON Online | Ferramenta Gratis da Cordium</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Arial,sans-serif;background:#1a0a02;display:flex;flex-direction:column;min-height:100vh;overflow:auto}
@@ -45,13 +45,13 @@ textarea{flex:1;width:100%;border:none;padding:7px 9px;font-family:Consolas,mono
 .seo-intro h1{font-size:24px;color:#1a0a02;margin:0 0 8px}
 .seo-intro p{font-size:14px;line-height:1.7;color:#4d3b2d;margin:0}
 .seo-links{margin-top:10px;display:flex;gap:10px;flex-wrap:wrap}
-.seo-links a{color:#8b1400;font-weight:bold;text-decoration:none;font-size:13px}.btn-op.is-target{outline:2px solid #fff; box-shadow:0 0 0 2px rgba(201,130,10,0.55)}
+.seo-links a{color:#8b1400;font-weight:bold;text-decoration:none;font-size:13px}
 </style>
 </head>
 <body>
 <header>
   <div class="brand">
-    <a href="/"><img src="/img/Logo_Cordium.webp" alt="Cordium"></a>
+    <a href="/"><img src="/img/Logo_Cordium.webp" alt="Cordium - formatar JSON online"></a>
     <a class="brand-name" href="/">Cordium</a>
   </div>
   <nav class="nav-info">
@@ -62,7 +62,7 @@ textarea{flex:1;width:100%;border:none;padding:7px 9px;font-family:Consolas,mono
   </nav>
 </header>
 <nav class="nav-tools">
-  <span class="tools-label">🛠 Ferramentas:</span>
+  <span class="tools-label">&#128736;</span>
   <a href="/baixar-imagens">baixar imagens automaticamente</a>
   <span class="tools-sep">|</span>
   <a class="ativo" href="/formatar-json">formatar JSON online</a>
@@ -96,24 +96,11 @@ textarea{flex:1;width:100%;border:none;padding:7px 9px;font-family:Consolas,mono
 <div class="main">
   <div class="panel"><div class="ph"><span class="pt">1 - Entrada A</span><button class="btn-ph" data-action="clear" data-target="p1">Limpar</button></div><textarea id="p1" placeholder="Cole ou digite o JSON aqui..."></textarea></div>
   <div class="panel"><div class="ph"><span class="pt">2 - Entrada B (comparacao e mesclagem)</span><button class="btn-ph" data-action="clear" data-target="p2">Limpar</button></div><textarea id="p2" placeholder="Segundo texto para comparacao ou mesclagem..."></textarea></div>
-  <div class="panel"><div class="ph"><span class="pt">3 - Resultado</span><button class="btn-ph" data-action="copy">Copiar</button><button class="btn-ph" data-action="top1">Para Painel 1</button><button class="btn-ph" data-action="clear" data-target="p3">Limpar</button></div><textarea id="p3" readonly placeholder="Resultado aparecera aqui..."></textarea></div>
+  <div class="panel"><div class="ph"><span class="pt">3 - Resultado</span><button class="btn-ph" data-action="copy">Copiar</button><button class="btn-ph" data-action="email">Email</button><button class="btn-ph" data-action="whatsapp">WhatsApp</button><button class="btn-ph" data-action="top1">Para Painel 1</button><button class="btn-ph" data-action="clear" data-target="p3">Limpar</button></div><textarea id="p3" readonly placeholder="Resultado aparecera aqui..."></textarea></div>
   <div class="panel"><div class="ph"><span class="pt">4 - Mensagens / Andamento</span><button class="btn-ph" data-action="clrlog">Limpar</button></div><div id="p4" class="msgs"></div></div>
 </div>
 <script>
 function g(id){return document.getElementById(id);}
-function selectedOperation(){
-  return new URLSearchParams(window.location.search).get("op");
-}
-function highlightOperation(){
-  var op=selectedOperation();
-  if(!op)return;
-  var btn=document.querySelector('.btn-op[data-op="'+op+'"]');
-  if(!btn)return;
-  btn.classList.add('is-target');
-  g("p4").innerHTML="";
-  log("Operacao sugerida para esta pagina: "+btn.textContent+".","warn");
-  g("p1").focus();
-}
 function log(msg,type){var d=document.createElement("div");d.className="m "+(type||"ok");d.textContent=new Date().toLocaleTimeString("pt-BR")+"  "+msg;g("p4").appendChild(d);g("p4").scrollTop=g("p4").scrollHeight;}
 function sanitize(s){s=String(s==null?"":s);s=s.replace(/\r\n|\r|\n/g," ");s=s.replace(/"/g,"\x27");s=s.normalize("NFD").replace(/\p{Mn}/gu,"");s=s.replace(/ {2,}/g," ");return s.trim();}
 function normalizeNode(v){if(v===null||v===undefined)return"";if(Array.isArray(v))return v.map(normalizeNode);if(typeof v==="object"){var r={};for(var k in v)r[sanitize(k)]=normalizeNode(v[k]);return r;}return sanitize(v);}
@@ -125,10 +112,12 @@ function mergeDeep(a,b){if(a&&b&&typeof a==="object"&&!Array.isArray(a)&&typeof 
 function flattenObj(obj,prefix){var out={};prefix=prefix||"";for(var k in obj){var nova=prefix?prefix+"."+k:k;if(obj[k]!==null&&typeof obj[k]==="object"&&!Array.isArray(obj[k])){var sub=flattenObj(obj[k],nova);for(var sk in sub)out[sk]=sub[sk];}else{out[nova]=String(obj[k]==null?"":obj[k]);}}return out;}
 function unflattenObj(flat){var out={};for(var chave in flat){var partes=chave.split(".");var atual=out;for(var i=0;i<partes.length-1;i++){if(!(partes[i] in atual)||typeof atual[partes[i]]!=="object")atual[partes[i]]={};atual=atual[partes[i]];}atual[partes[partes.length-1]]=flat[chave];}return out;}
 function makeSchema(v){if(Array.isArray(v)){return{type:"array",items:v.length?makeSchema(v[0]):{}};}if(v!==null&&typeof v==="object"){var props={};for(var k in v)props[k]=makeSchema(v[k]);return{type:"object",properties:props};}return{type:"string"};}
+function getShareText(maxLen){var v=g("p3").value||"";if(!v.trim()){log("Painel 3 vazio.","warn");return null;}var texto="Resultado gerado no Cordium:\n\n"+v.trim();if(maxLen&&texto.length>maxLen){texto=texto.slice(0,maxLen)+"\n\n... (conteudo truncado para envio)";log("Resultado truncado para envio.","warn");}return texto;}
+function sendEmail(){var texto=getShareText(12000);if(!texto)return;var assunto=encodeURIComponent("Resultado JSON - Cordium");var body=encodeURIComponent(texto);window.location.href="mailto:?subject="+assunto+"&body="+body;log("Abrindo app de email...","ok");}
+function sendWhatsApp(){var texto=getShareText(3500);if(!texto)return;var payload=encodeURIComponent(texto);var mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);var url=mobile?"whatsapp://send?text="+payload:"https://wa.me/?text="+payload;window.open(url,"_blank");log("Abrindo WhatsApp...","ok");}
 function runOp(op){g("p4").innerHTML="";var t1=g("p1").value.trim();var t2=g("p2").value.trim();var result="";try{if(op==="normalize"){log("Normalizando...","warn");log("[!] Valores serao convertidos para texto.","warn");result=JSON.stringify(normalizeNode(JSON.parse(t1)),null,2);log("Concluido.");log("[!] Ajuste os tipos se necessario.","warn");}else if(op==="format"){result=JSON.stringify(JSON.parse(t1),null,2);log("JSON indentado.");}else if(op==="template"){result=JSON.stringify(makeTemplate(JSON.parse(t1)),null,2);log("Template gerado.");}else if(op==="types"){result=JSON.stringify(makeTypes(JSON.parse(t1)),null,2);log("Tipos gerados.");}else if(op==="json2csv"){result=json2csv(t1);log("JSON convertido para CSV.");}else if(op==="csv2json"){result=csv2json(t1);log("CSV convertido para JSON.");}else if(op==="merge"){if(!t2){log("Painel 2 (B) esta vazio.","err");return;}var d1=JSON.parse(t1);var d2=JSON.parse(t2);var merged=normalizeNode(mergeDeep(d1,d2));result=JSON.stringify(merged,null,2);log("Mesclagem concluida. "+Object.keys(merged).length+" chave(s) no resultado.");}else if(op==="flatten"){var flat=normalizeNode(flattenObj(JSON.parse(t1)));result=JSON.stringify(flat,null,2);log("Flatten concluido. "+Object.keys(flat).length+" chave(s) geradas.");}else if(op==="unflatten"){var nested=normalizeNode(unflattenObj(JSON.parse(t1)));result=JSON.stringify(nested,null,2);log("Unflatten concluido. "+Object.keys(nested).length+" chave(s) de raiz.");}else if(op==="schema"){var schema=makeSchema(JSON.parse(t1));result=JSON.stringify(schema,null,2);log("Schema gerado.");}}catch(e){log("Erro: "+e.message,"err");result="";}g("p3").value=result;}
 document.querySelectorAll(".btn-op").forEach(function(btn){btn.addEventListener("click",function(){runOp(this.dataset.op);});});
-document.querySelectorAll(".btn-ph").forEach(function(btn){btn.addEventListener("click",function(){var a=this.dataset.action,t=this.dataset.target;if(a==="clear"){g(t).value="";}else if(a==="clrlog"){g("p4").innerHTML="";}else if(a==="copy"){var v=g("p3").value;if(!v){log("Painel 3 vazio.","warn");return;}navigator.clipboard.writeText(v).then(function(){log("Copiado.");}).catch(function(e){log("Erro: "+e,"err");});}else if(a==="top1"){var v=g("p3").value;if(!v){log("Painel 3 vazio.","warn");return;}g("p1").value=v;log("Transferido para Painel 1.");}});});
-highlightOperation();
+document.querySelectorAll(".btn-ph").forEach(function(btn){btn.addEventListener("click",function(){var a=this.dataset.action,t=this.dataset.target;if(a==="clear"){g(t).value="";}else if(a==="clrlog"){g("p4").innerHTML="";}else if(a==="copy"){var v=g("p3").value;if(!v){log("Painel 3 vazio.","warn");return;}navigator.clipboard.writeText(v).then(function(){log("Copiado.");}).catch(function(e){log("Erro: "+e,"err");});}else if(a==="email"){sendEmail();}else if(a==="whatsapp"){sendWhatsApp();}else if(a==="top1"){var v=g("p3").value;if(!v){log("Painel 3 vazio.","warn");return;}g("p1").value=v;log("Transferido para Painel 1.");}});});
 </script>
 </body>
 </html>

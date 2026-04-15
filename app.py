@@ -121,6 +121,12 @@ def modo():
     """Informa ao frontend se está rodando em cloud ou local."""
     return {'cloud': IS_CLOUD}
 
+@app.route('/api/instalador-status')
+def instalador_status():
+    """Informa se o executavel desktop está disponível no servidor."""
+    exe = os.path.join(DIST_DIR, 'Coletor_Imagens.exe')
+    return {'available': os.path.exists(exe)}
+
 
 @app.route('/api/zip/<task_id>')
 def download_zip(task_id):

@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Baixe imagens automaticamente online com filtros por origem, tipo e tamanho. Cole a URL da busca e selecione as imagens que deseja salvar.">
+    <meta name="description" content="Cole a URL da busca e baixe imagens automaticamente com filtros de tamanho e formato. Compare miniaturas e salve so o que interessa.">
     <link rel="canonical" href="https://cordium.com.br/baixar-imagens">
     <meta property="og:title" content="Baixar Imagens Automaticamente | Cordium">
     <meta property="og:description" content="Ferramenta online para baixar imagens automaticamente com filtros, pre-visualizacao e selecao antes do download.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cordium.com.br/baixar-imagens">
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Baixar Imagens Automaticamente","applicationCategory":"UtilityApplication","operatingSystem":"Web","url":"https://cordium.com.br/baixar-imagens","description":"Ferramenta online para baixar imagens automaticamente a partir de paginas de busca com filtros e pre-visualizacao."}</script>
-    <title>Baixar Imagens Automaticamente | Ferramenta Online | Cordium</title>
+    <title>Baixar Imagens Automaticamente Online | Cordium</title>
     <style>
         * { box-sizing: border-box; }
         body { margin: 0; font-family: Arial, sans-serif; background: #faf6f0; }
@@ -218,7 +218,7 @@
 
 <header>
     <div class="brand">
-        <a href="/"><img src="/img/Logo_Cordium.webp" alt="Cordium"></a>
+        <a href="/"><img src="/img/Logo_Cordium.webp" alt="Cordium - baixar imagens automaticamente online"></a>
         <a class="brand-name" href="/">Cordium</a>
     </div>
     <nav class="nav-info">
@@ -227,16 +227,15 @@
     </nav>
 </header>
 <nav class="nav-tools">
-    <span class="tools-label">🛠 Ferramentas:</span>
+    <span class="tools-label">&#128736;</span>
     <a class="ativo" href="/baixar-imagens">baixar imagens automaticamente</a>
     <span class="tools-sep">|</span>
     <a href="/formatar-json">formatar JSON online</a>
 </nav>
 
 <div class="container">
-    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px;">
-        <h1 style="margin:0; color:#c9820a; font-size:32px;">Baixar Imagens Automaticamente</h1>
-        <a class="btn" href="/download" style="width:auto; margin-top:0; text-decoration:none; display:inline-block;">Baixar executavel</a>
+    <div style="margin-bottom:20px;">
+        <h1 style="margin:0; color:#c9820a; font-size:32px;">Baixar Imagens Automaticamente Online</h1>
     </div>
 
     <p style="margin:0 0 20px; color:#444; line-height:1.8;">Use esta ferramenta para baixar imagens automaticamente a partir de paginas de busca do Bing ou Google. Voce pode colar a URL da pesquisa, aplicar filtros por resolucao e tipo de arquivo, pre-visualizar os resultados e escolher exatamente quais imagens deseja salvar.</p>
@@ -255,7 +254,12 @@
             <li>Cole no campo <strong>URL da pesquisa</strong> abaixo</li>
             <li>Preencha os demais campos e clique em <strong>🔍 Pré-visualizar Imagens</strong></li>
             <li>Analise as miniaturas, marque as que deseja e clique em <strong>⬇ Baixar Selecionadas</strong></li>
+            <li style="line-height:1.7; margin-top:6px;">Opcional: se preferir usar o programa desktop, faça o download do executavel em <a id="download-desktop-link" href="/download" style="color:#8b1400; font-weight:600;">baixar imagens automaticamente no Windows</a>.</li>
         </ol>
+    </div>
+
+    <div id="download-msg" style="display:none; background:#fff3e0; border-left:4px solid #fb8c00; border-radius:8px; padding:12px 14px; margin:-10px 0 20px; color:#8b1400; font-size:14px; line-height:1.6;">
+        O instalador esta temporariamente indisponivel. Entre em contato com o suporte: <strong>suporte@cordium.com.br</strong>
     </div>
 
     <form id="form" autocomplete="off">
@@ -393,6 +397,33 @@
     let isCloud = false;
     let urlsColetadas = [];
 
+    async function abrirDownloadDesktop(event) {
+        event.preventDefault();
+        const aviso = document.getElementById('download-msg');
+        if (aviso) aviso.style.display = 'none';
+
+        try {
+            const res = await fetch('/api/instalador-status', { cache: 'no-store' });
+            if (!res.ok) throw new Error('status');
+            const data = await res.json();
+            if (data.available) {
+                window.location.href = '/download';
+                return;
+            }
+        } catch (_) {
+            // Se a consulta falhar, mantém o comportamento original e tenta abrir a pagina de download.
+            window.location.href = '/download';
+            return;
+        }
+
+        if (aviso) aviso.style.display = 'block';
+    }
+
+    const downloadDesktopLink = document.getElementById('download-desktop-link');
+    if (downloadDesktopLink) {
+        downloadDesktopLink.addEventListener('click', abrirDownloadDesktop);
+    }
+
     // ── Detecta modo cloud/local ao carregar ────────────────────────────
     (async () => {
         try {
@@ -400,11 +431,13 @@
             const data = await res.json();
             isCloud = data.cloud;
             if (isCloud) {
-                const fdInput = document.getElementById('fdpath');
-                fdInput.value = '';
-                fdInput.disabled = true;
-                fdInput.placeholder = 'Não aplicável no modo online';
-                document.getElementById('fdpath-info').style.display = 'block';
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+                if (isMobile) {
+                    const fdField = document.getElementById('fdpath-field');
+                    if (fdField) fdField.style.display = 'none';
+                    const fdInfo = document.getElementById('fdpath-info');
+                    if (fdInfo) { fdInfo.textContent = 'No celular, as imagens serão baixadas como arquivo ZIP.'; fdInfo.style.display = 'block'; }
+                }
                 // Google/Selenium não disponível no cloud
                 const engineSel = document.getElementById('engine');
                 for (const opt of engineSel.options) {
