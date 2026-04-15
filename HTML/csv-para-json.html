@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Converta CSV para JSON online e gere estruturas prontas para APIs, importacoes e fluxos de integracao sem instalar programas extras.">
+    <link rel="canonical" href="https://cordium.com.br/csv-para-json">
+    <meta property="og:title" content="Converter CSV para JSON Online | Cordium">
+    <meta property="og:description" content="Ferramenta online para converter CSV para JSON de forma rapida e gratuita.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://cordium.com.br/csv-para-json">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Converter CSV para JSON Online","url":"https://cordium.com.br/csv-para-json","applicationCategory":"DeveloperApplication","operatingSystem":"Web","description":"Pagina dedicada para converter CSV para JSON online usando a ferramenta da Cordium."}</script>
+    <title>Converter CSV para JSON Online | Cordium</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #faf6f0; color: #2e2118; }
+        header { background: #1a0a02; color: white; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; }
+        header .brand { display: flex; align-items: center; gap: 12px; }
+        header .brand img { height: 50px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        header .brand-name { color: white; font-size: 22px; font-weight: bold; text-decoration: none; }
+        header .nav-info a { color: white; margin-left: 20px; text-decoration: none; font-weight: bold; }
+        header .nav-info a:hover { color: #c9820a; }
+        .nav-tools { background: #3d1f00; padding: 8px 30px; display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        .nav-tools .tools-label { color: #c9820a; font-weight: bold; margin-right: 6px; }
+        .nav-tools a { color: white; text-decoration: none; font-weight: bold; padding: 4px 14px; border-radius: 4px; }
+        .nav-tools a:hover, .nav-tools a.ativo { background: #c9820a; }
+        .nav-tools .tools-sep { color: #c9820a; margin: 0 2px; }
+        .hero { max-width: 1080px; margin: 0 auto; padding: 56px 24px 28px; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 28px; align-items: center; }
+        .hero-card, .info-card { background: white; border-radius: 18px; padding: 28px; box-shadow: 0 12px 28px rgba(0,0,0,0.08); }
+        h1 { margin: 0 0 14px; font-size: 40px; color: #1a0a02; }
+        h2 { color: #8b1400; margin-top: 0; }
+        p, li { line-height: 1.75; }
+        .btn-row { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 24px; }
+        .btn { display: inline-block; background: #c9820a; color: white; padding: 14px 22px; border-radius: 10px; text-decoration: none; font-weight: bold; }
+        .btn.alt { background: #fff3e0; color: #8b1400; border: 1px solid #e5c28a; }
+        .grid { max-width: 1080px; margin: 0 auto 40px; padding: 0 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .section { max-width: 1080px; margin: 0 auto 40px; padding: 0 24px; }
+        .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.07); }
+        .faq-item { margin-bottom: 18px; }
+        footer { text-align: center; padding: 24px; color: #777; }
+        a { color: #8b1400; }
+        @media (max-width: 860px) { .hero { grid-template-columns: 1fr; } h1 { font-size: 32px; } }
+    </style>
+</head>
+<body>
+<header>
+    <div class="brand">
+        <a href="/"><img src="/img/Logo_Cordium.webp" alt="Cordium"></a>
+        <a class="brand-name" href="/">Cordium</a>
+    </div>
+    <nav class="nav-info">
+        <a href="/sobre">Sobre</a>
+        <a href="/suporte">Suporte</a>
+    </nav>
+</header>
+<nav class="nav-tools">
+    <span class="tools-label">Ferramentas:</span>
+    <a href="/baixar-imagens">baixar imagens automaticamente</a>
+    <span class="tools-sep">|</span>
+    <a class="ativo" href="/formatar-json">formatar JSON online</a>
+</nav>
+<section class="hero">
+    <div class="hero-card">
+        <h1>Converter CSV para JSON Online</h1>
+        <p>Esta pagina atende a intencao de busca de quem precisa converter CSV para JSON online. Ela explica o fluxo e leva direto para a mesma ferramenta da Cordium que ja faz a transformacao de planilhas em objetos JSON prontos para automacoes, APIs e integracoes.</p>
+        <p>O uso e simples: cole o CSV com cabecalho, escolha a operacao CSV para JSON e copie o resultado no formato estruturado.</p>
+        <div class="btn-row">
+            <a class="btn" href="/formatar-json?op=csv2json">Abrir conversor CSV para JSON</a>
+            <a class="btn alt" href="/json-para-csv">Ver conversor JSON para CSV</a>
+        </div>
+    </div>
+    <aside class="info-card">
+        <h2>Casos comuns</h2>
+        <ul>
+            <li>Preparar dados para APIs</li>
+            <li>Transformar planilhas em objetos JSON</li>
+            <li>Testar payloads de integracao rapidamente</li>
+        </ul>
+    </aside>
+</section>
+<section class="grid">
+    <article class="card">
+        <h2>Como converter CSV para JSON</h2>
+        <p>Garanta que a primeira linha contenha os nomes das colunas. Depois, cole o conteudo no painel e execute a conversao CSV para JSON.</p>
+    </article>
+    <article class="card">
+        <h2>Por que usar a ferramenta online</h2>
+        <p>Ela reduz o tempo de testes e evita scripts temporarios para transformacoes simples de dados estruturados.</p>
+    </article>
+    <article class="card">
+        <h2>Veja tambem</h2>
+        <p><a href="/formatar-json">Formatar JSON online</a> e <a href="/json-para-csv">converter JSON para CSV</a> com a mesma interface.</p>
+    </article>
+</section>
+<section class="section">
+    <div class="card">
+        <h2>Perguntas frequentes</h2>
+        <div class="faq-item">
+            <strong>Posso usar com delimitador padrao?</strong>
+            <p>Sim. O conversor foi pensado para CSV comum com virgulas e cabecalho na primeira linha.</p>
+        </div>
+        <div class="faq-item">
+            <strong>Preciso cadastrar conta?</strong>
+            <p>Nao. A ferramenta abre direto no navegador.</p>
+        </div>
+    </div>
+</section>
+<footer>© 2026 Cordium — Todos os direitos reservados.</footer>
+</body>
+</html>

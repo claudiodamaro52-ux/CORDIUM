@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, request, Response, send_file
+from flask import Flask, send_from_directory, request, Response, send_file, redirect
 import subprocess, sys, os, json, re, tempfile, zipfile, uuid, shutil
 
 app = Flask(__name__)
@@ -16,12 +16,48 @@ DEVJSON_HTML = os.path.join(DEVJSON_DIR, 'HTML')
 
 # Render.com define a variável RENDER=true automaticamente
 IS_CLOUD = bool(os.environ.get('RENDER'))
+SITE_URL = os.environ.get('SITE_URL', 'https://cordium.com.br').rstrip('/')
 
 # Armazena zips gerados: task_id → caminho do .zip
 _zip_store = {}
 
 
 # ── Páginas ────────────────────────────────────────────────
+
+def _full_url(path):
+    return f"{SITE_URL}{path}"
+
+
+@app.route('/robots.txt')
+def robots():
+    conteudo = f"User-agent: *\nAllow: /\n\nSitemap: {_full_url('/sitemap.xml')}\n"
+    return Response(conteudo, mimetype='text/plain')
+
+
+@app.route('/sitemap.xml')
+def sitemap():
+    paginas = [
+        '/',
+        '/baixar-imagens',
+        '/formatar-json',
+        '/download',
+        '/json-para-csv',
+        '/csv-para-json',
+        '/sobre',
+        '/suporte',
+    ]
+    itens = ''.join(
+        f'<url><loc>{_full_url(path)}</loc></url>'
+        for path in paginas
+    )
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+        f'{itens}'
+        '</urlset>'
+    )
+    return Response(xml, mimetype='application/xml')
+
 
 @app.route('/img/<filename>')
 def imagem(filename):
@@ -36,6 +72,14 @@ def index():
 def download():
     return send_from_directory(HTML_DIR, 'coletorImagens.html')
 
+@app.route('/json-para-csv')
+def json_para_csv():
+    return send_from_directory(HTML_DIR, 'json-para-csv.html')
+
+@app.route('/csv-para-json')
+def csv_para_json():
+    return send_from_directory(HTML_DIR, 'csv-para-json.html')
+
 @app.route('/suporte')
 def suporte():
     return send_from_directory(HTML_DIR, 'faq.html')
@@ -45,6 +89,11 @@ def sobre():
     return send_from_directory(HTML_DIR, 'sobre.html')
 
 @app.route('/coletor')
+def coletor_legado():
+    return redirect('/baixar-imagens', code=301)
+
+
+@app.route('/baixar-imagens')
 def coletor():
     return send_from_directory(COLETOR_HTML, 'coletor.html')
 
@@ -57,6 +106,11 @@ def descarregar():
 
 
 @app.route('/devjson')
+def devjson_legado():
+    return redirect('/formatar-json', code=301)
+
+
+@app.route('/formatar-json')
 def devjson():
     return send_from_directory(DEVJSON_HTML, 'devjson.html')
 

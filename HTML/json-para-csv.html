@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Converta JSON para CSV online com rapidez. Organize arrays e objetos em colunas e exporte tabelas sem instalar nada.">
+    <link rel="canonical" href="https://cordium.com.br/json-para-csv">
+    <meta property="og:title" content="Converter JSON para CSV Online | Cordium">
+    <meta property="og:description" content="Ferramenta online para converter JSON para CSV de forma simples, rapida e gratuita.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://cordium.com.br/json-para-csv">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Converter JSON para CSV Online","url":"https://cordium.com.br/json-para-csv","applicationCategory":"DeveloperApplication","operatingSystem":"Web","description":"Pagina dedicada para converter JSON para CSV online usando a ferramenta da Cordium."}</script>
+    <title>Converter JSON para CSV Online | Cordium</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #faf6f0; color: #2e2118; }
+        header { background: #1a0a02; color: white; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; }
+        header .brand { display: flex; align-items: center; gap: 12px; }
+        header .brand img { height: 50px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        header .brand-name { color: white; font-size: 22px; font-weight: bold; text-decoration: none; }
+        header .nav-info a { color: white; margin-left: 20px; text-decoration: none; font-weight: bold; }
+        header .nav-info a:hover { color: #c9820a; }
+        .nav-tools { background: #3d1f00; padding: 8px 30px; display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        .nav-tools .tools-label { color: #c9820a; font-weight: bold; margin-right: 6px; }
+        .nav-tools a { color: white; text-decoration: none; font-weight: bold; padding: 4px 14px; border-radius: 4px; }
+        .nav-tools a:hover, .nav-tools a.ativo { background: #c9820a; }
+        .nav-tools .tools-sep { color: #c9820a; margin: 0 2px; }
+        .hero { max-width: 1080px; margin: 0 auto; padding: 56px 24px 28px; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 28px; align-items: center; }
+        .hero-card, .info-card { background: white; border-radius: 18px; padding: 28px; box-shadow: 0 12px 28px rgba(0,0,0,0.08); }
+        h1 { margin: 0 0 14px; font-size: 40px; color: #1a0a02; }
+        h2 { color: #8b1400; margin-top: 0; }
+        p, li { line-height: 1.75; }
+        .btn-row { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 24px; }
+        .btn { display: inline-block; background: #c9820a; color: white; padding: 14px 22px; border-radius: 10px; text-decoration: none; font-weight: bold; }
+        .btn.alt { background: #fff3e0; color: #8b1400; border: 1px solid #e5c28a; }
+        .grid { max-width: 1080px; margin: 0 auto 40px; padding: 0 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .section { max-width: 1080px; margin: 0 auto 40px; padding: 0 24px; }
+        .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.07); }
+        .faq-item { margin-bottom: 18px; }
+        footer { text-align: center; padding: 24px; color: #777; }
+        a { color: #8b1400; }
+        @media (max-width: 860px) { .hero { grid-template-columns: 1fr; } h1 { font-size: 32px; } }
+    </style>
+</head>
+<body>
+<header>
+    <div class="brand">
+        <a href="/"><img src="/img/Logo_Cordium.webp" alt="Cordium"></a>
+        <a class="brand-name" href="/">Cordium</a>
+    </div>
+    <nav class="nav-info">
+        <a href="/sobre">Sobre</a>
+        <a href="/suporte">Suporte</a>
+    </nav>
+</header>
+<nav class="nav-tools">
+    <span class="tools-label">Ferramentas:</span>
+    <a href="/baixar-imagens">baixar imagens automaticamente</a>
+    <span class="tools-sep">|</span>
+    <a class="ativo" href="/formatar-json">formatar JSON online</a>
+</nav>
+<section class="hero">
+    <div class="hero-card">
+        <h1>Converter JSON para CSV Online</h1>
+        <p>Use esta pagina quando a sua busca for converter JSON para CSV online. A ferramenta da Cordium transforma arrays e objetos em colunas organizadas, o que ajuda em exportacoes para planilhas, auditorias e integracoes com sistemas que exigem formato tabular.</p>
+        <p>Ela funciona direto no navegador e evita instalar utilitarios separados. Basta colar o JSON, escolher a operacao de JSON para CSV e copiar o resultado.</p>
+        <div class="btn-row">
+            <a class="btn" href="/formatar-json?op=json2csv">Abrir conversor JSON para CSV</a>
+            <a class="btn alt" href="/csv-para-json">Precisa do caminho inverso?</a>
+        </div>
+    </div>
+    <aside class="info-card">
+        <h2>Quando usar</h2>
+        <ul>
+            <li>Transformar respostas de API em tabelas</li>
+            <li>Exportar dados para Excel ou Google Sheets</li>
+            <li>Validar rapidamente estruturas antes de importar</li>
+        </ul>
+    </aside>
+</section>
+<section class="grid">
+    <article class="card">
+        <h2>Como converter JSON para CSV</h2>
+        <p>Cole um JSON valido no painel principal da ferramenta, escolha a operacao JSON para CSV e copie o resultado para sua planilha ou fluxo de dados.</p>
+    </article>
+    <article class="card">
+        <h2>Vantagens</h2>
+        <p>O conversor ajuda a deixar visivel a estrutura dos dados e acelera o trabalho de analistas, desenvolvedores e equipes que lidam com importacao e exportacao.</p>
+    </article>
+    <article class="card">
+        <h2>Veja tambem</h2>
+        <p><a href="/formatar-json">Formatar JSON online</a> e <a href="/csv-para-json">converter CSV para JSON</a> na mesma plataforma.</p>
+    </article>
+</section>
+<section class="section">
+    <div class="card">
+        <h2>Perguntas frequentes</h2>
+        <div class="faq-item">
+            <strong>Preciso instalar algo?</strong>
+            <p>Nao. O conversor JSON para CSV roda no navegador.</p>
+        </div>
+        <div class="faq-item">
+            <strong>Funciona com arrays?</strong>
+            <p>Sim. A operacao foi pensada principalmente para listas de objetos, comuns em respostas de API.</p>
+        </div>
+    </div>
+</section>
+<footer>© 2026 Cordium — Todos os direitos reservados.</footer>
+</body>
+</html>
