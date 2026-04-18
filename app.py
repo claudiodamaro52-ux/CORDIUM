@@ -455,8 +455,7 @@ def stats():
 @app.route('/api/acessos', methods=['POST'])  # compat
 def registrar_acesso():
     with _stats_lock:
-        if request.remote_addr not in ('127.0.0.1', '::1'):
-            _stats['acessos'] += 1
+        _stats['acessos'] += 1
         return dict(_stats)
 
 
