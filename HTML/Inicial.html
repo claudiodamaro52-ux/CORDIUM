@@ -138,7 +138,7 @@ body{padding-bottom:48px}
 (function(){
   var btn=document.getElementById('btn-like');
   if(localStorage.getItem('cordium_liked')){btn.disabled=true;btn.style.background='#c9820a';}
-  fetch('/api/acessos',{method:'POST'}).catch(function(){});
+  fetch('/api/ping',{method:'POST'}).catch(function(){});
   fetch('/api/stats').then(r=>r.json()).then(d=>{
     document.getElementById('count-acessos').textContent=d.acessos;
     document.getElementById('count-likes').textContent=d.likes;
