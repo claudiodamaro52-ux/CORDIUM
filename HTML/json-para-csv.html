@@ -104,9 +104,18 @@
         </div>
     </div>
 </section>
+<div id="popup-stats" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:#faf6f0;border-radius:8px;padding:24px;max-width:500px;width:90%;max-height:70vh;overflow-y:auto;position:relative">
+    <button onclick="document.getElementById('popup-stats').style.display='none'" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:#1a0a02">✕</button>
+    <h3 style="margin:0 0 12px;color:#1a0a02">📊 Estatísticas Cordium</h3>
+    <div id="popup-agora" style="margin-bottom:16px;padding:8px;background:#1a0a02;color:#faf6f0;border-radius:6px;text-align:center">Carregando...</div>
+    <h4 style="margin:0 0 8px;color:#1a0a02">Histórico (últimos 3 meses)</h4>
+    <div id="popup-tabela">Carregando...</div>
+  </div>
+</div>
 <div id="stats-bar">
   <span>© 2026 Cordium — Todos os direitos reservados. &nbsp;|&nbsp; contato: <a href="mailto:claudio@damaro.com.br" style="color:#c9820a">claudio@damaro.com.br</a></span>
-  <span>👁️ Acessos: <strong id="count-acessos">...</strong> &nbsp; <button id="btn-like" onclick="darLike()">❤️ Like <span id="count-likes">...</span></button></span>
+  <span>👁️ <span onclick="abrirStats()" style="cursor:pointer;text-decoration:underline dotted">Acessos</span>: <strong id="count-acessos">...</strong> &nbsp; <button id="btn-like" onclick="darLike()">❤️ Like <span id="count-likes">...</span></button></span>
 </div>
 <style>
 #stats-bar{position:fixed;bottom:0;left:0;right:0;background:#1a0a02;color:#faf6f0;display:flex;align-items:center;justify-content:space-between;padding:8px 24px;font-size:.85rem;z-index:999}
@@ -135,6 +144,28 @@ function darLike(){
     btn.style.background='#c9820a';
     localStorage.setItem('cordium_liked','1');
   }).catch(function(){btn.disabled=false;});
+}
+function abrirStats(){
+  var popup=document.getElementById('popup-stats');
+  popup.style.display='flex';
+  fetch('/api/stats').then(r=>r.json()).then(d=>{
+    document.getElementById('popup-agora').innerHTML='Agora &nbsp;▶&nbsp; Acessos: <strong>'+d.acessos+'</strong> &nbsp;|&nbsp; Likes: <strong>'+d.likes+'</strong>';
+  }).catch(function(){document.getElementById('popup-agora').textContent='Erro ao carregar.';});
+  fetch('https://raw.githubusercontent.com/claudiodamaro52-ux/CORDIUM/main/reports/historico.csv')
+  .then(r=>r.text()).then(function(txt){
+    var linhas=txt.trim().split('\n').slice(1);
+    var limite=new Date();limite.setDate(limite.getDate()-90);
+    var filtrado=linhas.filter(function(l){return new Date(l.split(',')[0])>=limite;}).reverse();
+    if(!filtrado.length){document.getElementById('popup-tabela').innerHTML='<p style="color:#888;text-align:center">Nenhum dado ainda.</p>';return;}
+    var h='<table style="width:100%;border-collapse:collapse;font-size:.85rem">';
+    h+='<tr style="background:#1a0a02;color:#faf6f0"><th style="padding:6px 8px;text-align:left">Data</th><th style="padding:6px 8px">Hora</th><th style="padding:6px 8px">Acessos</th><th style="padding:6px 8px">Likes</th></tr>';
+    filtrado.forEach(function(l,i){
+      var p=l.split(',');
+      h+='<tr style="background:'+(i%2?'#f0e8df':'#faf6f0')+'"><td style="padding:5px 8px">'+p[0]+'</td><td style="padding:5px 8px;text-align:center">'+p[1]+'</td><td style="padding:5px 8px;text-align:center">'+p[2]+'</td><td style="padding:5px 8px;text-align:center">'+p[3]+'</td></tr>';
+    });
+    h+='</table>';
+    document.getElementById('popup-tabela').innerHTML=h;
+  }).catch(function(){document.getElementById('popup-tabela').innerHTML='<p style="color:#888;text-align:center">Erro ao carregar histórico.</p>';});
 }
 </script>
 </body>
