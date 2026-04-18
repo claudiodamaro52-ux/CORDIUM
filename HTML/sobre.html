@@ -89,9 +89,38 @@
     </ul>
 </div>
 
-<footer>
-    © 2026 Cordium — Todos os direitos reservados.
-</footer>
-
+<div id="stats-bar">
+  <span>© 2026 Cordium — Todos os direitos reservados. &nbsp;|&nbsp; contato: <a href="mailto:claudio@damaro.com.br" style="color:#c9820a">claudio@damaro.com.br</a></span>
+  <span>👁️ Acessos: <strong id="count-acessos">...</strong> &nbsp; <button id="btn-like" onclick="darLike()">❤️ Like <span id="count-likes">...</span></button></span>
+</div>
+<style>
+#stats-bar{position:fixed;bottom:0;left:0;right:0;background:#1a0a02;color:#faf6f0;display:flex;align-items:center;justify-content:space-between;padding:8px 24px;font-size:.85rem;z-index:999}
+#btn-like{background:#8b1400;color:#faf6f0;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:.9rem;transition:background .2s}
+#btn-like:hover{background:#c9820a}#btn-like:disabled{opacity:.7;cursor:default}
+body{padding-bottom:48px}
+</style>
+<script>
+(function(){
+  var btn=document.getElementById('btn-like');
+  if(localStorage.getItem('cordium_liked')){btn.disabled=true;btn.style.background='#c9820a';}
+  fetch('/api/acessos',{method:'POST'}).catch(function(){});
+  fetch('/api/stats').then(r=>r.json()).then(d=>{
+    document.getElementById('count-acessos').textContent=d.acessos;
+    document.getElementById('count-likes').textContent=d.likes;
+  }).catch(function(){
+    document.getElementById('count-acessos').textContent='–';
+    document.getElementById('count-likes').textContent='–';
+  });
+})();
+function darLike(){
+  var btn=document.getElementById('btn-like');
+  btn.disabled=true;
+  fetch('/api/like',{method:'POST'}).then(r=>r.json()).then(d=>{
+    document.getElementById('count-likes').textContent=d.likes;
+    btn.style.background='#c9820a';
+    localStorage.setItem('cordium_liked','1');
+  }).catch(function(){btn.disabled=false;});
+}
+</script>
 </body>
 </html>

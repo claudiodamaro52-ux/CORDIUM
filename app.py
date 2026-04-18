@@ -1,5 +1,8 @@
 from flask import Flask, send_from_directory, request, Response, send_file, redirect
-import subprocess, sys, os, json, re, tempfile, zipfile, uuid, shutil
+import subprocess, sys, os, json, re, tempfile, zipfile, uuid, shutil, threading
+import requests as http_requests
+from datetime import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 
@@ -362,6 +365,124 @@ def baixar_selecionadas():
         mimetype='text/event-stream',
         headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'}
     )
+
+
+# ── Stats (em memória) ─────────────────────────────────────
+_stats = {'acessos': 0, 'likes': 0}
+_stats_lock = threading.Lock()
+
+
+# ── Relatório ──────────────────────────────────────────────
+
+GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
+GITHUB_REPO  = os.environ.get('GITHUB_REPO', 'claudiodamaro52-ux/CORDIUM')
+RELATORIO_INTERVALO_HORAS = int(os.environ.get('RELATORIO_INTERVALO_HORAS', 6))
+
+def _gerar_relatorio():
+    """Gera relatório atual, salva/atualiza reports/ via GitHub API."""
+    if not GITHUB_TOKEN:
+        return False, 'GITHUB_TOKEN não configurado.'
+
+    with _stats_lock:
+        acessos = _stats['acessos']
+        likes   = _stats['likes']
+
+    agora     = datetime.now()
+    data_str  = agora.strftime('%Y-%m-%d')
+    hora_str  = agora.strftime('%H-%M')
+    timestamp = agora.strftime('%Y-%m-%d %H:%M')
+
+    # JSON individual
+    dados_json = {
+        'data':    data_str,
+        'hora':    agora.strftime('%H:%M'),
+        'acessos': acessos,
+        'likes':   likes,
+    }
+    json_nome    = f'reports/{data_str}_{hora_str}.json'
+    json_conteudo = json.dumps(dados_json, indent=2, ensure_ascii=False)
+
+    # Linha CSV
+    linha_csv = f'{data_str},{agora.strftime("%H:%M")},{acessos},{likes}\n'
+
+    headers = {
+        'Authorization': f'token {GITHUB_TOKEN}',
+        'Accept': 'application/vnd.github.v3+json',
+    }
+    api = f'https://api.github.com/repos/{GITHUB_REPO}/contents'
+
+    def _get_sha(path):
+        r = http_requests.get(f'{api}/{path}', headers=headers)
+        return r.json().get('sha') if r.status_code == 200 else None
+
+    def _put_file(path, conteudo, mensagem, sha=None):
+        import base64
+        body = {
+            'message': mensagem,
+            'content': base64.b64encode(conteudo.encode()).decode(),
+        }
+        if sha:
+            body['sha'] = sha
+        r = http_requests.put(f'{api}/{path}', headers=headers, json=body)
+        return r.status_code in (200, 201)
+
+    # Salva JSON individual
+    _put_file(json_nome, json_conteudo, f'relatorio {timestamp}')
+
+    # Atualiza historico.csv
+    csv_path   = 'reports/historico.csv'
+    cabecalho  = 'data,hora,acessos,likes\n'
+    sha_csv    = _get_sha(csv_path)
+    if sha_csv:
+        import base64
+        r = http_requests.get(f'{api}/{csv_path}', headers=headers)
+        conteudo_atual = base64.b64decode(r.json()['content']).decode()
+        novo_csv = conteudo_atual + linha_csv
+    else:
+        novo_csv = cabecalho + linha_csv
+
+    _put_file(csv_path, novo_csv, f'historico csv {timestamp}', sha_csv)
+    return True, timestamp
+
+
+@app.route('/api/stats')
+def stats():
+    with _stats_lock:
+        return dict(_stats)
+
+
+@app.route('/api/acessos', methods=['POST'])
+def registrar_acesso():
+    with _stats_lock:
+        if request.remote_addr not in ('127.0.0.1', '::1'):
+            _stats['acessos'] += 1
+        return dict(_stats)
+
+
+@app.route('/api/like', methods=['POST'])
+def registrar_like():
+    with _stats_lock:
+        _stats['likes'] += 1
+        return dict(_stats)
+
+
+@app.route('/api/relatorio', methods=['POST'])
+def relatorio():
+    ok, msg = _gerar_relatorio()
+    if ok:
+        return {'status': 'ok', 'timestamp': msg}
+    return {'status': 'erro', 'mensagem': msg}, 500
+
+
+# Inicia scheduler (funciona com Gunicorn e direto)
+# WERKZEUG_RUN_MAIN evita duplo start no modo debug do Flask
+import atexit
+if GITHUB_TOKEN and os.environ.get('WERKZEUG_RUN_MAIN', 'true') == 'true':
+    _scheduler = BackgroundScheduler()
+    _scheduler.add_job(_gerar_relatorio, 'interval',
+                       hours=RELATORIO_INTERVALO_HORAS)
+    _scheduler.start()
+    atexit.register(lambda: _scheduler.shutdown())
 
 
 if __name__ == '__main__':
