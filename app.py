@@ -49,17 +49,35 @@ def sitemap():
         '/sobre',
         '/suporte',
     ]
+    logo_url = _full_url('/img/Logo_Cordium.webp')
     itens = ''.join(
-        f'<url><loc>{_full_url(path)}</loc></url>'
+        (
+            '<url>'
+            f'<loc>{_full_url(path)}</loc>'
+            '<changefreq>weekly</changefreq>'
+            '<priority>0.8</priority>'
+            '<image:image>'
+            f'<image:loc>{logo_url}</image:loc>'
+            '<image:title>Cordium</image:title>'
+            '<image:caption>CORDIUM ferramentas online de automação</image:caption>'
+            '</image:image>'
+            '</url>'
+        )
         for path in paginas
     )
     xml = (
         '<?xml version="1.0" encoding="UTF-8"?>'
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+        'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">'
         f'{itens}'
         '</urlset>'
     )
     return Response(xml, mimetype='application/xml')
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(IMG_DIR, 'Logo_Cordium.webp')
 
 
 @app.route('/img/<filename>')

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="IMG/Logo_Cordium.webp" alt="Cordium" width="120"/>
+  <img src="IMG/Logo_Cordium.webp" alt="CORDIUM ferramentas online de automação" width="120"/>
 </p>
 
 <h1 align="center">Cordium — Ferramentas Web Gratuitas</h1>
@@ -62,7 +62,7 @@ Baixe em: [cordium.com.br/baixar-imagens](https://cordium.com.br/baixar-imagens)
 ---
 
 <p align="center">
-  <img src="IMG/Logo_Cordium.webp" alt="Cordium" width="32"/>
+  <img src="IMG/Logo_Cordium.webp" alt="CORDIUM ferramentas online de automação" width="32"/>
   &nbsp;
   <strong>Powered by D'AMARO</strong>
 </p>

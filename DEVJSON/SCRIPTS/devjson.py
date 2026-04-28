@@ -27,9 +27,9 @@ def run(op, text, text2="", param=""):
             try:
                 data = json.loads(text)
                 result = json.dumps(data, indent=2, ensure_ascii=False)
-                msgs = ["JSON valido.", f"  Tipo raiz: {type(data).__name__}", f"  Elementos: {_count(data)}"]
+                msgs = ["JSON válido.", f"  Tipo raiz: {type(data).__name__}", f"  Elementos: {_count(data)}"]
             except json.JSONDecodeError as e:
-                msgs = [f"JSON invalido - linha {e.lineno}, col {e.colno}: {e.msg}"]
+                msgs = [f"JSON inválido - linha {e.lineno}, col {e.colno}: {e.msg}"]
 
         elif op == "to_csv":
             data = json.loads(text)
@@ -91,10 +91,10 @@ def run(op, text, text2="", param=""):
             _diff(data1, data2, "", diffs)
             if diffs:
                 result = "\n".join(diffs)
-                msgs = [f"{len(diffs)} diferenca(s) encontrada(s)."]
+                msgs = [f"{len(diffs)} diferença(s) encontrada(s)."]
             else:
-                result = "(Sem diferencas - JSONs identicos)"
-                msgs = ["JSONs identicos."]
+                result = "(Sem diferenças - JSONs idênticos)"
+                msgs = ["JSONs idênticos."]
 
         elif op == "merge":
             data1 = json.loads(text)
@@ -102,21 +102,21 @@ def run(op, text, text2="", param=""):
             resultado = merge_deep(data1, data2)
             resultado = normalize_node(resultado)
             result = json.dumps(resultado, indent=2, ensure_ascii=False)
-            msgs = [f"Mesclagem concluida. {len(resultado)} chave(s) no resultado."]
+            msgs = [f"Mesclagem concluída. {len(resultado)} chave(s) no resultado."]
 
         elif op == "flatten":
             data = json.loads(text)
             flat = flatten_obj(data)
             flat = normalize_node(flat)
             result = json.dumps(flat, indent=2, ensure_ascii=False)
-            msgs = [f"Flatten concluido. {len(flat)} chave(s) geradas."]
+            msgs = [f"Flatten concluído. {len(flat)} chave(s) geradas."]
 
         elif op == "unflatten":
             data = json.loads(text)
             nested = unflatten_obj(data)
             nested = normalize_node(nested)
             result = json.dumps(nested, indent=2, ensure_ascii=False)
-            msgs = [f"Unflatten concluido. {len(nested)} chave(s) de raiz."]
+            msgs = [f"Unflatten concluído. {len(nested)} chave(s) de raiz."]
 
         elif op == "schema":
             data = json.loads(text)
@@ -125,10 +125,10 @@ def run(op, text, text2="", param=""):
             msgs = ["Schema gerado."]
 
         else:
-            msgs = [f"Operacao desconhecida: {op}"]
+            msgs = [f"Operação desconhecida: {op}"]
 
     except json.JSONDecodeError as e:
-        msgs = [f"JSON invalido - linha {e.lineno}, col {e.colno}: {e.msg}"]
+        msgs = [f"JSON inválido - linha {e.lineno}, col {e.colno}: {e.msg}"]
     except Exception as e:
         msgs = [f"Erro: {e}"]
 

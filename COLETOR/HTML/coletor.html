@@ -9,6 +9,13 @@
     <meta property="og:description" content="Ferramenta online para baixar imagens automaticamente com filtros, pre-visualizacao e selecao antes do download.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cordium.com.br/baixar-imagens">
+    <meta property="og:image" content="https://cordium.com.br/img/Logo_Cordium.webp">
+    <meta property="og:image:alt" content="CORDIUM ferramentas online de automação">
+    <meta property="og:site_name" content="Cordium">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://cordium.com.br/img/Logo_Cordium.webp">
+    <meta name="keywords" content="Cordium, ferramentas online, automação, baixar imagens, formatar JSON">
+    <link rel="icon" href="/img/Logo_Cordium.webp" type="image/webp">
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Baixar Imagens Automaticamente","applicationCategory":"UtilityApplication","operatingSystem":"Web","url":"https://cordium.com.br/baixar-imagens","description":"Ferramenta online para baixar imagens automaticamente a partir de paginas de busca com filtros e pre-visualizacao."}</script>
     <title>Baixar Imagens Automaticamente Online | Cordium</title>
     <style>
@@ -213,12 +220,13 @@
 
         #scrolls-field { display: none; }
     </style>
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Cordium","url":"https://cordium.com.br/","logo":"https://cordium.com.br/img/Logo_Cordium.webp","image":"https://cordium.com.br/img/Logo_Cordium.webp"}</script>
 </head>
 <body>
 
 <header>
     <div class="brand">
-        <a href="/"><img src="/img/Logo_Cordium.webp" alt="Cordium - baixar imagens automaticamente online"></a>
+        <a href="/"><img src="/img/Logo_Cordium.webp" alt="CORDIUM ferramentas online de automação"></a>
         <a class="brand-name" href="/">Cordium</a>
     </div>
     <nav class="nav-info">
@@ -242,7 +250,7 @@
 
     <div style="background:#f7efe3; border-radius:8px; padding:16px 20px; margin-bottom:22px;">
         <h2 style="margin:0 0 10px; font-size:22px;">Como baixar imagens automaticamente</h2>
-        <p style="margin:0; color:#555; line-height:1.7;">A ferramenta foi pensada para quem precisa acelerar a coleta de referencias visuais, catalogos e pesquisas. Para complementar seu fluxo, veja tambem a ferramenta de <a href="/formatar-json" style="color:#8b1400; font-weight:bold;">formatar JSON online</a>.</p>
+        <p style="margin:0; color:#555; line-height:1.7;">A ferramenta foi pensada para quem precisa acelerar a coleta de referências visuais, catálogos e pesquisas. Para complementar seu fluxo, veja também a ferramenta de <a href="/formatar-json" style="color:#8b1400; font-weight:bold;">formatar JSON online</a>.</p>
     </div>
 
     <!-- Instruções -->
@@ -254,7 +262,7 @@
             <li>Cole no campo <strong>URL da pesquisa</strong> abaixo</li>
             <li>Preencha os demais campos e clique em <strong>🔍 Pré-visualizar Imagens</strong></li>
             <li>Analise as miniaturas, marque as que deseja e clique em <strong>⬇ Baixar Selecionadas</strong></li>
-            <li style="line-height:1.7; margin-top:6px;">Opcional: se preferir usar o programa desktop, faça o download do executavel em <a id="download-desktop-link" href="/download" style="color:#8b1400; font-weight:600;">baixar imagens automaticamente no Windows</a>.</li>
+            <li style="line-height:1.7; margin-top:6px;">Opcional: se preferir usar o programa desktop, faça o download do executável em <a id="download-desktop-link" href="/download" style="color:#8b1400; font-weight:600;">baixar imagens automaticamente no Windows</a>.</li>
         </ol>
     </div>
 
@@ -286,13 +294,13 @@
             <!-- URL -->
             <div class="field full">
                 <label for="url">URL da pesquisa</label>
-                <input type="url" id="url" name="url" placeholder="https://www.bing.com/images/search?q=gatos" required>
+                <input type="url" id="url" name="url" placeholder="https://www.bing.com/images/search?q=cordium" required>
             </div>
 
             <!-- Pasta destino -->
             <div class="field full" id="fdpath-field">
                 <label for="fdpath">Pasta de destino</label>
-                <input type="text" id="fdpath" name="fdpath" placeholder="C:\Imagens\gatos">
+                <input type="text" id="fdpath" name="fdpath" placeholder="C:\Imagens\cordium">
                 <small id="fdpath-info" style="display:none; color:#c9820a; margin-top:4px;">
                     ☁️ Modo online: as imagens serão empacotadas em ZIP para download.
                 </small>
@@ -410,7 +418,7 @@
                 return;
             }
         } catch (_) {
-            // Se a consulta falhar, mantém o comportamento original e tenta abrir a pagina de download.
+            // Se a consulta falhar, mantém o comportamento original e tenta abrir a página de download.
             window.location.href = '/download';
             return;
         }
@@ -728,8 +736,8 @@
 </div>
 <style>
 #stats-bar{position:fixed;bottom:0;left:0;right:0;background:#1a0a02;color:#faf6f0;display:flex;align-items:center;justify-content:space-between;padding:8px 24px;font-size:.85rem;z-index:999}
-#btn-like{background:#8b1400;color:#faf6f0;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:.9rem;transition:background .2s}
-#btn-like:hover{background:#c9820a}#btn-like:disabled{opacity:.7;cursor:default}
+#btn-like{background:#4CAF50;color:#faf6f0;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:.9rem;transition:background .2s}
+#btn-like:hover{background:#45a049}#btn-like:disabled{opacity:.7;cursor:default}
 body{padding-bottom:48px}
 </style>
 <script>
