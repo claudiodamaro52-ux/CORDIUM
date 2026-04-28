@@ -37,17 +37,28 @@
         header .nav-info a:hover { color: #c9820a; }
         .nav-tools {
             background: #3d1f00; padding: 8px 30px;
-            display: flex; align-items: center; gap: 8px; font-size: 14px;
+            display: flex; align-items: center; gap: 8px; font-size: 14px; border-top: 1px solid #d4af37; border-bottom: 1px solid #d4af37;
         }
         .nav-tools .tools-label { color: #c9820a; font-weight: bold; margin-right: 6px; }
         .nav-tools a { color: white; text-decoration: none; font-weight: bold; padding: 4px 14px; border-radius: 4px; transition: background 0.2s; }
         .nav-tools a:hover, .nav-tools a.ativo { background: #c9820a; }
         .nav-tools .tools-sep { color: #c9820a; margin: 0 2px; }
         .hero {
-            background: linear-gradient(to right, #1a0a02, #3d1f00);
-            color: white;
-            padding: 80px 30px;
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 1554 / 726;
+            min-height: 420px;
+            padding: 72px 30px 90px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
             text-align: center;
+            color: white;
+            background-color: #140a08;
+            background-image: linear-gradient(180deg, rgba(8, 4, 3, 0.18) 0%, rgba(8, 4, 3, 0.06) 24%, rgba(8, 4, 3, 0.58) 100%), url('/img/IMGhero-parede-quadro.jpg');
+            background-repeat: no-repeat;
+            background-position: center top;
+            background-size: 100% auto;
         }
         .hero h1 {
             font-size: 40px;
@@ -56,13 +67,20 @@
         .hero p {
             font-size: 34px;
             font-weight: 700;
+            color: #d4af37;
+            text-shadow: 0 1px 0 rgba(30, 12, 6, 0.8), 0 4px 14px rgba(0, 0, 0, 0.55);
             line-height: 1.35;
             max-width: 980px;
-            margin: 8px auto 34px;
+            margin: 0 auto;
+            margin-top: 120px; margin-bottom: 0;
+            padding: 18px 22px;
+            border-radius: 10px;
+            background: linear-gradient(180deg, rgba(20, 10, 8, 0.18), rgba(20, 10, 8, 0.34));
+            backdrop-filter: blur(1px);
         }
         @media (max-width: 860px) {
-            .hero { padding: 56px 20px; }
-            .hero p { font-size: 24px; max-width: 95%; }
+            .hero { min-height: 260px; padding: 28px 16px 20px; background-position: center top; background-size: cover; }
+            .hero p { font-size: 24px; max-width: 95%; padding: 14px 16px; }
         }
         .btn {
             background: #c9820a;
@@ -105,18 +123,14 @@
     <span class="tools-label">&#128736;</span>
     <a href="/baixar-imagens">baixar imagens automaticamente</a>
     <span class="tools-sep">|</span>
-    <a href="/formatar-json">formatar JSON online</a>
+    <a href="/formatar-json">JSON Tools Pro</a>
 </nav>
 
 <section class="hero">
-    <img src="/img/Logo_Cordium.webp" alt="CORDIUM ferramentas online de automação"
-         style="max-width:640px; width:90%; border-radius:12px; margin-bottom:24px; box-shadow:0 6px 24px rgba(0,0,0,0.6);">
     <p>CORDIUM oferece uso online de ferramentas de automação com operação simples, fluxo enxuto e execução imediata.</p>
 </section>
-
-<section style="max-width:1100px; margin:40px auto; padding:0 24px 20px; display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
     <article style="background:#f0e6d2; border-radius:14px; padding:24px; box-shadow:0 10px 24px rgba(0,0,0,0.08);">
-        <h2 style="margin-top:0; color:#1a0a02;">Formatar JSON Online</h2>
+        <h2 style="margin-top:0; color:#1a0a02;">JSON Tools Pro</h2>
         <p style="color:#4a3a2b; line-height:1.7;">Ferramenta online para formatar JSON, validar estrutura, minificar conteúdo e converter JSON para CSV sem instalar nada.</p>
         <a href="/formatar-json">Abrir ferramenta</a>
         <p style="margin:16px 0 0; line-height:1.7; color:#4a3a2b;">Atalhos: <a href="/json-para-csv">JSON para CSV</a> e <a href="/csv-para-json">CSV para JSON</a>.</p>
@@ -142,7 +156,7 @@
   <span>👁️ <span onclick="abrirStats()" style="cursor:pointer;text-decoration:underline dotted">Acessos</span>: <strong id="count-acessos">...</strong> &nbsp; <button id="btn-like" onclick="darLike()">❤️ Like <span id="count-likes">...</span></button></span>
 </div>
 <style>
-#stats-bar{position:fixed;bottom:0;left:0;right:0;background:#1a0a02;color:#faf6f0;display:flex;align-items:center;justify-content:space-between;padding:8px 24px;font-size:.85rem;z-index:999}
+#stats-bar{position:fixed;bottom:0;left:0;right:0;background:#1a0a02;color:#faf6f0;display:flex;align-items:center;justify-content:space-between;padding:8px 24px;font-size:.85rem;z-index:999;border-top:1px solid #d4af37;border-bottom:1px solid #d4af37}
 #btn-like{background:#4CAF50;color:#faf6f0;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:.9rem;transition:background .2s}
 #btn-like:hover{background:#45a049}#btn-like:disabled{opacity:.7;cursor:default}
 body{padding-bottom:48px}
