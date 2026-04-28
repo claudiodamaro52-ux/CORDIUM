@@ -18,7 +18,7 @@
 
 | Ferramenta | Descrição | Link |
 |---|---|---|
-| **Formatar JSON** | Formata, valida e converte JSON online | [abrir](https://cordium.com.br/formatar-json) |
+| **JSON Tools Pro** | Formata, valida e converte JSON online | [abrir](https://cordium.com.br/formatar-json) |
 | **Baixar Imagens** | Coleta imagens da web por palavra-chave | [abrir](https://cordium.com.br/baixar-imagens) |
 | **JSON para CSV** | Converte arquivos JSON em planilha CSV | [abrir](https://cordium.com.br/json-para-csv) |
 | **CSV para JSON** | Converte planilhas CSV em JSON | [abrir](https://cordium.com.br/csv-para-json) |
