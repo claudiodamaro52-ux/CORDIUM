@@ -17,6 +17,11 @@ IMG_DIR      = os.path.join(BASE, 'IMG')
 DEVJSON_DIR  = os.path.join(BASE, 'DEVJSON')
 DEVJSON_HTML = os.path.join(DEVJSON_DIR, 'HTML')
 
+SIM9_DIR     = os.path.join(BASE, 'SIM9')
+SIM9_HTML    = os.path.join(SIM9_DIR, 'HTML')
+sys.path.insert(0, os.path.join(SIM9_DIR, 'SCRIPTS'))
+import sim9_motor as _sim9
+
 # Render.com define a variável RENDER=true automaticamente
 IS_CLOUD = bool(os.environ.get('RENDER'))
 SITE_URL = os.environ.get('SITE_URL', 'https://cordium.com.br').rstrip('/')
@@ -109,6 +114,11 @@ def devjson_legado():
 @app.route('/formatar-json')
 def devjson():
     return send_from_directory(DEVJSON_HTML, 'devjson.html')
+
+
+@app.route('/sim9')
+def sim9():
+    return send_from_directory(SIM9_HTML, 'sim9.html')
 
 # ── API ────────────────────────────────────────────────────
 
@@ -355,6 +365,42 @@ def baixar_selecionadas():
 
     return Response(
         generate(),
+        mimetype='text/event-stream',
+        headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'}
+    )
+
+
+
+# ── SIM9 ─────────────────────────────────────────────────────────
+
+@app.route('/api/sim9/processar', methods=['POST'])
+def sim9_processar():
+    import queue as _q
+    data   = request.json or {}
+    lista  = str(data.get('lista',  ''))[:500000]
+    nivel  = int(data.get('nivel',  1))
+    padrao = str(data.get('padrao', ''))[:200]
+    rm_num = bool(data.get('rm_num', False))
+
+    fila = _q.Queue()
+
+    def _run():
+        def _cb(i, n):
+            fila.put({'progress': round(i / n * 100), 'i': i, 'n': n})
+        resultado = _sim9.processar(lista, nivel, padrao, rm_num, on_progress=_cb)
+        fila.put({'done': True, 'result': resultado})
+
+    threading.Thread(target=_run, daemon=True).start()
+
+    def _stream():
+        while True:
+            item = fila.get()
+            yield f"data: {json.dumps(item, ensure_ascii=False)}\n\n"
+            if item.get('done'):
+                break
+
+    return Response(
+        _stream(),
         mimetype='text/event-stream',
         headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'}
     )
