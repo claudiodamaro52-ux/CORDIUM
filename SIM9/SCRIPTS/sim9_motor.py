@@ -1,27 +1,38 @@
 # SIM9 — Motor de Similaridade Textual v1
 # Normalização e regras internas protegidas — direitos autorais Claudio D'Amaro
-import unicodedata, re
+import unicodedata, re, csv as _csv, os as _os
 
-# ── Configuração interna (não expor ao usuário) ─────────────
-_W = {
-    'r_nc': 40,   # peso: nome completo
-    'r_pu': 25,   # peso: primeiro + último
-    'r_pn': 10,   # peso: primeiro nome
-    'r_sn': 10,   # peso: sobrenome
-    'r_lv': 30,   # peso: levenshtein-fuzzy
-    'r_sx': 20,   # peso: soundex-br
-    'r_mp': 25,   # peso: metaphone-br
-}
+# ── Configuração carregada de sim9_config.csv ───────────────
+_CFG_PATH = _os.path.join(_os.path.dirname(__file__), 'sim9_config.csv')
 
-# Mapeamento nível → conjunto de regras (oculto ao usuário)
-_NR = {
-    1: ('r_pn', 'r_pu', 'r_lv'),              # Básico: primeiro nome + pri+ult + fuzzy
-    2: ('r_nc', 'r_pu', 'r_pn', 'r_lv'),      # Profissional: + nome completo
-    3: ('r_pn', 'r_lv', 'r_mp', 'r_sn'),      # Auditoria: + metaphone + sobrenome
-    4: tuple(_W),                               # Premium: todas as regras
-}
+def _load_config():
+    # Valores padrão (fallback se CSV não existir)
+    W = {'r_nc':40,'r_pu':25,'r_pn':10,'r_sn':10,'r_lv':30,'r_sx':20,'r_mp':25}
+    NR = {1:('r_pn','r_pu','r_lv'),2:('r_nc','r_pu','r_pn','r_lv'),
+          3:('r_pn','r_lv','r_mp','r_sn'),4:tuple(W)}
+    LIM = {1:55, 2:50, 3:40, 4:35}
+    if not _os.path.isfile(_CFG_PATH):
+        return W, NR, LIM
+    W2, NR2, LIM2 = {}, {1:[],2:[],3:[],4:[]}, {}
+    with open(_CFG_PATH, newline='', encoding='utf-8') as f:
+        for row in _csv.DictReader(f):
+            r = row['regra'].strip()
+            if r == 'limiar':
+                for n in range(1, 5):
+                    v = row.get(f'nivel{n}','').strip()
+                    if v:
+                        LIM2[n] = int(v)
+            elif r:
+                peso = row.get('peso','').strip()
+                if peso:
+                    W2[r] = int(peso)
+                for n in range(1, 5):
+                    if int(row.get(f'nivel{n}', 0) or 0):
+                        NR2[n].append(r)
+    NR2 = {k: tuple(v) for k, v in NR2.items()}
+    return W2 or W, NR2 or NR, LIM2 or LIM
 
-_LIM    = {1: 55, 2: 50, 3: 40, 4: 35}   # limiares mínimos por nível
+_W, _NR, _LIM = _load_config()
 MAX_REG = 10000                             # limite de registros por processamento
 
 
@@ -93,20 +104,24 @@ def _lsim(a, b):
     if a == b:
         return 1.0
     m, n = len(a), len(b)
-    # Early-exit: diferença de comprimento já garante que Levenshtein não passaria o limiar
     mx = max(m, n)
-    _lim = 0.9 if mx < 5 else (0.8 if mx < 10 else 0.7)
-    if (mx - min(m, n)) / mx > (1.0 - _lim):
+    lim = 0.9 if mx < 5 else (0.8 if mx < 10 else 0.7)
+    max_dist = mx - int(mx * lim)          # distância máxima permitida
+    if mx - min(m, n) > max_dist:
         return 0.0
     d = list(range(n + 1))
     for i in range(1, m + 1):
         prev = d[:]
         d[0] = i
+        row_min = i
         for j in range(1, n + 1):
             cost = 0 if a[i - 1] == b[j - 1] else 1
             d[j] = min(d[j] + 1, d[j - 1] + 1, prev[j - 1] + cost)
-    sim = 1.0 - d[n] / max(m, n)
-    lim = 0.9 if max(m, n) < 5 else (0.8 if max(m, n) < 10 else 0.7)
+            if d[j] < row_min:
+                row_min = d[j]
+        if row_min > max_dist:             # abandono antecipado por linha
+            return 0.0
+    sim = 1.0 - d[n] / mx
     return sim if sim >= lim else 0.0
 
 
@@ -205,6 +220,15 @@ def processar(lista_txt, nivel=1, padrao='', rm_num=True, on_progress=None):
     nrms  = [_nrm(r[1], rm_n=rm_num) for r in regs]
     pad_n = _nrm(padrao) if padrao.strip() else ''
 
+    # Pré-filtro matemático: pares com primeiro token diferente têm score máximo
+    # limitado às regras que NÃO dependem de primeiro nome (r_nc/r_pu/r_pn = 0).
+    # Se esse teto já estiver abaixo do limiar, o par pode ser descartado sem calcular.
+    first_t = [s.split()[0] if s else '' for s in nrms]
+    _regras  = _NR.get(nivel, _NR[1])
+    _tp      = sum(_W[r] for r in _regras)
+    _w_diff  = sum(_W[r] for r in _regras if r not in ('r_nc', 'r_pu', 'r_pn'))
+    _skip    = _tp > 0 and (_w_diff / _tp * 100) < limiar
+
     # Cálculo de pares
     grupos = {}
     _step = max(1, n // 100)
@@ -213,7 +237,10 @@ def processar(lista_txt, nivel=1, padrao='', rm_num=True, on_progress=None):
             on_progress(i, n)
         if pad_n and pad_n not in nrms[i]:
             continue
+        _fi = first_t[i]
         for j in range(i + 1, n):
+            if _skip and first_t[j] != _fi:
+                continue
             f = _forca(nrms[i], nrms[j], nivel)
             if f >= limiar:
                 grupos.setdefault(i, []).append((j, f))
