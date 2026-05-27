@@ -14,7 +14,7 @@
 
 ---
 
-## Ìª†Ô∏è Ferramentas dispon√≠veis
+## ÔøΩÔøΩÔøΩÔ∏è Ferramentas dispon√≠veis
 
 | Ferramenta | Descri√ß√£o | Link |
 |---|---|---|
@@ -22,6 +22,7 @@
 | **Baixar Imagens** | Coleta imagens da web por palavra-chave | [abrir](https://cordium.com.br/baixar-imagens) |
 | **JSON para CSV** | Converte arquivos JSON em planilha CSV | [abrir](https://cordium.com.br/json-para-csv) |
 | **CSV para JSON** | Converte planilhas CSV em JSON | [abrir](https://cordium.com.br/csv-para-json) |
+| **SIM9** | Detecta registros similares/duplicados em listas (nomes, CPF, CNPJ, e-mail, telefone, texto livre, endere√ßo) | [abrir](https://cordium.com.br/sim9) |
 | **FAQ** | Perguntas frequentes | [abrir](https://cordium.com.br/faq) |
 | **Sobre** | Sobre o projeto | [abrir](https://cordium.com.br/sobre) |
 
@@ -36,7 +37,7 @@
 
 ---
 
-## Ì∫Ä Rodar localmente
+## ÔøΩÔøΩÔøΩ Rodar localmente
 
 ```bash
 # Clone o reposit√≥rio
@@ -54,7 +55,7 @@ Acesse: `http://localhost:5000`
 
 ---
 
-## Ì≥¶ App Desktop
+## ÔøΩÔøΩÔøΩ App Desktop
 
 O coletor de imagens tamb√©m est√° dispon√≠vel como execut√°vel para Windows.  
 Baixe em: [cordium.com.br/baixar-imagens](https://cordium.com.br/baixar-imagens)
