@@ -2,10 +2,10 @@
   <img src="IMG/Logo_Cordium.webp" alt="CORDIUM ferramentas online de automação" width="120"/>
 </p>
 
-<h1 align="center">Cordium — Ferramentas Web Gratuitas</h1>
+<h1 align="center">Cordium — Ferramentas Web</h1>
 
 <p align="center">
-  Utilitários online simples e rápidos, sem instalação, sem cadastro.
+  Utilitários online simples e rápidos, sem instalação.
 </p>
 
 <p align="center">
@@ -57,13 +57,13 @@ Acesse: `http://localhost:5000`
 
 ## ��� App Desktop
 
-O coletor de imagens também está disponível como executável para Windows.  
-Baixe em: [cordium.com.br/baixar-imagens](https://cordium.com.br/baixar-imagens)
+O coletor de imagens também está disponível como executável para Windows. Contacte-nos
+## Baixe em: [cordium.com.br/baixar-imagens](https://cordium.com.br/baixar-imagens)
 
 ---
 
 <p align="center">
   <img src="IMG/Logo_Cordium.webp" alt="CORDIUM ferramentas online de automação" width="32"/>
   &nbsp;
-  <strong>Powered by D'AMARO</strong>
+  <strong> by D'AMARO & COPILOT</strong>
 </p>
