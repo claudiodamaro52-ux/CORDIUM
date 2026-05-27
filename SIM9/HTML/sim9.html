@@ -127,6 +127,18 @@ textarea:focus{outline:none;border-color:#8b1400}
     <div class="ph"><span class="pt">Configuracao e Entrada</span></div>
     <div class="ctrl-body">
 
+      <div class="lbl">Tipo de dado</div>
+      <select id="tipo" onchange="onTipoChange()">
+        <option value="nome">Nome</option>
+        <option value="cpf">CPF</option>
+        <option value="cnpj">CNPJ</option>
+        <option value="email">E-mail</option>
+        <option value="telefone">Telefone</option>
+        <option value="texto">Texto livre</option>
+        <option value="endereco">Endereço</option>
+      </select>
+
+      <div id="nivel-wrap">
       <div class="lbl">Nivel de Acuracidade</div>
       <select id="nivel">
         <option value="1">1 &mdash; Basico</option>
@@ -134,6 +146,7 @@ textarea:focus{outline:none;border-color:#8b1400}
         <option value="3">3 &mdash; Auditoria</option>
         <option value="4">4 &mdash; Premium</option>
       </select>
+      </div>
 
       <div class="lbl">Importar arquivo texto (.txt)</div>
       <div class="file-row">
@@ -148,7 +161,7 @@ textarea:focus{outline:none;border-color:#8b1400}
       <div class="lbl">Padrao de pesquisa (opcional)</div>
       <input id="padrao" type="text" placeholder="Ex: Joao — filtra registros que contem este texto">
 
-      <div class="chk-row">
+      <div id="rmnum-wrap" class="chk-row">
         <input id="rm-num" type="checkbox" checked>
         <label for="rm-num">Remover numeros antes de comparar</label>
       </div>
@@ -268,6 +281,7 @@ body{padding-bottom:44px}
 var _resultados = [];
 var _reservados = {};   // id -> {id, texto}
 var _popupIdx   = -1;
+var _t0         = 0;
 
 function g(id){ return document.getElementById(id); }
 
@@ -300,8 +314,9 @@ function importarArquivo(input){
 function processar(){
   var lista  = g('lista').value.trim();
   var nivel  = parseInt(g('nivel').value, 10);
+  var tipo   = g('tipo').value;
   var padrao = g('padrao').value.trim();
-  var rmNum  = g('rm-num').checked;
+  var rmNum  = g('tipo').value === 'nome' || g('tipo').value === 'texto' ? g('rm-num').checked : false;
 
   logClear();
   log('Processando...');
@@ -309,11 +324,12 @@ function processar(){
   var prog = g('sim9-prog');
   prog.style.width = '0%'; progWrap.style.display = 'block';
   g('btn-processar').disabled = true;
+  _t0 = Date.now();
 
   fetch('/api/sim9/processar', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({lista: lista, nivel: nivel, padrao: padrao, rm_num: rmNum})
+    body: JSON.stringify({lista: lista, nivel: nivel, tipo: tipo, padrao: padrao, rm_num: rmNum})
   })
   .then(function(r){
     var reader  = r.body.getReader();
@@ -339,7 +355,8 @@ function processar(){
               progMsg.className = 'm ok';
               g('msgs').appendChild(progMsg);
             }
-            progMsg.textContent = 'Processando... ' + item.progress + '% (' + item.i + '/' + item.n + ')';
+            var _el = ((Date.now() - _t0) / 1000).toFixed(1);
+            progMsg.textContent = 'Processando... ' + item.progress + '% (' + item.i + '/' + item.n + ')  ⏱ ' + _el + 's';
             g('msgs').scrollTop = g('msgs').scrollHeight;
           } else if(item.done){
             progWrap.style.display = 'none';
@@ -349,6 +366,9 @@ function processar(){
             (data.msgs || []).forEach(function(m){ log(m); });
             _resultados = data.resultados || [];
             renderResultados();
+            var _el = ((Date.now() - _t0) / 1000).toFixed(2);
+            var _ct = g('contador');
+            if(_ct) _ct.textContent += '  |  ⏱ ' + _el + 's';
             var tem = _resultados.length > 0;
             g('btn-txt').disabled       = !tem;
             g('btn-csv').disabled       = !tem;
@@ -396,14 +416,18 @@ function abrirDetalhe(idx){
   _popupIdx = idx;
   var res = _resultados[idx];
   var body = '';
-  body += '<div class="popup-ref">' + escHtml(res.ref_id) + ' : ' + escHtml(res.ref_texto) + ' <em style="color:#aaa">(referencia)</em></div>';
+  var vRef = res.valido===true?' <span style="color:#28a745;font-weight:bold">&#10003; v\u00e1lido</span>':
+             res.valido===false?' <span style="color:#dc3545;font-weight:bold">&#10007; INV\u00c1LIDO</span>':'';
+  body += '<div class="popup-ref">' + escHtml(res.ref_id) + ' : ' + escHtml(res.ref_texto) + vRef + ' <em style="color:#aaa">(referencia)</em></div>';
   body += '<div class="popup-sep">Similares &mdash; clique para reservar</div>';
   res.similares.forEach(function(s){
     var rsv = _reservados[s.id] ? ' reservado' : '';
+    var vSim = s.valido===true?' <span style="color:#28a745">&#10003;</span>':
+               s.valido===false?' <span style="color:#dc3545">&#10007;</span>':'';
     body += '<div class="popup-sim' + rsv + '" id="psim-' + escId(s.id) +
             '" data-id="' + escHtml(s.id) + '" data-txt="' + escHtml(s.texto) +
             '" onclick="var d=this.dataset;toggleReservado(d.id,d.txt)">' +
-            escHtml(s.id) + ' : [' + s.forca + '%] ' + escHtml(s.texto) + '</div>';
+            escHtml(s.id) + ' : [' + s.forca + '%] ' + escHtml(s.texto) + vSim + '</div>';
   });
   g('popup-detalhe-body').innerHTML = body;
   atualizarResInfo();
@@ -460,10 +484,13 @@ function exportarTxt(){
 }
 
 function exportarCsv(){
-  var linhas = ['ref_id;ref_texto;sim_id;sim_texto;forca'];
+  var tipo   = g('tipo').value.toUpperCase();
+  var linhas = ['ID_ORIGEM;REF_TEXTO;ID_SIMILAR;SIM_TEXTO;SCORE;TIPO;VALIDO'];
   _resultados.forEach(function(res){
     res.similares.forEach(function(s){
-      linhas.push([res.ref_id, csvEsc(res.ref_texto), s.id, csvEsc(s.texto), s.forca].join(';'));
+      var vr = res.valido===true?'SIM':(res.valido===false?'NAO':'-');
+      var vs = s.valido===true?'SIM':(s.valido===false?'NAO':'-');
+      linhas.push([res.ref_id, csvEsc(res.ref_texto), s.id, csvEsc(s.texto), s.forca, tipo, vr+'/'+vs].join(';'));
     });
   });
   baixarArquivo(linhas.join('\n'), 'sim9_resultado_' + _ts() + '.csv', 'text/csv');
@@ -486,13 +513,15 @@ function exportarReservadosCsv(){
 
 // ── Gerar relatorio ──────────────────────────────────────────
 function gerarRelatorio(){
-  var nivel   = g('nivel').options[g('nivel').selectedIndex].text;
+  var tipoSel = g('tipo').options[g('tipo').selectedIndex].text;
+  var nivel   = g('tipo').value === 'nome' ? g('nivel').options[g('nivel').selectedIndex].text : 'N/A';
   var notas   = g('notas').value.trim();
   var agora   = new Date().toLocaleString('pt-BR');
   var totalP  = _resultados.reduce(function(s,r){ return s + r.similares.length; }, 0);
   var linhas  = [
     'SIM9 - Relatorio de Similaridade Textual',
     'Data/Hora : ' + agora,
+    'Tipo      : ' + tipoSel,
     'Nivel     : ' + nivel,
     'Grupos    : ' + _resultados.length,
     'Pares     : ' + totalP,
@@ -522,6 +551,17 @@ function gerarRelatorio(){
   log('Relatorio gerado: sim9_relatorio.txt');
 }
 
+// ── onTipoChange ────────────────────────────────────────────
+function onTipoChange(){
+  var tipo = g('tipo').value;
+  var mostrarNivel = tipo === 'nome';
+  var mostrarRmNum = tipo === 'nome' || tipo === 'texto' || tipo === 'endereco';
+  g('nivel-wrap').style.display  = mostrarNivel ? '' : 'none';
+  g('rmnum-wrap').style.display  = mostrarRmNum ? '' : 'none';
+  var lbl = document.querySelector('label[for="rm-num"]');
+  if(lbl) lbl.textContent = tipo === 'endereco' ? 'Ignorar n\u00famero do endere\u00e7o' : 'Remover numeros antes de comparar';
+}
+
 // ── Limpar ───────────────────────────────────────────────────
 function limpar(){
   g('lista').value    = '';
@@ -529,6 +569,11 @@ function limpar(){
   g('notas').value    = '';
   g('rm-num').checked = false;
   g('nivel').value    = '1';
+  g('tipo').value     = 'nome';
+  g('nivel-wrap').style.display = '';
+  g('rmnum-wrap').style.display = '';
+  var lbl = document.querySelector('label[for="rm-num"]');
+  if(lbl) lbl.textContent = 'Remover numeros antes de comparar';
   g('file-nome').textContent = 'nenhum arquivo';
   g('file-in').value  = '';
   _resultados = [];

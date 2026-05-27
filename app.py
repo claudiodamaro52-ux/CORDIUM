@@ -379,6 +379,7 @@ def sim9_processar():
     data   = request.json or {}
     lista  = str(data.get('lista',  ''))[:500000]
     nivel  = int(data.get('nivel',  1))
+    tipo   = str(data.get('tipo',   'nome'))[:20]
     padrao = str(data.get('padrao', ''))[:200]
     rm_num = bool(data.get('rm_num', False))
 
@@ -387,7 +388,7 @@ def sim9_processar():
     def _run():
         def _cb(i, n):
             fila.put({'progress': round(i / n * 100), 'i': i, 'n': n})
-        resultado = _sim9.processar(lista, nivel, padrao, rm_num, on_progress=_cb)
+        resultado = _sim9.processar(lista, nivel, padrao, rm_num, on_progress=_cb, tipo=tipo)
         fila.put({'done': True, 'result': resultado})
 
     threading.Thread(target=_run, daemon=True).start()

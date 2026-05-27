@@ -1,0 +1,15 @@
+{
+  "avenida": "av",
+  "alameda": "al",
+  "travessa": "trav",
+  "estrada": "est",
+  "rodovia": "rod",
+  "praca": "pca",
+  "viaduto": "via",
+  "marginal": "marg",
+  "corredor": "corr",
+  "largo": "lgo",
+  "beco": "bco",
+  "viela": "vil",
+  "rua": "r"
+}
