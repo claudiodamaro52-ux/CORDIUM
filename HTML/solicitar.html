@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Sobre a Cordium: ecossistema de ferramentas online de automacao — SIM9 para deduplicacao cadastral, JSON Tools Pro e Coletor de Imagens.">
-    <link rel="canonical" href="https://cordium.com.br/sobre">
-    <meta property="og:title" content="Sobre a Cordium | Ferramentas Online">
-    <meta property="og:description" content="Conheca a Cordium: ferramentas online de automacao para profissionais de dados, auditores, desenvolvedores e gestores de cadastro.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://cordium.com.br/sobre">
-    <meta property="og:image" content="https://cordium.com.br/img/Logo_Cordium.webp">
-    <meta property="og:image:alt" content="CORDIUM ferramentas online de automacao">
-    <meta property="og:site_name" content="Cordium">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="https://cordium.com.br/img/Logo_Cordium.webp">
-    <meta name="keywords" content="Cordium, sobre, ferramentas online, automacao, JSON, imagens, SIM9, similaridade textual, deduplicacao, datamining, CPF, CNPJ">
-    <link rel="icon" href="/img/Logo_Cordium.webp" type="image/webp">
-    <title>Sobre a Cordium | Ferramentas Online de Automa&ccedil;&#227;o</title>
-    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Cordium","url":"https://cordium.com.br/","logo":"https://cordium.com.br/img/Logo_Cordium.webp","image":"https://cordium.com.br/img/Logo_Cordium.webp"}</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Solicite acesso antecipado ao plano profissional do SIM9 Cordium. Preencha nome, e-mail e receba as instrucoes.">
+<link rel="canonical" href="https://cordium.com.br/solicitar">
+<meta property="og:title" content="Solicitar Acesso | Cordium">
+<meta property="og:description" content="Solicite acesso ao plano profissional do SIM9 Cordium e seja notificado quando estiver disponivel.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cordium.com.br/solicitar">
+<meta property="og:image" content="https://cordium.com.br/img/Logo_Cordium.webp">
+<meta property="og:image:alt" content="CORDIUM ferramentas online de automacao">
+<meta property="og:site_name" content="Cordium">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://cordium.com.br/img/Logo_Cordium.webp">
+<meta name="keywords" content="Cordium, solicitar acesso, plano profissional, SIM9, token">
+<link rel="icon" href="/img/Logo_Cordium.webp" type="image/webp">
+<title>Solicitar Acesso | Cordium</title>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Cordium","url":"https://cordium.com.br/","logo":"https://cordium.com.br/img/Logo_Cordium.webp","image":"https://cordium.com.br/img/Logo_Cordium.webp"}</script>
     <style>
         body { font-family: Arial, sans-serif; background: #faf6f0; margin: 0; padding: 0; }
         header { background: #1a0a02; color: white; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; }
@@ -52,17 +52,20 @@
         footer { background: #1a0a02; color: white; text-align: center; padding: 20px; margin-top: 40px; }
     </style>
     <style>
-        .produto-card { border: 1.5px solid #e0d0bc; border-radius: 10px; padding: 22px 24px; margin-bottom: 20px; background: #fdf9f5; }
-        .produto-card h3 { color: #1a0a02; margin-top: 0; font-size: 1.2rem; }
-        .produto-card p { color: #444; line-height: 1.7; margin: 0 0 12px; }
-        .produto-card ul { padding-left: 20px; line-height: 1.9; color: #333; margin: 0 0 14px; }
-        .visao { background: linear-gradient(135deg, #1a0a02, #3d1f00); color: #faf6f0; border-radius: 12px; padding: 28px 32px; margin: 28px 0; }
-        .visao h2 { color: #c9820a; margin-top: 0; }
-        .visao p { margin: 0; line-height: 1.8; font-size: 15px; }
-        .timeline { border-left: 3px solid #c9820a; padding-left: 20px; margin: 16px 0; }
-        .timeline .item { margin-bottom: 16px; }
-        .timeline .item .label { font-weight: bold; color: #c9820a; font-size: 13px; }
-        .timeline .item p { color: #333; margin: 2px 0 0; font-size: 14px; line-height: 1.6; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-weight: bold; color: #3d1f00; margin-bottom: 5px; font-size: 14px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 10px 12px; border: 1.5px solid #c9820a; border-radius: 6px;
+            font-size: 14px; background: #fffdf8; color: #222; box-sizing: border-box;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: #8b1400; box-shadow: 0 0 0 2px rgba(201,130,10,.15);
+        }
+        .btn-enviar { background: #c9820a; color: white; border: none; border-radius: 8px; padding: 13px 32px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background .2s; }
+        .btn-enviar:hover { background: #8b1400; }
+        .btn-enviar:disabled { opacity: .6; cursor: default; }
+        #msg-sucesso { display:none; background: #d4edda; border-left: 4px solid #28a745; border-radius: 6px; padding: 16px 18px; color: #155724; margin-top: 20px; }
+        #msg-erro { display:none; background: #f8d7da; border-left: 4px solid #dc3545; border-radius: 6px; padding: 16px 18px; color: #721c24; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -73,7 +76,7 @@
         <a class="brand-name" href="/">Cordium</a>
     </div>
     <nav class="nav-info">
-        <a class="ativo" href="/sobre">Sobre</a>
+        <a href="/sobre">Sobre</a>
         <a href="/sobre-sim9">SIM9</a>
         <a href="/planos">Planos</a>
         <a href="/suporte">Suporte</a>
@@ -90,73 +93,104 @@
 
 <div class="container">
 
-    <h1 style="margin-bottom:4px">Sobre a Cordium</h1>
-    <p style="color:#555;margin-bottom:24px">Ferramentas online de automa&ccedil;&#227;o para profissionais de dados, auditores e desenvolvedores.</p>
+    <h1 style="margin-bottom:4px">Solicitar Acesso</h1>
+    <p style="color:#555;margin-bottom:20px">Acesso antecipado ao plano profissional do SIM9.</p>
 
-    <p>A Cordium &#233; uma plataforma de ferramentas online focada em produtividade e qualidade de dados. Cada ferramenta &#233; constru&#237;da com princ&#237;pios de simplicidade operacional: sem instala&ccedil;&#227;o, sem cadastro obrigat&#243;rio e com execu&ccedil;&#227;o imediata no navegador.</p>
-
-    <div class="visao">
-        <h2>Vis&#227;o</h2>
-        <p>Democratizar o acesso a ferramentas de qualidade de dados que, normalmente, existem apenas em sistemas corporativos de alto custo. Um analista individual, uma empresa de contabilidade ou um fiscal de &#243;rg&#227;o p&#250;blico deve ter acesso ao mesmo n&#237;vel de precis&#227;o anal&#237;tica que grandes corpora&ccedil;&#245;es &mdash; sem burocracia e sem contrato.</p>
+    <div class="notice">
+        &#9888;&#65039; <strong>Sistema de tokens em fase final de implanta&ccedil;&#227;o.</strong>
+        Ap&#243;s enviar sua solicita&ccedil;&#227;o, voc&#234; receber&#225; instru&ccedil;&#245;es de acesso por e-mail assim que o sistema estiver ativo.
+        Em m&#233;dia, as respostas s&#227;o enviadas em <strong>at&#233; 48 horas</strong>.
     </div>
 
-    <h2>Ecossistema de ferramentas</h2>
+    <form id="form-solicitar" autocomplete="off" onsubmit="enviarSolicitacao(event)">
 
-    <div class="produto-card">
-        <h3>&#128203; SIM9 &mdash; Similaridade Textual <span style="background:#c9820a;color:#fff;font-size:11px;padding:2px 8px;border-radius:8px;margin-left:8px;vertical-align:middle">carro-chefe</span></h3>
-        <p>Motor de compara&ccedil;&#227;o cadastral. Analisa listas no formato <code>ID;TEXTO</code> e detecta duplicatas, grafias alternativas e entradas similares usando combina&ccedil;&#227;o de algoritmos fonéticos e de dist&#226;ncia de edi&ccedil;&#227;o adaptados ao portugu&#234;s.</p>
-        <ul>
-            <li><strong>Processamento N &#215; N</strong> &mdash; todos os pares, score 0&#8211;100&nbsp;%</li>
-            <li><strong>Busca pontual 1 &#215; N</strong> &mdash; consulta sem reprocessar o lote</li>
-            <li><strong>Painel anal&#237;tico</strong> &mdash; taxa de duplicidade, distribui&ccedil;&#227;o estat&#237;stica, registro mais duplicado</li>
-            <li><strong>4 n&#237;veis de acur&#225;cia</strong>: Levenshtein, Soundex-BR, Metaphone-BR, Jaro-Winkler</li>
-            <li><strong>Tipos suportados</strong>: nome, CPF, CNPJ, endere&ccedil;o, texto livre</li>
-            <li><strong>Exporta&ccedil;&#227;o</strong>: TXT, CSV, XLSX, Relat&#243;rio com Resumo Anal&#237;tico</li>
-            <li><strong>API REST</strong>: <code>POST /api/sim9/processar</code> e <code>POST /api/sim9/buscar</code></li>
-        </ul>
-        <a class="btn" href="/sim9">Abrir SIM9</a>
-        <a class="btn-outline" href="/sobre-sim9">Sobre o SIM9</a>
+        <div class="form-group">
+            <label for="nome">Nome completo <span style="color:#c9820a">*</span></label>
+            <input type="text" id="nome" name="nome" placeholder="Maria da Silva" required maxlength="200">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="form-group">
+                <label for="documento">CPF ou CNPJ</label>
+                <input type="text" id="documento" name="documento" placeholder="000.000.000-00 ou 00.000.000/0001-00" maxlength="20">
+            </div>
+            <div class="form-group">
+                <label for="email">E-mail <span style="color:#c9820a">*</span></label>
+                <input type="email" id="email" name="email" placeholder="seu@email.com.br" required maxlength="200">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="horas">Horas de processamento desejadas</label>
+            <select id="horas" name="horas">
+                <option value="1">1 hora (ideal para testes)</option>
+                <option value="5" selected>5 horas</option>
+                <option value="10">10 horas</option>
+                <option value="20">20 horas ou mais</option>
+                <option value="personalizado">Personalizado &#8212; detalhar abaixo</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="obs">Descri&ccedil;&#227;o do uso / observa&ccedil;&#245;es</label>
+            <textarea id="obs" name="obs" rows="4" placeholder="Ex: preciso processar listas de CPF com 5000 registros mensalmente para auditoria cadastral..." maxlength="2000"></textarea>
+        </div>
+
+        <button type="submit" class="btn-enviar" id="btn-enviar">&#128229; Enviar solicita&ccedil;&#227;o</button>
+
+        <div id="msg-sucesso">
+            <strong>&#10003; Solicita&ccedil;&#227;o recebida!</strong><br>
+            Agradecemos seu interesse. Voc&#234; receber&#225; as instru&ccedil;&#245;es de acesso por e-mail em at&#233; 48 horas.
+            <br><a href="/sim9" style="color:#155724;font-weight:bold">Enquanto isso, use o SIM9 gratuitamente &rarr;</a>
+        </div>
+        <div id="msg-erro">
+            <strong>&#10007; Erro ao enviar.</strong> Por favor, tente novamente ou entre em contato pelo e-mail
+            <a href="mailto:claudio@damaro.com.br" style="color:#721c24">claudio@damaro.com.br</a>.
+        </div>
+
+    </form>
+
+    <div class="secao-destaque" style="margin-top:32px">
+        <h3 style="margin-top:0">Enquanto aguarda</h3>
+        <p style="color:#333;margin:0">O SIM9 funciona <strong>gratuitamente</strong> para listas de at&#233; 1&nbsp;000 registros sem necessidade de cadastro ou token.
+        Experimente agora: <a href="/sim9"><strong>Abrir SIM9 &rarr;</strong></a></p>
     </div>
-
-    <div class="produto-card">
-        <h3>&#123;&#125; JSON Tools Pro</h3>
-        <p>Ferramenta web para manipula&ccedil;&#227;o de JSON diretamente no navegador. Interface de 4 pain&#233;is (Entrada A, Entrada B, Resultado, Mensagens) com 10 opera&ccedil;&#245;es dispon&#237;veis.</p>
-        <ul>
-            <li>Normalizar, Indentar, Template, Tipos</li>
-            <li>JSON &#8596; CSV (convers&#227;o b&#237;direcional)</li>
-            <li>Mesclar (A+B), Flatten, Unflatten, Schema</li>
-            <li>Compartilhamento via Email e WhatsApp</li>
-        </ul>
-        <a class="btn" href="/formatar-json">Abrir JSON Tools Pro</a>
-    </div>
-
-    <div class="produto-card">
-        <h3>&#128248; Baixar Imagens Automaticamente</h3>
-        <p>Cole a URL de uma pesquisa do Bing, filtre por resolu&ccedil;&#227;o e tipo, pr&#233;-visualize em galeria e baixe as imagens selecionadas em um arquivo ZIP &mdash; tudo sem instalar nada.</p>
-        <ul>
-            <li>Motor Bing no modo online</li>
-            <li>Filtros por resolu&ccedil;&#227;o m&#237;nima e extens&#245;o</li>
-            <li>Galeria com sele&ccedil;&#227;o manual e lightbox</li>
-            <li>Download em ZIP com prefixo customiz&#225;vel</li>
-        </ul>
-        <a class="btn" href="/baixar-imagens">Abrir Coletor de Imagens</a>
-    </div>
-
-    <h2>Evolu&ccedil;&#227;o da plataforma</h2>
-    <div class="timeline">
-        <div class="item"><div class="label">&#10003; Dispon&#237;vel</div><p>JSON Tools Pro, Coletor de Imagens, SIM9 com painel anal&#237;tico, exporta&ccedil;&#227;o XLSX, cache de resultados, modo Preview.</p></div>
-        <div class="item"><div class="label">&#9889; Em implanta&ccedil;&#227;o</div><p>Sistema de tokens para processamentos acima de 1&nbsp;000 registros. <a href="/planos">Ver planos &rarr;</a></p></div>
-        <div class="item"><div class="label">&#128336; Pr&#243;ximos passos</div><p>Hist&#243;rico de processamentos, dashboard de qualidade cadastral, exporta&ccedil;&#227;o PDF do relat&#243;rio, API com autentica&ccedil;&#227;o por token.</p></div>
-    </div>
-
-    <h2>Contato e suporte</h2>
-    <ul>
-        <li>E-mail: <a href="mailto:claudio@damaro.com.br">claudio@damaro.com.br</a></li>
-        <li><a href="/suporte">Central de Suporte / FAQ</a></li>
-        <li><a href="/solicitar">Solicitar acesso ao plano profissional</a></li>
-    </ul>
 
 </div>
+<script>
+function enviarSolicitacao(e){
+  e.preventDefault();
+  var btn = document.getElementById('btn-enviar');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  var dados = {
+    nome:      document.getElementById('nome').value.trim(),
+    documento: document.getElementById('documento').value.trim(),
+    email:     document.getElementById('email').value.trim(),
+    horas:     document.getElementById('horas').value,
+    obs:       document.getElementById('obs').value.trim()
+  };
+  fetch('/api/solicitacao', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(dados)
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.ok || d.id){
+      document.getElementById('msg-sucesso').style.display = 'block';
+      document.getElementById('form-solicitar').style.opacity = '.5';
+      btn.style.display = 'none';
+    } else {
+      throw new Error(d.erro || 'Resposta inesperada');
+    }
+  })
+  .catch(function(err){
+    document.getElementById('msg-erro').style.display = 'block';
+    btn.disabled = false; btn.textContent = '\u2709\uFE0F Enviar solicita\u00e7\u00e3o';
+    console.error(err);
+  });
+}
+</script>
 
 <div id="popup-stats" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center">
   <div style="background:#faf6f0;border-radius:8px;padding:24px;max-width:500px;width:90%;max-height:70vh;overflow-y:auto;position:relative">

@@ -92,6 +92,20 @@ def servicos():
 def sobre():
     return send_from_directory(HTML_DIR, 'sobre.html')
 
+@app.route('/sobre-sim9')
+def sobre_sim9():
+    return send_from_directory(HTML_DIR, 'sobre-sim9.html')
+
+@app.route('/planos')
+@app.route('/precos')
+def planos():
+    return send_from_directory(HTML_DIR, 'planos.html')
+
+@app.route('/solicitar')
+@app.route('/solicitar-acesso')
+def solicitar():
+    return send_from_directory(HTML_DIR, 'solicitar.html')
+
 @app.route('/coletor')
 def coletor_legado():
     return redirect('/baixar-imagens', code=301)

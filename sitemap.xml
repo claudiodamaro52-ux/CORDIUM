@@ -44,4 +44,20 @@
     <loc>https://cordium.com.br/descarregar</loc>
     <priority>0.6</priority>
   </url>
+  <url>
+    <loc>https://cordium.com.br/sim9</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://cordium.com.br/sobre-sim9</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cordium.com.br/planos</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cordium.com.br/solicitar</loc>
+    <priority>0.7</priority>
+  </url>
 </urlset>

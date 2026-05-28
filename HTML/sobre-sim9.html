@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SIM9: motor de similaridade textual da Cordium. Detecta duplicatas cadastrais, compara nomes, CPF, CNPJ e enderecos com 4 niveis de acuracia.">
+<link rel="canonical" href="https://cordium.com.br/sobre-sim9">
+<meta property="og:title" content="Sobre o SIM9 | Cordium">
+<meta property="og:description" content="SIM9 e o motor de comparacao cadastral da Cordium: Levenshtein, Soundex-BR, Metaphone-BR, Jaro-Winkler, painel analitico e exportacao XLSX.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cordium.com.br/sobre-sim9">
+<meta property="og:image" content="https://cordium.com.br/img/Logo_Cordium.webp">
+<meta property="og:image:alt" content="SIM9 similaridade textual Cordium">
+<meta property="og:site_name" content="Cordium">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://cordium.com.br/img/Logo_Cordium.webp">
+<meta name="keywords" content="SIM9, similaridade textual, deduplicacao, Levenshtein, Soundex, Metaphone, Jaro-Winkler, CPF, CNPJ, datamining, Cordium">
+<link rel="icon" href="/img/Logo_Cordium.webp" type="image/webp">
+<title>Sobre o SIM9 &mdash; Similaridade Textual | Cordium</title>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"SIM9","applicationCategory":"DeveloperApplication","operatingSystem":"Web","url":"https://cordium.com.br/sim9","description":"Motor de comparacao de similaridade textual para deduplicacao cadastral. Usa Levenshtein, Soundex-BR, Metaphone-BR e Jaro-Winkler.","offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Cordium","url":"https://cordium.com.br/","logo":"https://cordium.com.br/img/Logo_Cordium.webp","image":"https://cordium.com.br/img/Logo_Cordium.webp"}</script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #faf6f0; margin: 0; padding: 0; }
+        header { background: #1a0a02; color: white; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; }
+        header .brand { display: flex; align-items: center; gap: 12px; }
+        header .brand img { height: 50px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        header .brand-name { color: white; font-size: 22px; font-weight: bold; text-decoration: none; margin: 0; }
+        header .nav-info a { color: white; margin-left: 20px; text-decoration: none; font-weight: bold; }
+        header .nav-info a:hover, header .nav-info a.ativo { color: #c9820a; }
+        .nav-tools { background: #3d1f00; padding: 8px 30px; display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        .nav-tools .tools-label { color: #c9820a; font-weight: bold; margin-right: 6px; }
+        .nav-tools a { color: white; text-decoration: none; font-weight: bold; padding: 4px 14px; border-radius: 4px; transition: background 0.2s; }
+        .nav-tools a:hover, .nav-tools a.ativo { background: #c9820a; }
+        .nav-tools .tools-sep { color: #c9820a; margin: 0 2px; }
+        .container { max-width: 900px; margin: 40px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        h1, h2 { color: #c9820a; }
+        h3, h4 { color: #3d1f00; }
+        a { color: #c9820a; }
+        .btn { display: inline-block; background: #c9820a; color: white; padding: 12px 22px; border-radius: 8px; text-decoration: none; font-size: 16px; margin: 8px 0 20px; font-weight: bold; }
+        .btn:hover { background: #8b1400; }
+        .btn-outline { display: inline-block; background: transparent; color: #c9820a; border: 2px solid #c9820a; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-size: 15px; margin: 6px 0 16px; font-weight: bold; }
+        .btn-outline:hover { background: #fdf3e0; }
+        .notice { background: #fff3cd; border-left: 4px solid #ffc107; padding: 14px 18px; border-radius: 6px; color: #856404; font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
+        .card-plano { border: 2px solid #c9820a; border-radius: 12px; padding: 24px; margin-bottom: 20px; background: #fdf9f5; }
+        .card-plano h3 { color: #1a0a02; margin-top: 0; }
+        .card-plano .preco { font-size: 28px; font-weight: bold; color: #c9820a; margin: 8px 0; }
+        .card-plano .preco-sub { font-size: 13px; color: #777; }
+        .card-plano ul { padding-left: 20px; line-height: 2; color: #333; }
+        .tag-em-breve { display: inline-block; background: #e0a020; color: white; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 10px; vertical-align: middle; margin-left: 8px; }
+        .secao-destaque { background: #f0e6d2; border-radius: 10px; padding: 22px 26px; margin: 24px 0; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+        footer { background: #1a0a02; color: white; text-align: center; padding: 20px; margin-top: 40px; }
+    </style>
+    <style>
+        .hero-sim9 { background: linear-gradient(135deg, #1a0a02 60%, #3d1f00); color: #faf6f0; padding: 44px 40px; border-radius: 12px; margin-bottom: 32px; }
+        .hero-sim9 h1 { color: #c9820a; margin: 0 0 12px; font-size: 2.2rem; }
+        .hero-sim9 p { margin: 0; line-height: 1.8; font-size: 15px; max-width: 680px; }
+        .hero-sim9 .hero-btns { margin-top: 22px; display: flex; gap: 12px; flex-wrap: wrap; }
+        .hero-sim9 .btn { margin: 0; }
+        .hero-sim9 .btn-outline { margin: 0; color: #faf6f0; border-color: #faf6f0; }
+        .hero-sim9 .btn-outline:hover { background: rgba(255,255,255,.12); }
+        .nivel-card { border-left: 4px solid #c9820a; padding: 10px 16px; margin-bottom: 12px; background: #fdf9f5; border-radius: 0 6px 6px 0; }
+        .nivel-card strong { color: #1a0a02; }
+        .nivel-card .nivel-badge { display: inline-block; background: #c9820a; color: white; font-size: 11px; font-weight: bold; padding: 1px 7px; border-radius: 8px; margin-right: 6px; }
+        .algo-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 16px 0; }
+        .algo-table th { background: #3d1f00; color: #faf6f0; padding: 7px 10px; text-align: left; }
+        .algo-table td { padding: 7px 10px; border-bottom: 1px solid #efe6d5; color: #333; }
+        .algo-table tr:nth-child(even) td { background: #fdf3e0; }
+        .ex-bloco { background: #1e1e1e; color: #ccc; font-family: Consolas, monospace; font-size: 12px; padding: 14px 16px; border-radius: 6px; margin: 12px 0; overflow-x: auto; white-space: pre; }
+        .uso-card { background: #f0e6d2; border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; }
+        .uso-card h4 { color: #1a0a02; margin: 0 0 6px; }
+        .uso-card p { color: #444; margin: 0; font-size: 14px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand">
+        <a href="/"><img src="/img/Logo_Cordium.webp" alt="CORDIUM ferramentas online de automa&#231;&#227;o"></a>
+        <a class="brand-name" href="/">Cordium</a>
+    </div>
+    <nav class="nav-info">
+        <a href="/sobre">Sobre</a>
+        <a href="/sobre-sim9">SIM9</a>
+        <a href="/planos">Planos</a>
+        <a href="/suporte">Suporte</a>
+    </nav>
+</header>
+<nav class="nav-tools">
+    <span class="tools-label">&#128736;</span>
+    <a href="/baixar-imagens">baixar imagens automaticamente</a>
+    <span class="tools-sep">|</span>
+    <a href="/formatar-json">JSON Tools Pro</a>
+    <span class="tools-sep">|</span>
+    <a href="/sim9">SIM9</a>
+</nav>
+
+<div class="container">
+
+    <div class="hero-sim9">
+        <h1>SIM9 &mdash; Similaridade Textual</h1>
+        <p>Motor de compara&ccedil;&#227;o cadastral online. Identifica duplicatas, grafias alternativas e registros semelhantes em listas de nomes, CPF, CNPJ ou endere&ccedil;os &mdash; com 4 n&#237;veis de acur&#225;cia configur&#225;veis e painel anal&#237;tico integrado.</p>
+        <div class="hero-btns">
+            <a class="btn" href="/sim9">Abrir SIM9</a>
+            <a class="btn-outline" href="/planos">Ver planos</a>
+            <a class="btn-outline" href="/suporte#sim9">FAQ</a>
+        </div>
+    </div>
+
+    <h2>O que &eacute; o SIM9?</h2>
+    <p>O SIM9 &#233; o motor de compara&ccedil;&#227;o cadastral da Cordium. Ele recebe uma lista no formato <code>ID;TEXTO</code>, calcula a similaridade entre todos os pares (processamento N &#215; N) e retorna grupos de registros similares com seus scores de 0 a 100&nbsp;%.</p>
+    <p>Al&#233;m do processamento em lote, o SIM9 oferece <strong>busca pontual</strong> (consultar um texto contra toda a base sem reprocessar) e um <strong>painel anal&#237;tico autom&#225;tico</strong> com m&#233;tricas estat&#237;sticas do resultado.</p>
+
+    <h2>Para quem se destina</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:16px 0 28px">
+        <div class="uso-card"><h4>&#128203; Gestores de cadastro</h4><p>Limpeza de bases com nomes repetidos, grafias variadas e duplicatas acumuladas ao longo do tempo.</p></div>
+        <div class="uso-card"><h4>&#128269; Auditores e fiscais</h4><p>Cruzamento de listas para detec&ccedil;&#227;o de fraudes, duplicidades ou inconsist&#234;ncias entre bases distintas.</p></div>
+        <div class="uso-card"><h4>&#128202; Analistas de dados</h4><p>Explora&ccedil;&#227;o estat&#237;stica da qualidade cadastral e datamining de registros problem&#225;ticos.</p></div>
+        <div class="uso-card"><h4>&#128203; Contabilistas e RH</h4><p>Valida&ccedil;&#227;o em massa de CPF e CNPJ com identifica&ccedil;&#227;o de d&#237;gitos inv&#225;lidos.</p></div>
+        <div class="uso-card"><h4>&#128187; Desenvolvedores</h4><p>Acesso via API REST documentada para integra&ccedil;&#227;o em sistemas pr&#243;prios.</p></div>
+        <div class="uso-card"><h4>&#127891; Pesquisadores</h4><p>Compara&ccedil;&#227;o de corpora textuais, lista de entidades nomeadas e registros hist&#243;ricos.</p></div>
+    </div>
+
+    <h2>Como funciona</h2>
+    <p>Para cada par de registros da lista, o SIM9 calcula um score de similaridade combinando os algoritmos selecionados pelo n&#237;vel de acur&#225;cia. O score final &#233; uma m&#233;dia ponderada normalizada para 0&#8211;100&nbsp;%.</p>
+
+    <table class="algo-table">
+        <tr><th>Algoritmo</th><th>Especialidade</th><th>N&#237;vel m&#237;nimo</th></tr>
+        <tr><td><strong>Levenshtein</strong></td><td>Dist&#226;ncia de edi&ccedil;&#227;o (inser&ccedil;&#245;es, dele&ccedil;&#245;es, substitui&ccedil;&#245;es)</td><td>1</td></tr>
+        <tr><td><strong>Soundex-BR</strong></td><td>Fon&#233;tica portuguesa &mdash; captura varia&ccedil;&#245;es de pronuncia</td><td>2</td></tr>
+        <tr><td><strong>Metaphone-BR</strong></td><td>Fon&#233;tica avan&ccedil;ada &mdash; consoantes e vogais do portugu&#234;s</td><td>3</td></tr>
+        <tr><td><strong>Jaro-Winkler</strong></td><td>Precis&#227;o em nomes pr&#243;prios e prefixos comuns</td><td>4</td></tr>
+    </table>
+
+    <h2>4 n&#237;veis de acur&#225;cia</h2>
+    <div class="nivel-card"><span class="nivel-badge">N1</span><strong>R&#225;pido</strong> &mdash; Levenshtein simples. Ideal para listas grandes onde a velocidade &#233; prioridade. Captura duplicatas exatas e erros de digita&ccedil;&#227;o evidentes.</div>
+    <div class="nivel-card"><span class="nivel-badge">N2</span><strong>Padr&#227;o</strong> &mdash; Levenshtein + Soundex-BR. Recomendado para a maioria dos casos. Captura varia&ccedil;&#245;es fon&#233;ticas do portugu&#234;s (ex: Aparecida / Aparecida / Aparesida).</div>
+    <div class="nivel-card"><span class="nivel-badge">N3</span><strong>Alto</strong> &mdash; Adiciona Metaphone-BR. Melhor cobertura de erros de pronuncia e grafias informais (ex: Jo&#227;o / Joao / Joao).</div>
+    <div class="nivel-card"><span class="nivel-badge">N4</span><strong>M&#225;ximo</strong> &mdash; Jaro-Winkler + todos os anteriores. O mais preciso para nomes pr&#243;prios. Recomendado para an&#225;lises de datamining e auditorias de alta precis&#227;o.</div>
+
+    <h2>Exemplos de uso</h2>
+
+    <h3>Entrada (formato ID;TEXTO)</h3>
+    <div class="ex-bloco">001;Maria da Silva Santos
+002;Maria Silva Santos
+003;MARIA SILVA SANT0S
+004;Jose Aparecido de Lima
+005;Jose Aparecido Lima
+006;12.345.678/0001-90
+007;12.345.678/0001-91</div>
+
+    <h3>Sa&#237;da esperada (N&#237;vel 2)</h3>
+    <div class="ex-bloco">Grupo: 001 Maria da Silva Santos  (referencia)
+  002 [95%] Maria Silva Santos
+  003 [88%] MARIA SILVA SANT0S
+
+Grupo: 004 Jose Aparecido de Lima  (referencia)
+  005 [92%] Jose Aparecido Lima
+
+Grupo: 006 12.345.678/0001-90  (referencia)
+  007 [89%] 12.345.678/0001-91  ← CNPJ inv&#225;lido detectado</div>
+
+    <h2>Painel anal&#237;tico</h2>
+    <p>Ap&#243;s cada processamento, o SIM9 calcula e exibe automaticamente:</p>
+    <ul style="padding-left:20px;line-height:2;color:#333">
+        <li><strong>Taxa de duplicidade</strong> &mdash; percentual de registros com ao menos um similar</li>
+        <li><strong>Score m&#233;dio, mediana e desvio padr&#227;o</strong> dos scores encontrados</li>
+        <li><strong>Distribui&ccedil;&#227;o por faixas</strong>: 90&ndash;100&nbsp;%, 70&ndash;89&nbsp;%, 50&ndash;69&nbsp;%</li>
+        <li><strong>Registro mais duplicado</strong> da lista (ID com mais ocorr&#234;ncias)</li>
+        <li><strong>Busca pontual</strong> 1 &#215; N para inspecionar registros individuais ap&#243;s o processamento</li>
+    </ul>
+
+    <h2>Exporta&ccedil;&#245;es dispon&#237;veis</h2>
+    <ul style="padding-left:20px;line-height:2;color:#333">
+        <li><strong>TXT</strong> &mdash; lista leg&#237;vel com todos os grupos e scores</li>
+        <li><strong>CSV</strong> &mdash; pares de similares para importar em Excel ou banco de dados</li>
+        <li><strong>XLSX</strong> &mdash; planilha com aba <em>Resumo Anal&#237;tico</em> e aba <em>Pares</em></li>
+        <li><strong>Relat&#243;rio TXT</strong> &mdash; documento completo com cabe&ccedil;alho, Resumo Anal&#237;tico e listagem detalhada</li>
+    </ul>
+
+    <h2>API REST</h2>
+    <p>O SIM9 exp&#245;e dois endpoints para integra&ccedil;&#227;o em sistemas pr&#243;prios:</p>
+    <div class="ex-bloco">POST /api/sim9/processar
+Content-Type: application/json
+
+{
+  "lista":   "001;Maria da Silva\n002;Maria Silva",
+  "nivel":   2,
+  "tipo":    "nome",
+  "min_sim": "auto"
+}
+
+# Retorna stream SSE com progresso + resultado final</div>
+    <div class="ex-bloco">POST /api/sim9/buscar
+Content-Type: application/json
+
+{
+  "query": "Maria Silva",
+  "lista": "001;Maria da Silva\n002;Joao Santos",
+  "nivel": 2,
+  "tipo":  "nome"
+}
+
+# Retorna JSON com lista de similares e scores</div>
+
+    <h2>Plano gratuito e limites</h2>
+    <p>O SIM9 processa listas de at&#233; <strong>1&nbsp;000 registros</strong> gratuitamente, sem cadastro. Para listas maiores, utilize o <a href="/planos">Plano Profissional</a> (em breve) ou o modo <strong>&#9889; Preview</strong> (amostra dos primeiros 300 registros) dispon&#237;vel na barra de opera&ccedil;&#245;es da ferramenta.</p>
+
+    <div style="text-align:center;margin:32px 0">
+        <a class="btn" href="/sim9" style="font-size:18px;padding:16px 36px">Abrir SIM9 agora &rarr;</a>
+    </div>
+
+</div>
+
+<div id="popup-stats" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:#faf6f0;border-radius:8px;padding:24px;max-width:500px;width:90%;max-height:70vh;overflow-y:auto;position:relative">
+    <button onclick="document.getElementById('popup-stats').style.display='none'" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:#1a0a02">&#10005;</button>
+    <h3 style="margin:0 0 12px;color:#1a0a02">&#128202; Estat&#237;sticas Cordium</h3>
+    <div id="popup-agora" style="margin-bottom:16px;padding:8px;background:#1a0a02;color:#faf6f0;border-radius:6px;text-align:center">Carregando...</div>
+    <h4 style="margin:0 0 8px;color:#1a0a02">Hist&#243;rico (&#250;ltimos 3 meses)</h4>
+    <div id="popup-tabela">Carregando...</div>
+  </div>
+</div>
+<div id="stats-bar">
+  <span>&#169; 2026 Cordium &#8212; Todos os direitos reservados. &nbsp;|&nbsp; contato: <a href="mailto:claudio@damaro.com.br" style="color:#c9820a">claudio@damaro.com.br</a></span>
+  <span>&#128065;&#65039; <span onclick="abrirStats()" style="cursor:pointer;text-decoration:underline dotted">Acessos</span>: <strong id="count-acessos">...</strong> &nbsp; <button id="btn-like" onclick="darLike()">&#10084;&#65039; Like <span id="count-likes">...</span></button></span>
+</div>
+<style>
+#stats-bar{position:fixed;bottom:0;left:0;right:0;background:#1a0a02;color:#faf6f0;display:flex;align-items:center;justify-content:space-between;padding:8px 24px;font-size:.85rem;z-index:999}
+#btn-like{background:#4CAF50;color:#faf6f0;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:.9rem;transition:background .2s}
+#btn-like:hover{background:#45a049}#btn-like:disabled{opacity:.7;cursor:default}
+body{padding-bottom:48px}
+</style>
+<script>
+(function(){
+  var btn=document.getElementById('btn-like');
+  if(localStorage.getItem('cordium_liked')){btn.disabled=true;btn.style.background='#c9820a';}
+  fetch('/api/ping',{method:'POST'}).catch(function(){});
+  fetch('/api/stats').then(r=>r.json()).then(d=>{
+    document.getElementById('count-acessos').textContent=d.acessos;
+    document.getElementById('count-likes').textContent=d.likes;
+  }).catch(function(){document.getElementById('count-acessos').textContent='–';document.getElementById('count-likes').textContent='–';});
+})();
+function darLike(){
+  var btn=document.getElementById('btn-like');btn.disabled=true;
+  fetch('/api/like',{method:'POST'}).then(r=>r.json()).then(d=>{
+    document.getElementById('count-likes').textContent=d.likes;
+    btn.style.background='#c9820a';localStorage.setItem('cordium_liked','1');
+  }).catch(function(){btn.disabled=false;});
+}
+function abrirStats(){
+  var popup=document.getElementById('popup-stats');popup.style.display='flex';
+  fetch('/api/stats').then(r=>r.json()).then(d=>{
+    document.getElementById('popup-agora').innerHTML='Agora &nbsp;&#9654;&nbsp; Acessos: <strong>'+d.acessos+'</strong> &nbsp;|&nbsp; Likes: <strong>'+d.likes+'</strong>';
+  }).catch(function(){document.getElementById('popup-agora').textContent='Erro ao carregar.';});
+  fetch('https://raw.githubusercontent.com/claudiodamaro52-ux/CORDIUM/main/reports/historico.csv')
+  .then(r=>r.text()).then(function(txt){
+    var linhas=txt.trim().split('\n').slice(1);
+    var limite=new Date();limite.setDate(limite.getDate()-90);
+    var filtrado=linhas.filter(function(l){return new Date(l.split(',')[0])>=limite;}).reverse();
+    if(!filtrado.length){document.getElementById('popup-tabela').innerHTML='<p style="color:#888;text-align:center">Nenhum dado ainda.</p>';return;}
+    var h='<table style="width:100%;border-collapse:collapse;font-size:.85rem">';
+    h+='<tr style="background:#1a0a02;color:#faf6f0"><th style="padding:6px 8px;text-align:left">Data</th><th style="padding:6px 8px">Hora</th><th style="padding:6px 8px">Acessos</th><th style="padding:6px 8px">Likes</th></tr>';
+    filtrado.forEach(function(l,i){var p=l.split(',');h+='<tr style="background:'+(i%2?'#f0e8df':'#faf6f0')+'"><td style="padding:5px 8px">'+p[0]+'</td><td style="padding:5px 8px;text-align:center">'+p[1]+'</td><td style="padding:5px 8px;text-align:center">'+p[2]+'</td><td style="padding:5px 8px;text-align:center">'+p[3]+'</td></tr>';});
+    h+='</table>';document.getElementById('popup-tabela').innerHTML=h;
+  }).catch(function(){document.getElementById('popup-tabela').innerHTML='<p style="color:#888;text-align:center">Erro ao carregar hist&#243;rico.</p>';});
+}
+</script>
+
+</body>
+</html>
