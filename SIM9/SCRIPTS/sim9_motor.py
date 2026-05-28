@@ -311,7 +311,7 @@ def _forca(na, nb, nivel):
 
 
 # ── API pública ────────────────────────────────────────────────
-def processar(lista_txt, nivel=1, padrao='', rm_num=True, on_progress=None, tipo='nome'):
+def processar(lista_txt, nivel=1, padrao='', rm_num=True, on_progress=None, tipo='nome', min_sim=None):
     """
     Processa lista no formato ID;TEXTO e devolve pares similares.
 
@@ -331,6 +331,12 @@ def processar(lista_txt, nivel=1, padrao='', rm_num=True, on_progress=None, tipo
     rm_num = bool(rm_num)
     if tipo == 'endereco' and rm_num:
         limiar = _LIM_TIPO.get('texto', 75)  # sem número → mesmo limiar que texto
+    # Override manual do score mínimo
+    if min_sim is not None:
+        try:
+            limiar = max(30, min(99, int(min_sim)))
+        except (ValueError, TypeError):
+            pass
 
     # Padrão de fallback: ID numérico inicial separado por espaço/tab do texto
     _FB = re.compile(r'^(\d+)[ \t]+(.+)$')

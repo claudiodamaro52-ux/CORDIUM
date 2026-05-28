@@ -28,6 +28,47 @@
 
 ---
 
+## 🔍 SIM9 — Identificação de Similaridade Textual
+
+Detecta registros duplicados ou similares em listas cadastrais com alta precisão.
+
+### Tipos de dado suportados
+| Tipo | Comportamento |
+|---|---|
+| **Nome** | Comparação textual com normalização |
+| **CPF** | Comparação + validação automática |
+| **CNPJ** | Comparação + validação automática |
+| **Texto livre** | Comparação genérica sem restrições |
+
+### Funcionalidades
+- **4 níveis de acurácia** — do básico ao premium, para diferentes necessidades de rigor
+- **Score mínimo ajustável** — sobrescreve o limiar automático por nível (30–99 %)
+- **Máx. similares por grupo** — limita a exibição por registro (útil em listas muito densas)
+- **Filtro ao vivo** com highlight — destaca o termo nos resultados em tempo real
+- **Ordenação** — por ordem original, maior score, mais similares ou por ID
+- **Colapso automático** de grupos grandes com expansão sob demanda
+- **Padrão de pesquisa** — analisa apenas registros que contenham o texto informado
+- **Remover números** — util para nomes com numeração (ex.: inscrições)
+- **Reservados** — marque similares no popup de detalhes e exporte a seleção
+- **Exportação** — TXT, CSV e Relatório completo
+- **Aviso de lista grande** — alerta antes de processar mais de 2 000 registros
+- **Config salva** — tipo, nível, score mínimo e opções são persistidos no `localStorage`
+- **Popup de Ajuda** — acesse via botão `? Ajuda` na barra de operações
+
+### Formato de entrada
+```
+ID;TEXTO          → separador ponto-e-vírgula
+ID TEXTO          → ID numérico + espaço (sem ponto-e-vírgula)
+```
+
+### Formato de resultado
+```
+001 ; 002 [85%] ; 003 [62%]
+```
+A primeira coluna é o registro de referência; os demais são os similares com o respectivo score.
+
+---
+
 ## ⚙️ Tecnologias
 
 - **Python 3 / Flask** — servidor web e APIs

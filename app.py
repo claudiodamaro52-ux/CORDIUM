@@ -381,14 +381,16 @@ def sim9_processar():
     nivel  = int(data.get('nivel',  1))
     tipo   = str(data.get('tipo',   'nome'))[:20]
     padrao = str(data.get('padrao', ''))[:200]
-    rm_num = bool(data.get('rm_num', False))
+    rm_num  = bool(data.get('rm_num', False))
+    _ms     = data.get('min_sim', None)
+    min_sim = int(_ms) if _ms not in (None, '', 'auto') else None
 
     fila = _q.Queue()
 
     def _run():
         def _cb(i, n):
             fila.put({'progress': round(i / n * 100), 'i': i, 'n': n})
-        resultado = _sim9.processar(lista, nivel, padrao, rm_num, on_progress=_cb, tipo=tipo)
+        resultado = _sim9.processar(lista, nivel, padrao, rm_num, on_progress=_cb, tipo=tipo, min_sim=min_sim)
         fila.put({'done': True, 'result': resultado})
 
     threading.Thread(target=_run, daemon=True).start()

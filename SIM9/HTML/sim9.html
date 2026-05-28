@@ -66,6 +66,9 @@ textarea:focus{outline:none;border-color:#8b1400}
 .result-line:hover{background:#fdeab0;border-color:#c9820a}
 .result-placeholder{color:#999;font-size:12px;padding:10px;text-align:center}
 .result-counter{font-size:11px;color:#f0c060;margin-left:auto}
+.hl{background:#ffe066;color:#2a1800;border-radius:2px;padding:0 1px}
+.ver-mais{font-size:10px;color:#c9820a;cursor:pointer;text-decoration:underline;margin-left:6px}
+.ver-mais:hover{color:#8b1400}
 #filtro-res{font-size:11px;padding:2px 7px;border-radius:3px;border:1px solid #c9820a;background:#fff9f0;color:#2a1800;width:130px;outline:none;margin-left:8px}
 #filtro-res:focus{border-color:#a06808;box-shadow:0 0 0 2px rgba(201,130,10,.2)}
 .popup-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);z-index:1000;align-items:center;justify-content:center}
@@ -150,6 +153,11 @@ textarea:focus{outline:none;border-color:#8b1400}
       </select>
       </div>
 
+      <div id="min-sim-wrap">
+      <div class="lbl">Score minimo % <span style="font-weight:normal;color:#888">(vazio = automatico por nivel)</span></div>
+      <input id="min-sim" type="number" min="30" max="99" step="1" placeholder="auto" style="width:90px">
+      </div>
+
       <div class="lbl">Importar arquivo texto (.txt)</div>
       <div class="file-row">
         <button class="btn-op" onclick="document.getElementById('file-in').click()">&#128193; Importar</button>
@@ -182,6 +190,12 @@ textarea:focus{outline:none;border-color:#8b1400}
     <div class="ph">
       <span class="pt">Resultados</span>
       <input id="filtro-res" type="text" placeholder="&#128269; filtrar..." title="Filtrar grupos exibidos (ID ou texto)" oninput="_filtro=this.value.trim().toLowerCase();renderResultados()">
+      <select id="ordem-res" title="Ordenar resultados" onchange="_ordem=this.value;renderResultados()" style="font-size:11px;padding:2px 5px;border-radius:3px;border:1px solid #c9820a;background:#fff9f0;color:#2a1800;margin-left:6px;width:auto">
+        <option value="entrada">ordem original</option>
+        <option value="score">maior score</option>
+        <option value="qtd">mais similares</option>
+        <option value="id">por ID</option>
+      </select>
       <span id="contador" class="result-counter"></span>
     </div>
     <div id="resultados" class="result-list">
@@ -217,43 +231,69 @@ textarea:focus{outline:none;border-color:#8b1400}
 </div>
 
 <div id="popup-ajuda" class="popup-overlay" onclick="fecharOverlay(event,'popup-ajuda')">
-  <div class="popup-box">
+  <div class="popup-box" style="max-width:600px">
     <button class="popup-close" onclick="fecharPopup('popup-ajuda')">&#10005;</button>
-    <h3>Ajuda &mdash; SIM9</h3>
+    <h3 style="margin-bottom:14px">&#10067; Ajuda &mdash; SIM9</h3>
+
     <div class="ajuda-section">
-      <h4>Como usar</h4>
-      <ol style="padding-left:16px;font-size:12px;line-height:1.8;color:#4d3b2d">
-        <li>Importe um arquivo .txt ou cole sua lista no campo &quot;Lista cadastral&quot;.</li>
-        <li>Formatos aceitos (uma linha por registro):<br>&bull; <strong>ID;TEXTO</strong> — separador ponto-e-vírgula<br>&bull; <strong>ID TEXTO</strong> — ID numérico separado por espaço (sem ponto-e-vírgula)</li>
-        <li>Selecione o nivel de acuracidade desejado.</li>
-        <li>Clique em <strong>Processar</strong>.</li>
-        <li>Os resultados aparecem no painel direito. Clique em uma linha para ver os detalhes.</li>
-        <li>No popup de detalhes, clique nos similares para marca-los como <strong>Reservados</strong>.</li>
-        <li>Use os botoes de exportacao para salvar os resultados.</li>
-      </ol>
-    </div>
-    <div class="ajuda-section">
-      <h4>Niveis de Acuracidade</h4>
+      <h4>&#128203; Entrada de dados</h4>
       <ul>
-        <li><strong>1 &mdash; Basico:</strong> similaridade quase absoluta. Ideal para inscricoes e cadastros simples.</li>
-        <li><strong>2 &mdash; Profissional:</strong> similaridade proxima. Para cadastros corporativos sensiveis.</li>
-        <li><strong>3 &mdash; Auditoria:</strong> similaridade remota. Para codigos, emails, auditorias.</li>
-        <li><strong>4 &mdash; Premium:</strong> integracao total. Para analistas e data mining.</li>
+        <li>Importe um <strong>.txt</strong> ou cole a lista no campo <em>Lista cadastral</em>.</li>
+        <li>Formato por linha: <code>ID;TEXTO</code> &nbsp;ou&nbsp; <code>ID TEXTO</code> (ID num&eacute;rico + espa&ccedil;o).</li>
+        <li>Listas com mais de 2&nbsp;000 registros recebem aviso antes de processar.</li>
       </ul>
     </div>
+
     <div class="ajuda-section">
-      <h4>Formato do resultado</h4>
-      <p style="font-family:Consolas,monospace;background:#f5f0e8;padding:6px;border-radius:3px">001 ; 002 [85%] ; 003 [62%]</p>
-      <p style="margin-top:4px">A primeira coluna e o registro de referencia. Os demais sao os similares encontrados com a respectiva forca de similaridade.</p>
+      <h4>&#9881;&#65039; Configura&ccedil;&otilde;es</h4>
+      <ul>
+        <li><strong>Tipo de dado:</strong> Nome, CPF, CNPJ ou Texto livre. CPF/CNPJ incluem valida&ccedil;&atilde;o autom&aacute;tica.</li>
+        <li><strong>N&iacute;vel de acur&aacute;cia:</strong> 1 B&aacute;sico &rarr; 4 Premium (quanto maior, mais pares detectados).</li>
+        <li><strong>Score m&iacute;nimo %:</strong> sobrescreve o limiar autom&aacute;tico por n&iacute;vel. Deixe em branco para usar o padr&atilde;o.</li>
+        <li><strong>Max. similares por grupo:</strong> limita quantos similares s&atilde;o exibidos por registro. Deixe em branco para sem limite.</li>
+        <li><strong>Remover n&uacute;meros:</strong> &uacute;til para nomes com numerac&atilde;o (ex.: inscri&ccedil;&otilde;es).</li>
+        <li><strong>Padr&atilde;o de pesquisa:</strong> processa apenas registros que contenham o texto informado.</li>
+        <li>As configura&ccedil;&otilde;es s&atilde;o salvas automaticamente no navegador (localStorage).</li>
+      </ul>
     </div>
+
     <div class="ajuda-section">
-      <h4>Padrao de pesquisa</h4>
-      <p>Filtra a analise para registros cujo texto contem o padrao informado. Util para analisar um subconjunto especifico da lista.</p>
+      <h4>&#128270; Resultados</h4>
+      <ul>
+        <li>Formato: <code style="font-size:11px">001 ; 002 [85%] ; 003 [62%]</code> &mdash; refer&ecirc;ncia seguida dos similares com score.</li>
+        <li><strong>Filtro ao vivo:</strong> digite no campo de filtro para destacar (&#9650;) os grupos que cont&ecirc;m o termo.</li>
+        <li><strong>Ordena&ccedil;&atilde;o:</strong> por ordem original, maior score, mais similares ou por ID.</li>
+        <li>Grupos com muitos similares s&atilde;o recolhidos automaticamente &mdash; clique <em>&#9660; +N mais</em> para expandir.</li>
+        <li>Clique em qualquer linha para abrir o popup de detalhes do grupo.</li>
+      </ul>
     </div>
+
     <div class="ajuda-section">
-      <h4>Reservados</h4>
-      <p>Ao clicar em um similar no popup de detalhes, o registro e marcado como Reservado. Use o botao <strong>Reservados</strong> para ver e exportar essa selecao.</p>
+      <h4>&#9733; Reservados</h4>
+      <ul>
+        <li>No popup de detalhes, clique em um similar para marc&aacute;-lo como <strong>Reservado</strong>.</li>
+        <li>O bot&atilde;o <strong>Reservados</strong> exibe e permite exportar a sele&ccedil;&atilde;o.</li>
+      </ul>
     </div>
+
+    <div class="ajuda-section">
+      <h4>&#8595; Exporta&ccedil;&atilde;o</h4>
+      <ul>
+        <li><strong>TXT / CSV:</strong> exporta todos os grupos encontrados.</li>
+        <li><strong>Relat&oacute;rio:</strong> gera um resumo dos resultados com m&eacute;tricas de similaridade.</li>
+      </ul>
+    </div>
+
+    <div class="ajuda-section">
+      <h4>&#127374; N&iacute;veis de Acur&aacute;cia</h4>
+      <ul style="margin:0">
+        <li><strong>1 &mdash; B&aacute;sico:</strong> similaridade quase absoluta. Inscri&ccedil;&otilde;es e cadastros simples.</li>
+        <li><strong>2 &mdash; Profissional:</strong> similaridade pr&oacute;xima. Cadastros corporativos sens&iacute;veis.</li>
+        <li><strong>3 &mdash; Auditoria:</strong> similaridade remota. C&oacute;digos, e-mails, auditorias.</li>
+        <li><strong>4 &mdash; Premium:</strong> integra&ccedil;&atilde;o total. Analistas e data mining.</li>
+      </ul>
+    </div>
+
   </div>
 </div>
 
@@ -286,6 +326,8 @@ var _reservados = {};   // id -> {id, texto}
 var _popupIdx   = -1;
 var _t0         = 0;
 var _filtro     = '';
+var _ordem      = 'entrada';
+var _expandidos = {};
 
 function g(id){ return document.getElementById(id); }
 
@@ -330,10 +372,25 @@ function processar(){
   g('btn-processar').disabled = true;
   _t0 = Date.now();
 
+  salvarCfg();
+
+  // Aviso para listas grandes
+  var _nLinhas = lista.split('\n').filter(function(l){ return l.trim().length > 0; }).length;
+  if(_nLinhas > 2000){
+    var _pairs = Math.round(_nLinhas * (_nLinhas - 1) / 2);
+    var _ok = confirm(
+      'Lista grande: ' + _nLinhas + ' registros (\u2248' + _pairs.toLocaleString() + ' pares a calcular).\n' +
+      'O processamento pode demorar alguns minutos.\nDeseja continuar?'
+    );
+    if(!_ok){ g('btn-processar').disabled = false; return; }
+  }
+
+  var msVal  = g('min-sim') ? g('min-sim').value.trim() : '';
+  var minSim = msVal !== '' ? parseInt(msVal, 10) : 'auto';
   fetch('/api/sim9/processar', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({lista: lista, nivel: nivel, tipo: tipo, padrao: padrao, rm_num: rmNum})
+    body: JSON.stringify({lista: lista, nivel: nivel, tipo: tipo, padrao: padrao, rm_num: rmNum, min_sim: minSim})
   })
   .then(function(r){
     var reader  = r.body.getReader();
@@ -412,6 +469,19 @@ function renderResultados(){
     });
   }) : _resultados;
 
+  // Ordenação
+  if(_ordem === 'score'){
+    lista = lista.slice().sort(function(a,b){
+      var sa = a.similares.reduce(function(m,s){ return Math.max(m,s.forca); },0);
+      var sb = b.similares.reduce(function(m,s){ return Math.max(m,s.forca); },0);
+      return sb - sa;
+    });
+  } else if(_ordem === 'qtd'){
+    lista = lista.slice().sort(function(a,b){ return b.similares.length - a.similares.length; });
+  } else if(_ordem === 'id'){
+    lista = lista.slice().sort(function(a,b){ return a.ref_id < b.ref_id ? -1 : a.ref_id > b.ref_id ? 1 : 0; });
+  }
+
   if(lista.length === 0){
     div.innerHTML = '<div class="result-placeholder">Nenhum resultado para &ldquo;' + escHtml(_filtro) + '&rdquo;</div>';
     g('contador').textContent = 'Grupos: 0/' + totalGrupos + ' | Pares: 0/' + totalPares;
@@ -432,9 +502,20 @@ function renderResultados(){
     res.similares.forEach(function(s){
       linha += ' ; ' + s.id + ' [' + s.forca + '%]';
     });
-    if(res.ref_texto) linha += '  (' + res.ref_texto + ')';
+    var sufixo   = res.ref_texto ? '  (' + res.ref_texto + ')' : '';
+    var sims     = res.similares;
+    var COLAPSO  = 5;
+    var PREVIEW  = 3;
+    var expandido = !!_expandidos[origIdx];
+    var simsVis  = (!expandido && sims.length > COLAPSO) ? sims.slice(0, PREVIEW) : sims;
+    var linhaBase = res.ref_id + simsVis.map(function(s){ return ' ; ' + s.id + ' [' + s.forca + '%]'; }).join('');
+    var verMais = (!expandido && sims.length > COLAPSO)
+      ? ' <span class="ver-mais" onclick="event.stopPropagation();_expandidos['+origIdx+']=true;renderResultados()">▼ +'+(sims.length-PREVIEW)+' mais</span>'
+      : (expandido && sims.length > COLAPSO)
+        ? ' <span class="ver-mais" onclick="event.stopPropagation();delete _expandidos['+origIdx+'];renderResultados()">▲ recolher</span>'
+        : '';
     html += '<div class="result-line" onclick="abrirDetalhe(' + origIdx + ')">' +
-            escHtml(linha) + '</div>';
+            hlTxt(linhaBase + sufixo, _filtro) + verMais + '</div>';
   });
   div.innerHTML = html;
 }
@@ -584,8 +665,10 @@ function onTipoChange(){
   var tipo = g('tipo').value;
   var mostrarNivel = tipo === 'nome';
   var mostrarRmNum = tipo === 'nome' || tipo === 'texto' || tipo === 'endereco';
-  g('nivel-wrap').style.display  = mostrarNivel ? '' : 'none';
-  g('rmnum-wrap').style.display  = mostrarRmNum ? '' : 'none';
+  g('nivel-wrap').style.display    = mostrarNivel ? '' : 'none';
+  g('rmnum-wrap').style.display    = mostrarRmNum ? '' : 'none';
+  var ocultarMinSim = tipo === 'cpf' || tipo === 'cnpj';
+  g('min-sim-wrap').style.display  = ocultarMinSim ? 'none' : '';
   var lbl = document.querySelector('label[for="rm-num"]');
   if(lbl) lbl.textContent = tipo === 'endereco' ? 'Ignorar n\u00famero do endere\u00e7o' : 'Remover numeros antes de comparar';
 }
@@ -598,6 +681,7 @@ function limpar(){
   g('rm-num').checked = false;
   g('nivel').value    = '1';
   g('tipo').value     = 'nome';
+  g('min-sim').value  = '';
   g('nivel-wrap').style.display = '';
   g('rmnum-wrap').style.display = '';
   var lbl = document.querySelector('label[for="rm-num"]');
@@ -609,6 +693,9 @@ function limpar(){
   _popupIdx   = -1;
   _filtro     = '';
   var _fi = g('filtro-res'); if(_fi) _fi.value = '';
+  _ordem      = 'entrada';
+  var _or = g('ordem-res'); if(_or) _or.value = 'entrada';
+  _expandidos = {};
   g('resultados').innerHTML = '<div class="result-placeholder">Clique em &quot;Processar&quot; para exibir resultados...</div>';
   g('contador').textContent = '';
   logClear();
@@ -629,6 +716,19 @@ function fecharOverlay(e, id){
 }
 
 // ── Utilitarios ──────────────────────────────────────────────
+function hlTxt(txt, termo){
+  if(!termo) return escHtml(txt);
+  var r = '', s = txt.toLowerCase(), t = termo.toLowerCase(), pos = 0;
+  var idx;
+  while((idx = s.indexOf(t, pos)) >= 0){
+    r += escHtml(txt.slice(pos, idx));
+    r += '<span class="hl">' + escHtml(txt.slice(idx, idx + t.length)) + '</span>';
+    pos = idx + t.length;
+  }
+  r += escHtml(txt.slice(pos));
+  return r;
+}
+
 function escHtml(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -658,6 +758,7 @@ function baixarArquivo(conteudo, nome, tipo){
 (function(){
   var btn = g('btn-like');
   if(localStorage.getItem('cordium_liked')){ btn.disabled=true; btn.style.background='#c9820a'; }
+  restaurarCfg();
   fetch('/api/ping',{method:'POST'}).catch(function(){});
   fetch('/api/stats').then(function(r){ return r.json(); }).then(function(d){
     g('count-acessos').textContent = d.acessos;
