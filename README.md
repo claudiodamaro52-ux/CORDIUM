@@ -2,10 +2,10 @@
   <img src="IMG/Logo_Cordium.webp" alt="CORDIUM ferramentas online de automação" width="120"/>
 </p>
 
-<h1 align="center">Cordium — Ferramentas Web</h1>
+<h1 align="center">Cordium — Soluções On Line</h1>
 
 <p align="center">
-  Utilitários online simples e rápidos, sem instalação.
+  Cordium reúne utilidades práticas e soluções avançadas como o SIM9 para apoiar profissionais, pesquisadores e instituições.
 </p>
 
 <p align="center">

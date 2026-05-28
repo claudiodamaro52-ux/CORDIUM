@@ -66,6 +66,8 @@ textarea:focus{outline:none;border-color:#8b1400}
 .result-line:hover{background:#fdeab0;border-color:#c9820a}
 .result-placeholder{color:#999;font-size:12px;padding:10px;text-align:center}
 .result-counter{font-size:11px;color:#f0c060;margin-left:auto}
+#filtro-res{font-size:11px;padding:2px 7px;border-radius:3px;border:1px solid #c9820a;background:#fff9f0;color:#2a1800;width:130px;outline:none;margin-left:8px}
+#filtro-res:focus{border-color:#a06808;box-shadow:0 0 0 2px rgba(201,130,10,.2)}
 .popup-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);z-index:1000;align-items:center;justify-content:center}
 .popup-box{background:#faf6f0;border-radius:8px;padding:20px;max-width:540px;width:94%;max-height:80vh;overflow-y:auto;position:relative;border:2px solid #c9820a}
 .popup-box h3{margin:0 0 12px;color:#1a0a02;font-size:15px}
@@ -179,6 +181,7 @@ textarea:focus{outline:none;border-color:#8b1400}
   <div class="panel">
     <div class="ph">
       <span class="pt">Resultados</span>
+      <input id="filtro-res" type="text" placeholder="&#128269; filtrar..." title="Filtrar grupos exibidos (ID ou texto)" oninput="_filtro=this.value.trim().toLowerCase();renderResultados()">
       <span id="contador" class="result-counter"></span>
     </div>
     <div id="resultados" class="result-list">
@@ -282,6 +285,7 @@ var _resultados = [];
 var _reservados = {};   // id -> {id, texto}
 var _popupIdx   = -1;
 var _t0         = 0;
+var _filtro     = '';
 
 function g(id){ return document.getElementById(id); }
 
@@ -396,16 +400,39 @@ function renderResultados(){
     g('contador').textContent = '';
     return;
   }
-  var totalPares = _resultados.reduce(function(s,r){ return s + r.similares.length; }, 0);
-  g('contador').textContent = 'Grupos: ' + _resultados.length + ' | Pares: ' + totalPares;
+  var totalGrupos = _resultados.length;
+  var totalPares  = _resultados.reduce(function(s,r){ return s + r.similares.length; }, 0);
+
+  // Aplica filtro nos resultados exibidos
+  var lista = _filtro ? _resultados.filter(function(res){
+    var base = (res.ref_id + ' ' + (res.ref_texto||'')).toLowerCase();
+    if(base.indexOf(_filtro) >= 0) return true;
+    return res.similares.some(function(s){
+      return ((s.id||'') + ' ' + (s.texto||'')).toLowerCase().indexOf(_filtro) >= 0;
+    });
+  }) : _resultados;
+
+  if(lista.length === 0){
+    div.innerHTML = '<div class="result-placeholder">Nenhum resultado para &ldquo;' + escHtml(_filtro) + '&rdquo;</div>';
+    g('contador').textContent = 'Grupos: 0/' + totalGrupos + ' | Pares: 0/' + totalPares;
+    return;
+  }
+
+  var filtPares = lista.reduce(function(s,r){ return s + r.similares.length; }, 0);
+  if(_filtro){
+    g('contador').textContent = 'Grupos: ' + lista.length + '/' + totalGrupos + ' | Pares: ' + filtPares + '/' + totalPares;
+  } else {
+    g('contador').textContent = 'Grupos: ' + totalGrupos + ' | Pares: ' + totalPares;
+  }
 
   var html = '';
-  _resultados.forEach(function(res, idx){
+  lista.forEach(function(res){
+    var origIdx = _resultados.indexOf(res);
     var linha = res.ref_id;
     res.similares.forEach(function(s){
       linha += ' ; ' + s.id + ' [' + s.forca + '%]';
     });
-    html += '<div class="result-line" onclick="abrirDetalhe(' + idx + ')">' +
+    html += '<div class="result-line" onclick="abrirDetalhe(' + origIdx + ')">' +
             escHtml(linha) + '</div>';
   });
   div.innerHTML = html;
@@ -579,6 +606,8 @@ function limpar(){
   _resultados = [];
   _reservados = {};
   _popupIdx   = -1;
+  _filtro     = '';
+  var _fi = g('filtro-res'); if(_fi) _fi.value = '';
   g('resultados').innerHTML = '<div class="result-placeholder">Clique em &quot;Processar&quot; para exibir resultados...</div>';
   g('contador').textContent = '';
   logClear();
