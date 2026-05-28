@@ -432,6 +432,7 @@ function renderResultados(){
     res.similares.forEach(function(s){
       linha += ' ; ' + s.id + ' [' + s.forca + '%]';
     });
+    if(res.ref_texto) linha += '  (' + res.ref_texto + ')';
     html += '<div class="result-line" onclick="abrirDetalhe(' + origIdx + ')">' +
             escHtml(linha) + '</div>';
   });
