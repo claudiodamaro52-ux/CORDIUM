@@ -4,3 +4,12 @@ WIMGCPT/SCRIPTS/config.json
 WIMGCPT/SCRIPTS/logs.txt
 __pycache__/
 *.pyc
+
+# banco local
+cordium.db
+
+# ambiente virtual
+.venv/
+
+# env local
+.env

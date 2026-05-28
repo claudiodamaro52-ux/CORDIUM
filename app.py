@@ -3,8 +3,11 @@ import subprocess, sys, os, json, re, tempfile, zipfile, uuid, shutil, threading
 import requests as http_requests
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
+from MONETIZACAO import init_db, monetizacao_bp
 
 app = Flask(__name__)
+init_db()
+app.register_blueprint(monetizacao_bp)
 
 BASE         = os.path.dirname(os.path.abspath(__file__))
 HTML_DIR     = os.path.join(BASE, 'HTML')
@@ -408,6 +411,22 @@ def sim9_processar():
         headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'}
     )
 
+
+
+@app.route('/api/sim9/buscar', methods=['POST'])
+def sim9_buscar():
+    """Busca pontual: compara um texto de consulta contra todos os registros da base."""
+    data    = request.json or {}
+    query   = str(data.get('query',  ''))[:500]
+    lista   = str(data.get('lista',  ''))[:500000]
+    tipo    = str(data.get('tipo',   'nome'))[:20]
+    nivel   = max(2, int(data.get('nivel',  1)))  # busca pontual usa min nivel 2
+    _ms     = data.get('min_sim', None)
+    min_sim = int(_ms) if _ms not in (None, '', 'auto') else None
+
+    resultado = _sim9.buscar_na_base(query, lista, tipo=tipo, nivel=nivel, min_sim=min_sim)
+    resultado['nivel_usado'] = nivel
+    return json.dumps(resultado, ensure_ascii=False), 200, {'Content-Type': 'application/json'}
 
 # ── Stats (em memória) ─────────────────────────────────────
 _stats = {'acessos': 0, 'likes': 0}

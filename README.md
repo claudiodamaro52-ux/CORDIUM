@@ -41,6 +41,8 @@ Detecta registros duplicados ou similares em listas cadastrais com alta precisã
 | **Texto livre** | Comparação genérica sem restrições |
 
 ### Funcionalidades
+
+#### Processamento em lote (N × N)
 - **4 níveis de acurácia** — do básico ao premium, para diferentes necessidades de rigor
 - **Score mínimo ajustável** — sobrescreve o limiar automático por nível (30–99 %)
 - **Máx. similares por grupo** — limita a exibição por registro (útil em listas muito densas)
@@ -48,11 +50,28 @@ Detecta registros duplicados ou similares em listas cadastrais com alta precisã
 - **Ordenação** — por ordem original, maior score, mais similares ou por ID
 - **Colapso automático** de grupos grandes com expansão sob demanda
 - **Padrão de pesquisa** — analisa apenas registros que contenham o texto informado
-- **Remover números** — util para nomes com numeração (ex.: inscrições)
+- **Remover números** — útil para nomes com numeração (ex.: inscrições)
 - **Reservados** — marque similares no popup de detalhes e exporte a seleção
-- **Exportação** — TXT, CSV e Relatório completo
 - **Aviso de lista grande** — alerta antes de processar mais de 2 000 registros
 - **Config salva** — tipo, nível, score mínimo e opções são persistidos no `localStorage`
+
+#### Busca pontual (1 × N)
+- **Busca individual** — consulte um único registro contra toda a lista sem reprocessar
+- **Score por cobertura de palavras** — cada palavra da consulta é confrontada individualmente (Levenshtein ≥ 75 %) para calcular o percentual de correspondência
+- **Nível mínimo 2** — precisão garantida nas buscas pontuais
+- **Resultado imediato** — exibido na área principal junto aos resultados do lote
+
+#### Painel analítico (datamining)
+- **Exibição automática** — painel sempre visível após o processamento, sem nenhuma ação adicional
+- **Taxa de duplicidade** — percentual de grupos com similares em relação ao total de registros
+- **Estatísticas de score** — média, mediana e desvio padrão dos scores encontrados
+- **Score mín/máx** — extremos da distribuição de similaridade
+- **Distribuição por faixas** — contagem de pares nas faixas 90–100 %, 70–89 % e 50–69 %
+- **Registro mais duplicado** — ID com maior frequência de ocorrência como similar
+- **Relatório analítico** — o bloco de estatísticas é incluído automaticamente no Relatório TXT exportado
+
+#### Exportação e Ajuda
+- **Exportação** — TXT, CSV e Relatório completo com bloco analítico
 - **Popup de Ajuda** — acesse via botão `? Ajuda` na barra de operações
 
 ### Formato de entrada

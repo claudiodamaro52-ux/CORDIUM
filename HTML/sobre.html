@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Sobre a Cordium: ferramentas online de automação para JSON e imagens.">
+    <meta name="description" content="Sobre a Cordium: ferramentas online de automação — SIM9 para detecção de duplicatas e similaridade textual, JSON Tools Pro e Coletor de Imagens.">
     <link rel="canonical" href="https://cordium.com.br/sobre">
     <meta property="og:title" content="Sobre a Cordium | Ferramentas Online">
-    <meta property="og:description" content="Conheça a Cordium e suas ferramentas online de automação para JSON e imagens.">
+    <meta property="og:description" content="Conheça a Cordium e suas ferramentas: SIM9 para deduplicação cadastral, JSON Tools Pro e Coletor de Imagens.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cordium.com.br/sobre">
     <meta property="og:image" content="https://cordium.com.br/img/Logo_Cordium.webp">
@@ -14,7 +14,7 @@
     <meta property="og:site_name" content="Cordium">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="https://cordium.com.br/img/Logo_Cordium.webp">
-    <meta name="keywords" content="Cordium, sobre, ferramentas online, automação, JSON, imagens">
+    <meta name="keywords" content="Cordium, sobre, ferramentas online, automação, JSON, imagens, SIM9, similaridade textual, deduplicação, datamining, CPF, CNPJ">
     <link rel="icon" href="/img/Logo_Cordium.webp" type="image/webp">
     <title>Sobre a Cordium | Ferramentas Online de Automação</title>
     <style>
@@ -99,7 +99,39 @@
     Normaliza, indenta, mescla, converte entre formatos e gera schemas.</p>
     <a class="btn" href="/formatar-json">Abrir JSON Tools Pro</a>
 
-    <h2>Links Úteis</h2>
+    <h3>SIM9 &mdash; Identificação de Similaridade Textual</h3>
+    <p>O SIM9 é o motor de comparação cadastral da Cordium. Analisa listas de registros e detecta
+    duplicatas, grafias alternativas e entradas semelhantes com precisão configurável &mdash;
+    usando algoritmos como Levenshtein, Soundex-BR, Metaphone-BR e Jaro-Winkler em combinação.</p>
+
+    <h4 style="color:#3d1f00;margin-bottom:4px">O que o SIM9 faz</h4>
+    <ul>
+        <li><strong>Processamento em lote (N × N)</strong> &mdash; compara todos os registros entre si e agrupa os similares com seu score de similaridade (0–100 %).</li>
+        <li><strong>Busca pontual (1 × N)</strong> &mdash; consulta um único nome ou texto contra toda a lista sem reprocessar o lote; o score mede quantas palavras da consulta estão presentes no registro.</li>
+        <li><strong>Painel analítico</strong> &mdash; exibe automaticamente taxa de duplicidade, score médio, mediana, desvio padrão, distribuição por faixas (90–100 %, 70–89 %, 50–69 %) e o registro mais duplicado da lista.</li>
+        <li><strong>Validação de CPF e CNPJ</strong> &mdash; identifica documentos inválidos durante o processamento.</li>
+        <li><strong>Relatório exportável</strong> &mdash; TXT com bloco <em>Resumo Analítico</em> completo, pronto para documentação ou auditoria.</li>
+    </ul>
+
+    <h4 style="color:#3d1f00;margin-bottom:4px">4 níveis de acurácia</h4>
+    <ul>
+        <li><strong>1 Básico</strong> &mdash; similaridade quase absoluta; ideal para inscrições e cadastros simples.</li>
+        <li><strong>2 Profissional</strong> &mdash; similaridade próxima; recomendado para cadastros corporativos sensíveis.</li>
+        <li><strong>3 Auditoria</strong> &mdash; similaridade remota; adequado para e-mails, códigos e auditorias.</li>
+        <li><strong>4 Premium</strong> &mdash; varredura ampla; para analistas e pesquisadores de datamining.</li>
+    </ul>
+
+    <h4 style="color:#3d1f00;margin-bottom:4px">Para quem se destina</h4>
+    <ul>
+        <li><strong>Gestores de cadastro</strong> &mdash; limpeza de bases com nomes repetidos ou grafias variadas.</li>
+        <li><strong>Auditores e fiscais</strong> &mdash; cruzamento de listas para detecção de fraudes ou duplicidades.</li>
+        <li><strong>Pesquisadores e analistas de dados</strong> &mdash; exploração estatística de qualidade cadastral (datamining).</li>
+        <li><strong>Contabilistas e RH</strong> &mdash; validação em massa de CPF e CNPJ.</li>
+        <li><strong>Desenvolvedores</strong> &mdash; acesso via API REST (<code>/api/sim9/processar</code> e <code>/api/sim9/buscar</code>).</li>
+    </ul>
+    <a class="btn" href="/sim9">Abrir SIM9</a>
+
+        <h2>Links Úteis</h2>
     <ul>
         <li><a href="/download">Página de Download</a></li>
         <li><a href="/suporte">Suporte / FAQ</a></li>

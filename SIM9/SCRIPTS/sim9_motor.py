@@ -486,3 +486,132 @@ def processar(lista_txt, nivel=1, padrao='', rm_num=True, on_progress=None, tipo
         'total_pares': total_pares,
         'msgs':        msgs,
     }
+
+
+# ── Busca pontual 1-para-N ─────────────────────────────────────────────────────
+def buscar_na_base(query_txt, lista_txt, tipo='nome', nivel=1, min_sim=None):
+    """
+    Compara um texto de consulta contra todos os registros da lista.
+
+    Retorna dict:
+      encontrou       — bool
+      correspondencias — lista de {id, texto, forca, valido} ordenada por score desc
+      mensagem        — string descritiva do resultado
+    """
+    tipo  = str(tipo or 'nome').lower()
+    nivel = max(1, min(4, int(nivel or 1)))
+
+    # Limiar: mesmo critério do processar()
+    limiar = _LIM[nivel] if tipo == 'nome' else _LIM_TIPO.get(tipo, 70)
+    if min_sim is not None:
+        try:
+            limiar = max(30, min(99, int(min_sim)))
+        except (ValueError, TypeError):
+            pass
+
+    query = (query_txt or '').strip()
+    if not query:
+        return {'encontrou': False, 'correspondencias': [],
+                'mensagem': 'Texto de busca nao informado.'}
+
+    # Parse da lista — mesmo padrão de processar()
+    _FB = re.compile(r'^(\d+)[ \t]+(.+)$')
+    regs = []
+    for ln in lista_txt.splitlines():
+        ln = ln.strip()
+        if not ln:
+            continue
+        if ';' in ln:
+            pts = ln.split(';', 1)
+            rid, rtx = pts[0].strip(), pts[1].strip()[:255]
+        else:
+            m = _FB.match(ln)
+            if m:
+                rid, rtx = m.group(1), m.group(2)[:255]
+            else:
+                continue
+        if rid and rtx:
+            regs.append((rid, rtx))
+
+    if not regs:
+        return {'encontrou': False, 'correspondencias': [],
+                'mensagem': 'Base vazia ou formato invalido.'}
+
+    # Normalizar query e registros — mesmo pipeline de processar()
+    if tipo in ('nome', 'texto'):
+        q_nrm = _nrm(query, rm_n=False)
+        nrms  = [_nrm(r[1], rm_n=False) for r in regs]
+    elif tipo == 'endereco':
+        _nrms_raw = [_nrm(r[1], rm_n=True) for r in regs]
+        _aprender_e_salvar(_nrms_raw)
+        nrms  = [_compor_end(s) for s in _nrms_raw]
+        q_nrm = _compor_end(_nrm(query, rm_n=True))
+    else:
+        q_nrm = query.lower().strip()
+        nrms  = [r[1].lower().strip() for r in regs]
+
+    # Pre-computacao para cpf/cnpj
+    validos = {}
+    _vals   = []
+    q_val   = ''
+    if tipo == 'cpf':
+        for rid, rtx in regs:
+            validos[rid] = _val_cpf(rtx)
+        _vals = [re.sub(r'\D', '', r[1]) for r in regs]
+        q_val = re.sub(r'\D', '', query)
+    elif tipo == 'cnpj':
+        for rid, rtx in regs:
+            validos[rid] = _val_cnpj(rtx)
+        _vals = [re.sub(r'\D', '', r[1]) for r in regs]
+        q_val = re.sub(r'\D', '', query)
+
+    correspondencias = []
+    for idx, (rid, rtx) in enumerate(regs):
+        if tipo == 'nome':
+            # busca pontual: token-overlap (% de palavras da query presentes no registro)
+            q_words = q_nrm.split()
+            r_words = nrms[idx].split()
+            if q_words and r_words:
+                matched = sum(
+                    1 for qw in q_words
+                    if max((_lsim(qw, rw) for rw in r_words), default=0) >= 0.75
+                )
+                f = round(matched / len(q_words) * 100)
+            else:
+                f = 0
+        elif tipo == 'texto':
+            f = round(_lsim(q_nrm, nrms[idx]) * 100)
+        elif tipo in ('cpf', 'cnpj'):
+            f = 100 if q_val and _vals[idx] and q_val == _vals[idx] else 0
+        elif tipo == 'email':
+            f = _sim_email(query, regs[idx][1])
+        elif tipo == 'telefone':
+            f = _sim_tel(query, regs[idx][1])
+        elif tipo == 'endereco':
+            f = round(_lsim(q_nrm, nrms[idx]) * 100)
+        else:
+            f = _forca(q_nrm, nrms[idx], nivel)
+
+        if f >= limiar:
+            correspondencias.append({
+                'id':     rid,
+                'texto':  rtx,
+                'forca':  f,
+                'valido': validos.get(rid),
+            })
+
+    correspondencias.sort(key=lambda x: -x['forca'])
+    n = len(regs)
+
+    if not correspondencias:
+        return {
+            'encontrou':        False,
+            'correspondencias': [],
+            'mensagem': f'OK — nenhum similar encontrado para "{query}" na base ({n} registros).',
+        }
+
+    return {
+        'encontrou':        True,
+        'correspondencias': correspondencias,
+        'mensagem': f'{len(correspondencias)} correspondencia(s) encontrada(s) em {n} registros.',
+    }

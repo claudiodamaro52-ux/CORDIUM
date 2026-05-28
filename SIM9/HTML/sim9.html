@@ -49,6 +49,7 @@ header .nav-info a:hover{color:#c9820a}
 .lbl{font-size:11px;color:#5a3a20;font-weight:bold;margin-top:2px}
 select,input[type=text]{width:100%;padding:4px 7px;border:1px solid #c9820a;border-radius:3px;font-size:12px;background:#fffdf8;color:#222}
 select:focus,input[type=text]:focus{outline:none;border-color:#8b1400}
+.stat-row{display:flex;justify-content:space-between;gap:12px;padding:2px 0;border-bottom:1px solid #f0e0b0}.stat-row span{color:#555}.stat-row strong{color:#2a1800}
 textarea{width:100%;padding:6px 8px;border:1px solid #c9820a;border-radius:3px;font-size:12px;font-family:Consolas,monospace;resize:vertical;background:#fffdf8;color:#222}
 textarea:focus{outline:none;border-color:#8b1400}
 #lista{min-height:140px;flex:1}
@@ -86,6 +87,14 @@ textarea:focus{outline:none;border-color:#8b1400}
 .ajuda-section h4{color:#1a0a02;font-size:13px;margin-bottom:4px}
 .ajuda-section p,.ajuda-section li{font-size:12px;line-height:1.6;color:#4d3b2d}
 .ajuda-section ul{padding-left:16px}
+
+.busca-sep{border-top:1px dashed #c9820a;margin-top:8px;padding-top:6px}
+.busca-ok{background:#d4edda;color:#155724;padding:7px 10px;border-radius:4px;font-size:12px;border:1px solid #c3e6cb;margin-top:4px}
+.busca-achou{background:#fff3cd;color:#856404;padding:5px 8px;border-radius:4px 4px 0 0;font-size:12px;border:1px solid #ffc107;font-weight:bold;margin-top:4px}
+.busca-lista{border:1px solid #ffc107;border-top:none;border-radius:0 0 4px 4px;max-height:150px;overflow-y:auto;font-family:Consolas,monospace;font-size:11px}
+.busca-item{padding:3px 8px;border-bottom:1px solid #eee;background:#fffdf8;display:flex;justify-content:space-between;align-items:center}
+.busca-item:last-child{border-bottom:none}
+.busca-score{color:#c9820a;font-weight:bold;margin-left:8px;white-space:nowrap}
 @media(max-width:720px){.main{grid-template-columns:1fr;grid-template-rows:auto 1fr}}
 </style>
 </head>
@@ -176,6 +185,13 @@ textarea:focus{outline:none;border-color:#8b1400}
         <label for="rm-num">Remover numeros antes de comparar</label>
       </div>
 
+
+      <div class="busca-sep lbl">&#128270; Busca pontual na base <span style="font-weight:normal;color:#999">(min. nivel 2)</span></div>
+      <input id="busca-query" type="text" placeholder="Ex: Joao da Silva, 01234-567, email@..." autocomplete="off">
+      <div style="display:flex;gap:4px;align-items:center">
+        <button class="btn-op" id="btn-buscar" onclick="buscarNaBase()">&#128269; Buscar</button>
+      </div>
+
       <div class="lbl">Observacoes para relatorio</div>
       <textarea id="notas" placeholder="Anotacoes adicionais..."></textarea>
 
@@ -198,6 +214,7 @@ textarea:focus{outline:none;border-color:#8b1400}
       </select>
       <span id="contador" class="result-counter"></span>
     </div>
+    <div id="stats-painel" style="display:none;background:#fdf6ec;border:1px solid #e0c87a;border-radius:4px;padding:10px 14px;margin-bottom:8px;font-size:12px;font-family:Consolas,monospace"></div>
     <div id="resultados" class="result-list">
       <div class="result-placeholder">Clique em &quot;Processar&quot; para exibir resultados...<br><br>
         <small style="color:#aaa">Cada linha mostra um grupo de registros similares.<br>Clique em uma linha para ver os detalhes e marcar registros.</small>
@@ -269,6 +286,30 @@ textarea:focus{outline:none;border-color:#8b1400}
     </div>
 
     <div class="ajuda-section">
+      <h4>&#128269; Busca pontual (1&nbsp;&times;&nbsp;N)</h4>
+      <ul>
+        <li>Consulte <strong>um &uacute;nico registro</strong> contra a lista sem reprocessar o lote.</li>
+        <li>Escreva o nome (ou texto) no campo <em>Buscar na lista</em> e clique <strong>Buscar</strong>.</li>
+        <li>O resultado aparece na &aacute;rea principal com os similares encontrados e seus scores.</li>
+        <li>O score mede a cobertura de palavras: quantas palavras da consulta est&atilde;o presentes no registro (Levenshtein &ge;&nbsp;75&nbsp;% por palavra).</li>
+        <li>N&iacute;vel m&iacute;nimo 2 &mdash; garantia de precis&atilde;o nas buscas individuais.</li>
+      </ul>
+    </div>
+
+    <div class="ajuda-section">
+      <h4>&#128202; Painel anal&iacute;tico (datamining)</h4>
+      <ul>
+        <li>Exibido automaticamente ap&oacute;s o processamento, acima dos grupos.</li>
+        <li><strong>Taxa de duplicidade</strong> &mdash; % de registros com pelo menos um similar.</li>
+        <li><strong>Score m&eacute;dio, mediana e desvio padr&atilde;o</strong> &mdash; distribui&ccedil;&atilde;o estat&iacute;stica dos scores.</li>
+        <li><strong>Score m&iacute;n / m&aacute;x</strong> &mdash; extremos da similaridade detectada.</li>
+        <li><strong>Faixas de score</strong> &mdash; quantidade de pares em 90&ndash;100&nbsp;%, 70&ndash;89&nbsp;% e 50&ndash;69&nbsp;%.</li>
+        <li><strong>Registro mais duplicado</strong> &mdash; ID com maior freq&uuml;&ecirc;ncia de ocorr&ecirc;ncia.</li>
+        <li>Todas as m&eacute;tricas s&atilde;o inclu&iacute;das no <strong>Relat&oacute;rio TXT</strong> exportado (bloco <em>RESUMO ANAL&Iacute;TICO</em>).</li>
+      </ul>
+    </div>
+
+    <div class="ajuda-section">
       <h4>&#9733; Reservados</h4>
       <ul>
         <li>No popup de detalhes, clique em um similar para marc&aacute;-lo como <strong>Reservado</strong>.</li>
@@ -280,7 +321,7 @@ textarea:focus{outline:none;border-color:#8b1400}
       <h4>&#8595; Exporta&ccedil;&atilde;o</h4>
       <ul>
         <li><strong>TXT / CSV:</strong> exporta todos os grupos encontrados.</li>
-        <li><strong>Relat&oacute;rio:</strong> gera um resumo dos resultados com m&eacute;tricas de similaridade.</li>
+        <li><strong>Relat&oacute;rio TXT:</strong> inclui cabe&ccedil;alho, <em>Resumo Anal&iacute;tico</em> completo (estat&iacute;sticas de datamining) e listagem de grupos.</li>
       </ul>
     </div>
 
@@ -290,7 +331,7 @@ textarea:focus{outline:none;border-color:#8b1400}
         <li><strong>1 &mdash; B&aacute;sico:</strong> similaridade quase absoluta. Inscri&ccedil;&otilde;es e cadastros simples.</li>
         <li><strong>2 &mdash; Profissional:</strong> similaridade pr&oacute;xima. Cadastros corporativos sens&iacute;veis.</li>
         <li><strong>3 &mdash; Auditoria:</strong> similaridade remota. C&oacute;digos, e-mails, auditorias.</li>
-        <li><strong>4 &mdash; Premium:</strong> integra&ccedil;&atilde;o total. Analistas e data mining.</li>
+        <li><strong>4 &mdash; Premium:</strong> integra&ccedil;&atilde;o total. Analistas, auditores e pesquisadores de datamining.</li>
       </ul>
     </div>
 
@@ -322,6 +363,8 @@ body{padding-bottom:44px}
 <script>
 // Estado global
 var _resultados = [];
+var _totalRefs  = 0;
+var _totalPares = 0;
 var _reservados = {};   // id -> {id, texto}
 var _popupIdx   = -1;
 var _t0         = 0;
@@ -426,7 +469,9 @@ function processar(){
             logClear();
             var data = item.result || {};
             (data.msgs || []).forEach(function(m){ log(m); });
-            _resultados = data.resultados || [];
+            _resultados   = data.resultados || [];
+            _totalRefs    = data.total_refs   || 0;
+            _totalPares   = data.total_pares  || 0;
             renderResultados();
             var _el = ((Date.now() - _t0) / 1000).toFixed(2);
             _elapsedTotal = _el + 's';
@@ -452,6 +497,79 @@ function processar(){
   });
 }
 
+
+// ── Estatísticas analíticas ──────────────────────────────────
+function _calcStats(){
+  if(!_resultados.length) return null;
+  var todos = [];
+  _resultados.forEach(function(r){
+    r.similares.forEach(function(s){ todos.push(s.forca); });
+  });
+  if(!todos.length) return null;
+  var soma  = todos.reduce(function(a,b){return a+b;},0);
+  var media = soma / todos.length;
+  var sorted= todos.slice().sort(function(a,b){return a-b;});
+  var mid   = Math.floor(sorted.length/2);
+  var mediana = sorted.length%2 ? sorted[mid] : Math.round((sorted[mid-1]+sorted[mid])/2);
+  var desvio= Math.sqrt(todos.reduce(function(s,v){return s+(v-media)*(v-media);},0)/todos.length);
+  // faixas
+  var f = {'50-69':0,'70-89':0,'90-100':0};
+  todos.forEach(function(v){ if(v>=90) f['90-100']++; else if(v>=70) f['70-89']++; else f['50-69']++; });
+  // registro mais duplicado
+  var freq = {};
+  _resultados.forEach(function(r){
+    freq[r.ref_id] = (freq[r.ref_id]||0) + r.similares.length;
+    r.similares.forEach(function(s){ freq[s.id] = (freq[s.id]||0) + 1; });
+  });
+  var topId='', topN=0;
+  Object.keys(freq).forEach(function(k){ if(freq[k]>topN){topN=freq[k];topId=k;} });
+  var taxa = _totalRefs>0 ? (_resultados.length/_totalRefs*100).toFixed(1) : '—';
+  return {
+    totalRefs:   _totalRefs,
+    grupos:      _resultados.length,
+    pares:       todos.length,
+    taxa:        taxa,
+    media:       media.toFixed(1),
+    mediana:     mediana,
+    desvio:      desvio.toFixed(1),
+    min:         sorted[0],
+    max:         sorted[sorted.length-1],
+    f5069:       f['50-69'],
+    f7089:       f['70-89'],
+    f90100:      f['90-100'],
+    topId:       topId,
+    topN:        topN
+  };
+}
+
+function _renderStats(){
+  var s = _calcStats();
+  var box = g('stats-painel');
+  if(!box) return;
+  if(!s){ box.style.display='none'; return; }
+  box.style.display='block';
+  box.innerHTML =
+    '<div style="display:flex;flex-wrap:wrap;gap:6px 18px;align-items:flex-start">' +
+    '<div style="min-width:160px">' +
+      '<div class="stat-row"><span>Registros analisados</span><strong>' + s.totalRefs + '</strong></div>' +
+      '<div class="stat-row"><span>Grupos com similares</span><strong>' + s.grupos + '</strong></div>' +
+      '<div class="stat-row"><span>Pares encontrados</span><strong>' + s.pares + '</strong></div>' +
+      '<div class="stat-row"><span>Taxa de duplicidade</span><strong>' + s.taxa + '%</strong></div>' +
+    '</div>' +
+    '<div style="min-width:160px">' +
+      '<div class="stat-row"><span>Score m\u00e9dio</span><strong>' + s.media + '%</strong></div>' +
+      '<div class="stat-row"><span>Mediana</span><strong>' + s.mediana + '%</strong></div>' +
+      '<div class="stat-row"><span>Desvio padr\u00e3o</span><strong>\u00b1' + s.desvio + '%</strong></div>' +
+      '<div class="stat-row"><span>Score m\u00edn / m\u00e1x</span><strong>' + s.min + '% / ' + s.max + '%</strong></div>' +
+    '</div>' +
+    '<div style="min-width:160px">' +
+      '<div class="stat-row"><span>Faixa 90–100%</span><strong>' + s.f90100 + ' pares</strong></div>' +
+      '<div class="stat-row"><span>Faixa 70–89%</span><strong>' + s.f7089 + ' pares</strong></div>' +
+      '<div class="stat-row"><span>Faixa 50–69%</span><strong>' + s.f5069 + ' pares</strong></div>' +
+      (s.topId ? '<div class="stat-row"><span>Mais duplicado</span><strong>ID ' + escHtml(s.topId) + ' (' + s.topN + 'x)</strong></div>' : '') +
+    '</div>' +
+    '</div>';
+}
 // ── Renderizar resultados ────────────────────────────────────
 function renderResultados(){
   var div = g('resultados');
@@ -463,6 +581,7 @@ function renderResultados(){
   }
   var totalGrupos = _resultados.length;
   var totalPares  = _resultados.reduce(function(s,r){ return s + r.similares.length; }, 0);
+  _renderStats();
 
   // Aplica filtro nos resultados exibidos
   var lista = _filtro ? _resultados.filter(function(res){
@@ -522,6 +641,76 @@ function renderResultados(){
             hlTxt(linhaBase + sufixo, _filtro) + verMais + '</div>';
   });
   div.innerHTML = html;
+}
+
+
+// ── Busca pontual na base ────────────────────────────────────
+function buscarNaBase(){
+  var query = g('busca-query').value.trim();
+  if(!query){ alert('Informe o texto para buscar.'); return; }
+  var lista = g('lista').value.trim();
+  if(!lista){ alert('Carregue a lista cadastral primeiro.'); return; }
+
+  g('btn-buscar').disabled = true;
+  logClear();
+  log('Buscando...');
+
+  var msVal  = g('min-sim') ? g('min-sim').value.trim() : '';
+  fetch('/api/sim9/buscar', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      query:   query,
+      lista:   lista,
+      tipo:    g('tipo').value,
+      nivel:   parseInt(g('nivel').value, 10),
+      min_sim: msVal !== '' ? parseInt(msVal, 10) : 'auto'
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    g('btn-buscar').disabled = false;
+    _renderBuscaResultado(data, query);
+  })
+  .catch(function(e){
+    g('btn-buscar').disabled = false;
+    log('Erro na busca: ' + e.message, 'err');
+  });
+}
+
+function _renderBuscaResultado(data, query){
+  var nv   = data.nivel_usado || '';
+  var _nv  = nv ? ' [Nivel ' + nv + ']' : '';
+  var cab  = '<span style="font-size:11px;color:#555;font-weight:normal">' +
+             'Buscado: <strong>' + escHtml(query) + '</strong>' +
+             (nv ? ' &nbsp;|&nbsp; Nivel ' + nv : '') + '</span>';
+  if(!data.encontrou){
+    var _msg = data.mensagem.replace(/^OK\s*[—\-]+\s*/i, '');
+    log('Busca pontual: "' + query + '" — ' + _msg + _nv, 'ok');
+    g('resultados').innerHTML = '<div style="padding:10px 12px;background:#eaf7ea;border-left:4px solid #28a745;border-radius:3px;font-size:13px">' +
+                                '<strong>&#10003; OK</strong> &mdash; ' + escHtml(_msg) +
+                                '<br>' + cab + '</div>';
+    return;
+  }
+  log('Busca pontual: "' + query + '" — ' + data.mensagem + _nv, 'err');
+  var html = '<div style="padding:8px 12px;background:#fff8e1;border-left:4px solid #e6a817;border-radius:3px;margin-bottom:8px;font-size:13px">' +
+             '⚠️ <strong>Busca pontual</strong> &mdash; ' + escHtml(data.mensagem) +
+             '<br>' + cab + '</div>';
+  html += '<table style="width:100%;border-collapse:collapse;font-size:12px;font-family:Consolas,monospace">';
+  html += '<tr style="background:#f0e8d8"><td style="padding:5px 8px;font-weight:bold">ID</td>' +
+          '<td style="padding:5px 8px;font-weight:bold">Texto</td>' +
+          '<td style="padding:5px 8px;font-weight:bold;text-align:right">Forca</td></tr>';
+  data.correspondencias.forEach(function(c, i){
+    var bg  = i % 2 === 0 ? '#fffdf8' : '#f5f0e8';
+    var vld = c.valido === true  ? ' <span style="color:#28a745">&#10003;</span>' :
+              c.valido === false ? ' <span style="color:#dc3545">&#10007;</span>' : '';
+    html += '<tr style="background:' + bg + '">' +
+            '<td style="padding:4px 8px;color:#999">' + escHtml(c.id) + '</td>' +
+            '<td style="padding:4px 8px">' + escHtml(c.texto) + vld + '</td>' +
+            '<td style="padding:4px 8px;text-align:right;font-weight:bold;color:#8b1400">' + c.forca + '%</td></tr>';
+  });
+  html += '</table>';
+  g('resultados').innerHTML = html;
 }
 
 // ── Salvar / restaurar configuração (localStorage) ─────────────
@@ -658,16 +847,32 @@ function gerarRelatorio(){
   var notas   = g('notas').value.trim();
   var agora   = new Date().toLocaleString('pt-BR');
   var totalP  = _resultados.reduce(function(s,r){ return s + r.similares.length; }, 0);
+  var _st = _calcStats();
   var linhas  = [
     'SIM9 - Relatorio de Similaridade Textual',
     'Data/Hora : ' + agora,
     'Tipo      : ' + tipoSel,
     'Nivel     : ' + nivel,
-    'Grupos    : ' + _resultados.length,
-    'Pares     : ' + totalP,
   ];
   if(notas){ linhas.push('Obs       : ' + notas); }
   linhas.push('', String('=').repeat(60), '');
+  if(_st){
+    linhas.push('RESUMO ANALITICO');
+    linhas.push(String('-').repeat(40));
+    linhas.push('Registros analisados : ' + _st.totalRefs);
+    linhas.push('Grupos com similares : ' + _st.grupos);
+    linhas.push('Pares encontrados    : ' + _st.pares);
+    linhas.push('Taxa de duplicidade  : ' + _st.taxa + '%');
+    linhas.push('Score medio          : ' + _st.media + '%');
+    linhas.push('Mediana              : ' + _st.mediana + '%');
+    linhas.push('Desvio padrao        : +/-' + _st.desvio + '%');
+    linhas.push('Score min / max      : ' + _st.min + '% / ' + _st.max + '%');
+    linhas.push('Faixa 90-100%        : ' + _st.f90100 + ' pares');
+    linhas.push('Faixa 70-89%         : ' + _st.f7089  + ' pares');
+    linhas.push('Faixa 50-69%         : ' + _st.f5069  + ' pares');
+    if(_st.topId) linhas.push('Mais duplicado       : ID ' + _st.topId + ' (' + _st.topN + 'x)');
+    linhas.push(String('=').repeat(60), '');
+  }
   _resultados.forEach(function(res){
     linhas.push(res.ref_id + ' : ' + res.ref_texto + '  (referencia)');
     res.similares.forEach(function(s){
@@ -717,6 +922,7 @@ function limpar(){
   g('rmnum-wrap').style.display = '';
   var lbl = document.querySelector('label[for="rm-num"]');
   if(lbl) lbl.textContent = 'Remover numeros antes de comparar';
+  g('busca-query').value = '';
   g('file-nome').textContent = 'nenhum arquivo';
   g('file-in').value  = '';
   _resultados = [];
@@ -728,6 +934,7 @@ function limpar(){
   var _or = g('ordem-res'); if(_or) _or.value = 'entrada';
   _expandidos = {};
   g('resultados').innerHTML = '<div class="result-placeholder">Clique em &quot;Processar&quot; para exibir resultados...</div>';
+  _totalRefs=0; _totalPares=0; var _sb=g('stats-painel'); if(_sb) _sb.style.display='none';
   g('contador').textContent = '';
   logClear();
   log('Campos limpos.');
