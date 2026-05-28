@@ -97,6 +97,7 @@ textarea:focus{outline:none;border-color:#8b1400}
 .busca-score{color:#c9820a;font-weight:bold;margin-left:8px;white-space:nowrap}
 @media(max-width:720px){.main{grid-template-columns:1fr;grid-template-rows:auto 1fr}}
 </style>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -132,6 +133,9 @@ textarea:focus{outline:none;border-color:#8b1400}
   <button class="btn-op" id="btn-csv" onclick="exportarCsv()" disabled>&#8595; CSV</button>
   <button class="btn-op" id="btn-reservados" onclick="verReservados()" disabled>&#9733; Reservados</button>
   <button class="btn-op" id="btn-relatorio" onclick="gerarRelatorio()" disabled>&#128196; Relatorio</button>
+  <button class="btn-op" id="btn-xlsx" onclick="exportarXlsx()" disabled>&#8595; XLSX</button>
+  <span style="color:#f0c060;font-size:12px;margin:0 2px">|</span>
+  <button class="btn-op" id="btn-preview" onclick="processarPreview()" title="Processa os primeiros 300 registros como amostra">&#9889; Preview</button>
   <button class="btn-help" onclick="abrirPopup('popup-ajuda')">? Ajuda</button>
 </div>
 
@@ -473,15 +477,18 @@ function processar(){
             _totalRefs    = data.total_refs   || 0;
             _totalPares   = data.total_pares  || 0;
             renderResultados();
+            salvarCache();
             var _el = ((Date.now() - _t0) / 1000).toFixed(2);
             _elapsedTotal = _el + 's';
-            log('⏱ Concluído em ' + _el + 's', 'ok');
+            if(_previewMode){ log('⏱ Concluído em ' + _el + 's (PREVIEW — amostra)', 'ok'); }
+            else { log('⏱ Concluído em ' + _el + 's', 'ok'); }
             var _ct = g('contador');
             if(_ct) _ct.textContent += '  |  ⏱ ' + _elapsedTotal;
             var tem = _resultados.length > 0;
             g('btn-txt').disabled       = !tem;
             g('btn-csv').disabled       = !tem;
             g('btn-relatorio').disabled = !tem;
+            g('btn-xlsx').disabled      = !tem;
           }
         });
         return lerChunk();
@@ -909,8 +916,146 @@ function onTipoChange(){
   if(lbl) lbl.textContent = tipo === 'endereco' ? 'Ignorar n\u00famero do endere\u00e7o' : 'Remover numeros antes de comparar';
 }
 
+
+// ── Cache de resultados (localStorage) ──────────────────────
+var _CACHE_KEY = 'sim9_cache_v2';
+function salvarCache(){
+  try{
+    var entry = {
+      ts:        Date.now(),
+      lista:     g('lista').value,
+      tipo:      g('tipo').value,
+      nivel:     g('nivel') ? g('nivel').value : '1',
+      resultados: _resultados,
+      totalRefs:  _totalRefs,
+      totalPares: _totalPares,
+      preview:    !!_previewMode
+    };
+    var json = JSON.stringify(entry);
+    if(json.length > 4 * 1024 * 1024){
+      // resultado muito grande — armazena só resumo
+      entry.resultados = _resultados.slice(0, 500);
+      entry._truncated = true;
+      json = JSON.stringify(entry);
+    }
+    localStorage.setItem(_CACHE_KEY, json);
+  }catch(e){}
+}
+function tentarRestaurarCache(){
+  try{
+    var raw = localStorage.getItem(_CACHE_KEY);
+    if(!raw) return;
+    var c = JSON.parse(raw);
+    var mins = Math.round((Date.now() - c.ts) / 60000);
+    if(mins > 120) return; // ignora cache com mais de 2h
+    var banner = document.createElement('div');
+    banner.id = 'banner-cache';
+    banner.style.cssText = 'background:#fff3cd;border-left:4px solid #c9820a;padding:10px 16px;font-size:13px;color:#8b4400;display:flex;align-items:center;gap:12px;flex-wrap:wrap;';
+    var label = c.preview ? ' (amostra)' : '';
+    banner.innerHTML = '<span>&#9889; Cache: resultado de ' + mins + ' min atr\u00e1s' + label + ' (' + (c.resultados||[]).length + ' grupos' + (c._truncated?' — truncado':'') + '). Restaurar?</span>'
+      + '<button onclick="restaurarCache()" style="background:#c9820a;color:#fff;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px">Sim, restaurar</button>'
+      + '<button onclick="fecharBannerCache()" style="background:none;border:1px solid #c9820a;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:12px;color:#8b4400">Ignorar</button>';
+    // Inserir antes do .main
+    var main = document.querySelector('.main');
+    if(main) main.parentNode.insertBefore(banner, main);
+  }catch(e){}
+}
+function restaurarCache(){
+  try{
+    var c = JSON.parse(localStorage.getItem(_CACHE_KEY));
+    if(!c) return;
+    fecharBannerCache();
+    _resultados  = c.resultados  || [];
+    _totalRefs   = c.totalRefs   || 0;
+    _totalPares  = c.totalPares  || 0;
+    _previewMode = !!c.preview;
+    if(c.lista)  g('lista').value = c.lista;
+    if(c.tipo)   { g('tipo').value = c.tipo; onTipoChange(); }
+    if(c.nivel && g('nivel')) g('nivel').value = c.nivel;
+    renderResultados();
+    var tem = _resultados.length > 0;
+    g('btn-txt').disabled       = !tem;
+    g('btn-csv').disabled       = !tem;
+    g('btn-relatorio').disabled = !tem;
+    g('btn-xlsx').disabled      = !tem;
+    log('Cache restaurado (' + _resultados.length + ' grupos)', 'ok');
+  }catch(e){ log('Erro ao restaurar cache: ' + e.message, 'err'); }
+}
+function fecharBannerCache(){
+  var b = document.getElementById('banner-cache');
+  if(b) b.remove();
+}
+
+// ── Preview mode (amostra dos primeiros 300 registros) ───────
+var _previewMode = false;
+var _PREVIEW_MAX = 300;
+function processarPreview(){
+  var lista = g('lista').value.trim();
+  var linhas = lista.split('\n').filter(function(l){ return l.trim().length > 0; });
+  if(linhas.length <= _PREVIEW_MAX){
+    alert('A lista tem apenas ' + linhas.length + ' registros — use o botão ▶ Processar normalmente.');
+    return;
+  }
+  var sample = linhas.slice(0, _PREVIEW_MAX).join('\n');
+  var original = g('lista').value;
+  g('lista').value = sample;
+  _previewMode = true;
+  processar(true);
+  g('lista').value = original;
+}
+
+// ── Exportar XLSX ────────────────────────────────────────────
+function exportarXlsx(){
+  if(!_resultados || !_resultados.length){ log('Sem resultados para exportar.', 'warn'); return; }
+  if(typeof XLSX === 'undefined'){ log('Biblioteca XLSX ainda carregando, aguarde.', 'warn'); return; }
+  try{
+    var wb = XLSX.utils.book_new();
+
+    // Aba 1 — Resumo Analitico
+    var st = _calcStats();
+    var resumo = [];
+    resumo.push(['SIM9 - Resumo Analitico', '']);
+    resumo.push(['Data/Hora', new Date().toLocaleString('pt-BR')]);
+    resumo.push(['Tipo', g('tipo').options[g('tipo').selectedIndex].text]);
+    if(st){
+      resumo.push(['Registros analisados', st.totalRefs]);
+      resumo.push(['Grupos com similares', st.grupos]);
+      resumo.push(['Pares encontrados', st.pares]);
+      resumo.push(['Taxa de duplicidade (%)', st.taxa]);
+      resumo.push(['Score medio (%)', st.media]);
+      resumo.push(['Mediana (%)', st.mediana]);
+      resumo.push(['Desvio padrao (+/-)', st.desvio]);
+      resumo.push(['Score min (%)', st.min]);
+      resumo.push(['Score max (%)', st.max]);
+      resumo.push(['Faixa 90-100%', st.f90100 + ' pares']);
+      resumo.push(['Faixa 70-89%',  st.f7089  + ' pares']);
+      resumo.push(['Faixa 50-69%',  st.f5069  + ' pares']);
+      if(st.topId) resumo.push(['Mais duplicado', 'ID ' + st.topId + ' (' + st.topN + 'x)']);
+    }
+    if(_previewMode) resumo.push(['Modo', 'PREVIEW - amostra de ' + _PREVIEW_MAX + ' registros']);
+    var ws1 = XLSX.utils.aoa_to_sheet(resumo);
+    ws1['!cols'] = [{wch:28},{wch:22}];
+    XLSX.utils.book_append_sheet(wb, ws1, 'Resumo');
+
+    // Aba 2 — Pares de similares
+    var pares = [['ID_Referencia','Texto_Referencia','ID_Similar','Texto_Similar','Score%']];
+    _resultados.forEach(function(res){
+      res.similares.forEach(function(s){
+        pares.push([res.ref_id, res.ref_texto, s.id, s.texto, s.forca]);
+      });
+    });
+    var ws2 = XLSX.utils.aoa_to_sheet(pares);
+    ws2['!cols'] = [{wch:16},{wch:40},{wch:16},{wch:40},{wch:8}];
+    XLSX.utils.book_append_sheet(wb, ws2, 'Pares');
+
+    XLSX.writeFile(wb, 'sim9_resultados_' + _ts() + '.xlsx');
+    log('XLSX exportado: ' + pares.length + ' pares + resumo.', 'ok');
+  }catch(e){ log('Erro ao gerar XLSX: ' + e.message, 'err'); }
+}
+
 // ── Limpar ───────────────────────────────────────────────────
 function limpar(){
+  _previewMode = false;
   g('lista').value    = '';
   g('padrao').value   = '';
   g('notas').value    = '';
@@ -997,6 +1142,7 @@ function baixarArquivo(conteudo, nome, tipo){
   var btn = g('btn-like');
   if(localStorage.getItem('cordium_liked')){ btn.disabled=true; btn.style.background='#c9820a'; }
   restaurarCfg();
+  tentarRestaurarCache();
   fetch('/api/ping',{method:'POST'}).catch(function(){});
   fetch('/api/stats').then(function(r){ return r.json(); }).then(function(d){
     g('count-acessos').textContent = d.acessos;

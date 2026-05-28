@@ -349,6 +349,7 @@
         </div>
 
         <button type="submit" class="btn" id="btn-visualizar">🔍 Pré-visualizar Imagens</button>
+        <button type="button" onclick="document.getElementById('popup-ajuda-coletor').style.display='flex'" style="background:transparent;color:#c9820a;border:2px solid #c9820a;border-radius:6px;padding:10px 24px;font-size:16px;font-weight:bold;cursor:pointer;margin-top:10px;">? Ajuda</button>
     </form>
 
     <!-- Loader durante a coleta -->
@@ -720,6 +721,46 @@
             .replace(/"/g, '&quot;');
     }
 </script>
+
+
+<!-- Popup de Ajuda do Coletor -->
+<div id="popup-ajuda-coletor" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:2000;align-items:center;justify-content:center">
+  <div style="background:#faf6f0;border-radius:10px;padding:28px 30px;max-width:600px;width:92%;max-height:80vh;overflow-y:auto;position:relative">
+    <button onclick="document.getElementById('popup-ajuda-coletor').style.display='none'" style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#1a0a02">&#10005;</button>
+    <h3 style="margin:0 0 16px;color:#1a0a02">&#10067; Ajuda &mdash; Baixar Imagens Automaticamente</h3>
+
+    <h4 style="color:#c9820a;margin:16px 0 6px">1. Como usar a ferramenta</h4>
+    <ol style="margin:0;padding-left:20px;line-height:2;color:#333">
+      <li>Acesse <strong>bing.com/images</strong> e pesquise as imagens desejadas</li>
+      <li>Copie a URL completa da barra de endere&ccedil;o do navegador</li>
+      <li>Cole no campo <strong>URL da pesquisa</strong></li>
+      <li>Defina os filtros opcionais (resolu&ccedil;&atilde;o, tipos, prefixo)</li>
+      <li>Clique em <strong>&#128269; Pr&eacute;-visualizar Imagens</strong></li>
+      <li>Na galeria, marque as imagens desejadas e clique em <strong>&#8595; Baixar Selecionadas</strong></li>
+    </ol>
+
+    <h4 style="color:#c9820a;margin:16px 0 6px">2. Campos da pesquisa</h4>
+    <ul style="margin:0;padding-left:20px;line-height:2;color:#333">
+      <li><strong>Motor de busca</strong> &mdash; Use <em>Bing</em> para o modo online. O Google requer o programa desktop.</li>
+      <li><strong>URL da pesquisa</strong> &mdash; URL da p&aacute;gina de resultados de imagens do Bing.</li>
+      <li><strong>Prefixo dos arquivos</strong> &mdash; Nome base dos arquivos baixados (ex: <code>gato_001.jpg</code>).</li>
+      <li><strong>Tipos permitidos</strong> &mdash; Extens&otilde;es aceitas separadas por v&iacute;rgula: <code>jpg,png,webp</code>. Vazio aceita todos.</li>
+      <li><strong>Resolu&ccedil;&atilde;o m&iacute;nima</strong> &mdash; Largura e altura m&iacute;nimas em pixels. Imagens menores s&atilde;o descartadas.</li>
+      <li><strong>Quantidade m&aacute;xima</strong> &mdash; Limite de imagens a coletar na p&aacute;gina.</li>
+    </ul>
+
+    <h4 style="color:#c9820a;margin:16px 0 6px">3. Galeria e sele&ccedil;&atilde;o</h4>
+    <p style="margin:0;color:#333;line-height:1.7">Ap&oacute;s a pr&eacute;-visualiza&ccedil;&atilde;o, as miniaturas aparecem em grade. Clique em uma miniatura para ampli&aacute;-la (lightbox). Marque as imagens desejadas com o checkbox ou use <strong>Selecionar Tudo</strong>. O bot&atilde;o <strong>Baixar Selecionadas</strong> empacota as imagens em ZIP para download imediato.</p>
+
+    <h4 style="color:#c9820a;margin:16px 0 6px">4. Limites e dicas</h4>
+    <ul style="margin:0;padding-left:20px;line-height:2;color:#333">
+      <li>O Bing pode limitar a quantidade de imagens por p&aacute;gina &mdash; v&aacute;rias coletas podem ser necess&aacute;rias para volumes grandes.</li>
+      <li>Imagens protegidas por DRM ou com restri&ccedil;&atilde;o de acesso podem falhar no download &mdash; verifique o log.</li>
+      <li>Use o campo <strong>Modo: Somente livres (CC)</strong> para filtrar imagens com licen&ccedil;a Creative Commons.</li>
+      <li>Acesse <a href="/suporte" style="color:#c9820a">suporte</a> se precisar de ajuda adicional.</li>
+    </ul>
+  </div>
+</div>
 
 <div id="popup-stats" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center">
   <div style="background:#faf6f0;border-radius:8px;padding:24px;max-width:500px;width:90%;max-height:70vh;overflow-y:auto;position:relative">

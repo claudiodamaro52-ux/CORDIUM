@@ -98,6 +98,8 @@ textarea{flex:1;width:100%;border:none;padding:7px 9px;font-family:Consolas,mono
   <button class="btn-op" data-op="flatten">Flatten</button>
   <button class="btn-op" data-op="unflatten">Unflatten</button>
   <button class="btn-op" data-op="schema">Schema</button>
+  <span style="color:#f0c060;font-size:12px;margin:0 4px;">|</span>
+  <button id="btn-ajuda-json" onclick="document.getElementById('popup-ajuda-json').style.display='flex'" style="background:transparent;color:#c9820a;border:1px solid #c9820a;border-radius:4px;padding:5px 11px;cursor:pointer;font-size:12px;font-weight:bold;">? Ajuda</button>
 </div>
 <div class="main">
   <div class="panel"><div class="ph"><span class="pt">1 - Entrada A</span><button class="btn-ph" data-action="clear" data-target="p1">Limpar</button></div><textarea id="p1" placeholder="Cole ou digite o JSON aqui..."></textarea></div>
@@ -125,6 +127,45 @@ function runOp(op){g("p4").innerHTML="";var t1=g("p1").value.trim();var t2=g("p2
 document.querySelectorAll(".btn-op").forEach(function(btn){btn.addEventListener("click",function(){runOp(this.dataset.op);});});
 document.querySelectorAll(".btn-ph").forEach(function(btn){btn.addEventListener("click",function(){var a=this.dataset.action,t=this.dataset.target;if(a==="clear"){g(t).value="";}else if(a==="clrlog"){g("p4").innerHTML="";}else if(a==="copy"){var v=g("p3").value;if(!v){log("Painel 3 vazio.","warn");return;}navigator.clipboard.writeText(v).then(function(){log("Copiado.");}).catch(function(e){log("Erro: "+e,"err");});}else if(a==="email"){sendEmail();}else if(a==="whatsapp"){sendWhatsApp();}else if(a==="top1"){var v=g("p3").value;if(!v){log("Painel 3 vazio.","warn");return;}g("p1").value=v;log("Transferido para Painel 1.");}});});
 </script>
+
+
+<!-- Popup de Ajuda JSON Tools Pro -->
+<div id="popup-ajuda-json" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:2000;align-items:center;justify-content:center">
+  <div style="background:#faf6f0;border-radius:10px;padding:28px 30px;max-width:640px;width:94%;max-height:85vh;overflow-y:auto;position:relative">
+    <button onclick="document.getElementById('popup-ajuda-json').style.display='none'" style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#1a0a02">&#10005;</button>
+    <h3 style="margin:0 0 16px;color:#1a0a02">&#10067; Ajuda &mdash; JSON Tools Pro</h3>
+
+    <h4 style="color:#c9820a;margin:14px 0 6px">Paineis</h4>
+    <ul style="margin:0;padding-left:20px;line-height:2;color:#333;font-size:13px">
+      <li><strong>1 - Entrada A</strong> &mdash; JSON ou CSV principal. As opera&ccedil;&otilde;es usam este painel como fonte.</li>
+      <li><strong>2 - Entrada B</strong> &mdash; Segundo texto. Usado somente por <em>Mesclar (A+B)</em>.</li>
+      <li><strong>3 - Resultado</strong> &mdash; Sa&iacute;da gerada. Pode ser copiada, enviada por Email/WhatsApp ou transferida para o Painel 1.</li>
+      <li><strong>4 - Mensagens</strong> &mdash; Log de opera&ccedil;&otilde;es e erros. Consulte aqui se o resultado n&atilde;o aparecer.</li>
+    </ul>
+
+    <h4 style="color:#c9820a;margin:14px 0 6px">Opera&ccedil;&otilde;es</h4>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;color:#333">
+      <tr style="background:#3d1f00;color:#faf6f0"><th style="padding:5px 8px;text-align:left">Opera&ccedil;&atilde;o</th><th style="padding:5px 8px;text-align:left">O que faz</th></tr>
+      <tr style="background:#fdf3e0"><td style="padding:5px 8px;font-weight:bold">Normalizar</td><td style="padding:5px 8px">Remove acentos, padroniza espa&ccedil;os. <em>Converte todos os valores para string.</em></td></tr>
+      <tr><td style="padding:5px 8px;font-weight:bold">Indentar</td><td style="padding:5px 8px">Formata o JSON com recuo de 2 espa&ccedil;os para leitura humana.</td></tr>
+      <tr style="background:#fdf3e0"><td style="padding:5px 8px;font-weight:bold">Template</td><td style="padding:5px 8px">Gera esqueleto com campos vazios &mdash; &uacute;til para criar modelos de preenchimento.</td></tr>
+      <tr><td style="padding:5px 8px;font-weight:bold">Tipos</td><td style="padding:5px 8px">Substitui cada valor pelo seu tipo inferido: <code>&lt;string&gt;</code>, <code>&lt;number&gt;</code>, <code>&lt;boolean&gt;</code>.</td></tr>
+      <tr style="background:#fdf3e0"><td style="padding:5px 8px;font-weight:bold">JSON para CSV</td><td style="padding:5px 8px">Converte array de objetos em CSV com cabe&ccedil;alho autom&aacute;tico.</td></tr>
+      <tr><td style="padding:5px 8px;font-weight:bold">CSV para JSON</td><td style="padding:5px 8px">Converte CSV (linha 1 = cabe&ccedil;alho) em array de objetos JSON.</td></tr>
+      <tr style="background:#fdf3e0"><td style="padding:5px 8px;font-weight:bold">Mesclar (A+B)</td><td style="padding:5px 8px">Deep merge dos Paineis 1 e 2. Chaves do B sobrescrevem as do A em conflito.</td></tr>
+      <tr><td style="padding:5px 8px;font-weight:bold">Flatten</td><td style="padding:5px 8px">Planifica estruturas aninhadas em chaves compostas: <code>endereco.cidade</code>.</td></tr>
+      <tr style="background:#fdf3e0"><td style="padding:5px 8px;font-weight:bold">Unflatten</td><td style="padding:5px 8px">Reconstr&oacute;i estrutura aninhada a partir de chaves compostas por pontos.</td></tr>
+      <tr><td style="padding:5px 8px;font-weight:bold">Schema</td><td style="padding:5px 8px">Gera JSON Schema b&aacute;sico descrevendo tipos e estrutura do objeto.</td></tr>
+    </table>
+
+    <div style="background:#fff3cd;border-left:4px solid #ffc107;border-radius:4px;padding:10px 14px;margin-top:16px;font-size:12px;color:#856404">
+      <strong>[!] Normalizar</strong> converte todos os valores para texto simples (string). Execute antes das demais opera&ccedil;&otilde;es e ajuste os tipos manualmente se necess&aacute;rio.
+    </div>
+
+    <h4 style="color:#c9820a;margin:14px 0 6px">Compartilhamento</h4>
+    <p style="margin:0;color:#333;line-height:1.7;font-size:13px">Use os bot&otilde;es <strong>Email</strong> e <strong>WhatsApp</strong> no cabe&ccedil;alho do Painel 3 para enviar o resultado. Conte&uacute;dos muito grandes s&atilde;o truncados automaticamente para caber no limite do canal (Email: 12&nbsp;000 chars, WhatsApp: 3&nbsp;500 chars).</p>
+  </div>
+</div>
 
 <div id="popup-stats" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center">
   <div style="background:#faf6f0;border-radius:8px;padding:24px;max-width:500px;width:90%;max-height:70vh;overflow-y:auto;position:relative">

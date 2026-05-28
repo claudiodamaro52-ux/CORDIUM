@@ -156,6 +156,105 @@
 
 </div>
 
+
+    <h2>SIM9 &mdash; Similaridade Textual</h2>
+
+    <div class="faq-item">
+        <h3>1. Qual o formato de entrada da lista?</h3>
+        <p>Cada linha deve seguir o padrao <strong>ID;TEXTO</strong>, por exemplo: <code>001;Maria da Silva</code>. O separador padrao e ponto-e-virgula (<code>;</code>), mas voce pode definir outro padrao no campo <strong>Padrao de separador</strong>. Se a linha nao tiver separador, o proprio texto e usado como ID.</p>
+    </div>
+
+    <div class="faq-item">
+        <h3>2. Quais tipos de dado o SIM9 suporta?</h3>
+        <p>A ferramenta oferece modos especializados para <strong>Nome</strong> (pessoal ou empresarial), <strong>CPF</strong>, <strong>CNPJ</strong>, <strong>Endereco</strong> e <strong>Texto livre</strong>. Cada modo aplica normalizacoes diferentes antes de comparar os registros.</p>
+    </div>
+
+    <div class="faq-item">
+        <h3>3. O que sao os 4 niveis de acuracia?</h3>
+        <p>Os niveis controlam a combinacao de algoritmos usados:</p>
+        <ul>
+            <li><strong>Nivel 1 (Rapido)</strong> &mdash; Levenshtein simples. Bom para listas grandes onde a velocidade importa.</li>
+            <li><strong>Nivel 2 (Padrao)</strong> &mdash; Levenshtein + Soundex-BR (fonetica). Recomendado para a maioria dos casos.</li>
+            <li><strong>Nivel 3 (Alto)</strong> &mdash; Adiciona Metaphone-BR. Melhor cobertura de erros foneticos.</li>
+            <li><strong>Nivel 4 (Maximo)</strong> &mdash; Jaro-Winkler + todos os anteriores. O mais preciso, porem mais lento.</li>
+        </ul>
+    </div>
+
+    <div class="faq-item">
+        <h3>4. O processamento trava ou demora muito. O que fazer?</h3>
+        <p>O SIM9 calcula todos os pares de registros (N &times; (N-1) / 2). Para listas com mais de 2&nbsp;000 itens, o tempo aumenta significativamente. Use <strong>Nivel 1</strong> para agilizar ou divida a lista em blocos menores. Listas muito grandes podem usar o <strong>modo Preview</strong> (Nivel 2+) para ver uma amostra antes do processamento completo.</p>
+    </div>
+
+    <div class="faq-item">
+        <h3>5. O que e a Busca Pontual?</h3>
+        <p>Permite consultar um unico texto contra toda a lista ja processada sem precisar reprocessar o lote. E util para verificar se um novo registro tem similares na base. O campo fica visivel no painel direito apos o processamento.</p>
+    </div>
+
+    <div class="faq-item">
+        <h3>6. Como interpretar o Painel Analitico?</h3>
+        <p>Apos processar, o painel exibe automaticamente: taxa de duplicidade, score medio, mediana, desvio padrao, faixas de concentracao (50-69%, 70-89%, 90-100%) e o registro mais duplicado. Use essas metricas para decidir se o limiar de similaridade esta adequado para seu conjunto de dados.</p>
+    </div>
+
+    <div class="faq-item">
+        <h3>7. Quais formatos de exportacao estao disponiveis?</h3>
+        <p>TXT (lista legivel), CSV (para importar em Excel ou banco de dados), XLSX (planilha com abas Resumo e Pares) e Relatorio (TXT completo com bloco de Resumo Analitico).</p>
+    </div>
+
+    <h2>JSON Tools Pro</h2>
+
+    <div class="faq-item">
+        <h3>1. O que cada operacao faz?</h3>
+        <ul>
+            <li><strong>Normalizar</strong> &mdash; Remove acentos, padroniza espacos e converte todos os valores para texto simples (string). Execute antes das demais operacoes.</li>
+            <li><strong>Indentar</strong> &mdash; Formata o JSON com indentacao de 2 espacos para leitura humana.</li>
+            <li><strong>Template</strong> &mdash; Gera um esqueleto do JSON com todos os campos vazios, util para criar modelos.</li>
+            <li><strong>Tipos</strong> &mdash; Mostra o tipo inferido de cada campo (<code>&lt;string&gt;</code>, <code>&lt;number&gt;</code>, <code>&lt;boolean&gt;</code>).</li>
+            <li><strong>JSON para CSV</strong> &mdash; Converte um array de objetos em CSV com cabecalho automatico.</li>
+            <li><strong>CSV para JSON</strong> &mdash; Converte CSV (com cabecalho) em array de objetos JSON.</li>
+            <li><strong>Mesclar (A+B)</strong> &mdash; Combina dois objetos JSON (Paineis 1 e 2) com mesclagem profunda (deep merge).</li>
+            <li><strong>Flatten</strong> &mdash; Transforma estruturas aninhadas em chaves compostas por pontos: <code>endereco.cidade</code>.</li>
+            <li><strong>Unflatten</strong> &mdash; Operacao inversa do Flatten: reconstroi a estrutura aninhada a partir de chaves compostas.</li>
+            <li><strong>Schema</strong> &mdash; Gera um JSON Schema basico descrevendo a estrutura do objeto.</li>
+        </ul>
+    </div>
+
+    <div class="faq-item">
+        <h3>2. Por que o aviso sobre Normalizar?</h3>
+        <p>A operacao Normalizar converte numeros, booleanos e nulos em texto (string). Se voce precisar preservar tipos, execute as demais operacoes primeiro e use Normalizar somente se necessario para remover acentos ou caracteres especiais.</p>
+    </div>
+
+    <div class="faq-item">
+        <h3>3. Como compartilhar o resultado?</h3>
+        <p>Use os botoes <strong>Email</strong> ou <strong>WhatsApp</strong> no cabecalho do Painel 3. O conteudo do resultado sera anexado automaticamente a mensagem. Para resultados muito grandes, o texto e truncado para caber no limite do canal.</p>
+    </div>
+
+    <div class="faq-item">
+        <h3>4. O resultado nao aparece no Painel 3. O que fazer?</h3>
+        <p>Verifique o Painel 4 (Mensagens) para ver a mensagem de erro. Causas comuns: JSON invalido no Painel 1, CSV sem cabecalho, ou Painel 2 vazio para operacoes que requerem dois paineis (Mesclar).</p>
+    </div>
+
+    <h2>Baixar Imagens Automaticamente</h2>
+
+    <div class="faq-item">
+        <h3>1. Qual URL devo colar?</h3>
+        <p>Acesse <a href="https://www.bing.com/images" target="_blank">bing.com/images</a>, faca sua pesquisa e copie a URL completa da barra de endereco do navegador. A URL deve conter o parametro <code>q=</code> com o termo de busca.</p>
+    </div>
+
+    <div class="faq-item">
+        <h3>2. Posso filtrar por resolucao ou tipo de arquivo?</h3>
+        <p>Sim. Preencha os campos <strong>Resolucao minima</strong> (largura x altura em pixels) e <strong>Tipos permitidos</strong> (ex: <code>jpg,png,webp</code>) para filtrar os resultados antes de baixar. Deixe em branco para aceitar todos.</p>
+    </div>
+
+    <div class="faq-item">
+        <h3>3. As imagens sao baixadas diretamente para meu computador?</h3>
+        <p>Sim. Na versao online, as imagens selecionadas sao empacotadas em um arquivo ZIP e baixadas pelo navegador. Nao e necessario instalar nada.</p>
+    </div>
+
+    <div class="faq-item">
+        <h3>4. O Google nao esta funcionando como motor de busca. Por que?</h3>
+        <p>O motor Google (Selenium) requer o programa desktop instalado no Windows. No modo online, use o <strong>Bing</strong> como motor de busca.</p>
+    </div>
+
 <div id="popup-stats" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center">
   <div style="background:#faf6f0;border-radius:8px;padding:24px;max-width:500px;width:90%;max-height:70vh;overflow-y:auto;position:relative">
     <button onclick="document.getElementById('popup-stats').style.display='none'" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:#1a0a02">✕</button>
