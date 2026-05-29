@@ -560,6 +560,11 @@ if GITHUB_TOKEN and os.environ.get('WERKZEUG_RUN_MAIN', 'true') == 'true':
     atexit.register(lambda: _scheduler.shutdown())
 
 
+@app.route('/admin')
+def admin_dashboard():
+    return send_from_directory(HTML_DIR, 'admin.html')
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_ENV') == 'development'

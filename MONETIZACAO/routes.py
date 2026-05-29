@@ -222,3 +222,185 @@ def validar_token():
         'data_expiracao':  row['data_expiracao'],
         'email':           row['email'],
     }), 200
+
+
+# ================================================================
+# ADMIN ENDPOINTS  —  todos exigem X-Admin-Secret correto
+# ================================================================
+
+def _check_admin():
+    secret = request.headers.get('X-Admin-Secret', '')
+    from .db import get_config
+    expected = get_config('admin_secret', 'cordium-admin-local')
+    if secret != expected:
+        return jsonify({'erro': 'Nao autorizado'}), 403
+    return None
+
+
+@monetizacao_bp.route('/api/admin/dados')
+def admin_dados():
+    err = _check_admin()
+    if err: return err
+    from .db import get_conn
+    from datetime import datetime, timezone
+    conn = get_conn()
+
+    solicitacoes = [dict(r) for r in conn.execute(
+        'SELECT * FROM solicitacoes ORDER BY data_criacao DESC').fetchall()]
+    tokens_list = [dict(r) for r in conn.execute(
+        'SELECT * FROM tokens ORDER BY data_emissao DESC').fetchall()]
+    assinaturas = [dict(r) for r in conn.execute(
+        'SELECT a.*, p.nome as plano_nome FROM assinaturas a '
+        'LEFT JOIN planos p ON a.plano_id = p.id ORDER BY a.data_criacao DESC'
+    ).fetchall()]
+    consumos = [dict(r) for r in conn.execute(
+        'SELECT * FROM consumos ORDER BY data DESC LIMIT 200').fetchall()]
+    aditamentos = [dict(r) for r in conn.execute(
+        'SELECT * FROM aditamentos ORDER BY data_solicitacao DESC').fetchall()]
+    planos = [dict(r) for r in conn.execute(
+        'SELECT * FROM planos ORDER BY ordem').fetchall()]
+    config = {r['chave']: {'valor': r['valor'], 'descricao': r['descricao']}
+              for r in conn.execute('SELECT * FROM config_monetizacao').fetchall()}
+
+    agora = datetime.now(timezone.utc)
+    agenda_tokens = []
+    for t in tokens_list:
+        if not t['ativo']:
+            continue
+        try:
+            exp = datetime.fromisoformat(t['data_expiracao'])
+            if exp.tzinfo is None:
+                exp = exp.replace(tzinfo=timezone.utc)
+            dias = (exp - agora).days
+            if dias <= 7:
+                agenda_tokens.append({**t, 'dias_para_expirar': dias})
+        except Exception:
+            pass
+
+    pendentes     = sum(1 for s in solicitacoes if s['status'] == 'pendente')
+    tokens_ativos = sum(1 for t in tokens_list  if t['ativo'])
+    vh = float(conn.execute(
+        "SELECT valor FROM config_monetizacao WHERE chave='valor_hora_legado'"
+    ).fetchone()['valor'])
+    receita_est     = sum(t['horas_contratadas'] * vh for t in tokens_list)
+    clientes_unicos = len({s['email'] for s in solicitacoes})
+    conn.close()
+
+    return jsonify({
+        'kpis': {
+            'solicitacoes_pendentes': pendentes,
+            'tokens_ativos':          tokens_ativos,
+            'receita_estimada':       round(receita_est, 2),
+            'clientes_unicos':        clientes_unicos,
+            'total_solicitacoes':     len(solicitacoes),
+            'total_assinaturas':      len(assinaturas),
+        },
+        'solicitacoes': solicitacoes,
+        'tokens':       tokens_list,
+        'assinaturas':  assinaturas,
+        'consumos':     consumos,
+        'aditamentos':  aditamentos,
+        'planos':       planos,
+        'config':       config,
+        'agenda':       agenda_tokens,
+    })
+
+
+@monetizacao_bp.route('/api/admin/planos/<int:plano_id>', methods=['PUT'])
+def admin_editar_plano(plano_id):
+    err = _check_admin()
+    if err: return err
+    from .db import get_conn
+    from datetime import datetime, timezone
+    data  = request.get_json(force=True) or {}
+    agora = datetime.now(timezone.utc).isoformat()
+    PERMITIDOS = {'nome','minutos_mensais','preco_mensal',
+                  'preco_aditamento_por_min','descricao','destaque','ativo','ordem'}
+    updates = {k: v for k, v in data.items() if k in PERMITIDOS}
+    if not updates:
+        return jsonify({'erro': 'Nenhum campo valido'}), 400
+    set_clause = ', '.join(f'{k} = ?' for k in updates)
+    conn = get_conn()
+    conn.execute(f'UPDATE planos SET {set_clause}, atualizado_em = ? WHERE id = ?',
+                 list(updates.values()) + [agora, plano_id])
+    conn.commit()
+    plano = dict(conn.execute('SELECT * FROM planos WHERE id = ?', (plano_id,)).fetchone())
+    conn.close()
+    return jsonify(plano)
+
+
+@monetizacao_bp.route('/api/admin/planos', methods=['POST'])
+def admin_criar_plano():
+    err = _check_admin()
+    if err: return err
+    from .db import get_conn
+    from datetime import datetime, timezone
+    data  = request.get_json(force=True) or {}
+    agora = datetime.now(timezone.utc).isoformat()
+    nome  = (data.get('nome') or '').strip()
+    mins  = int(data.get('minutos_mensais', 0))
+    preco = float(data.get('preco_mensal', 0))
+    padic = float(data.get('preco_aditamento_por_min', 0))
+    desc  = (data.get('descricao') or '').strip()
+    ordem = int(data.get('ordem', 99))
+    if not nome or mins <= 0 or preco <= 0:
+        return jsonify({'erro': 'nome, minutos_mensais e preco_mensal obrigatorios'}), 400
+    conn = get_conn()
+    cur  = conn.execute(
+        'INSERT INTO planos (nome,minutos_mensais,preco_mensal,'
+        'preco_aditamento_por_min,descricao,ativo,ordem,atualizado_em) '
+        'VALUES (?,?,?,?,?,1,?,?)',
+        (nome, mins, preco, padic, desc, ordem, agora))
+    conn.commit()
+    plano = dict(conn.execute('SELECT * FROM planos WHERE id=?', (cur.lastrowid,)).fetchone())
+    conn.close()
+    return jsonify(plano), 201
+
+
+@monetizacao_bp.route('/api/admin/config', methods=['PUT'])
+def admin_salvar_config():
+    err = _check_admin()
+    if err: return err
+    from .db import get_conn
+    from datetime import datetime, timezone
+    data  = request.get_json(force=True) or {}
+    agora = datetime.now(timezone.utc).isoformat()
+    conn  = get_conn()
+    atualizados = []
+    for chave, valor in data.items():
+        conn.execute('UPDATE config_monetizacao SET valor=?, atualizado_em=? WHERE chave=?',
+                     (str(valor), agora, chave))
+        if conn.execute('SELECT changes()').fetchone()[0]:
+            atualizados.append(chave)
+    conn.commit()
+    conn.close()
+    return jsonify({'atualizados': atualizados})
+
+
+@monetizacao_bp.route('/api/admin/solicitacoes/<int:sid>/status', methods=['PUT'])
+def admin_status_solicitacao(sid):
+    err = _check_admin()
+    if err: return err
+    from .db import get_conn
+    data   = request.get_json(force=True) or {}
+    status = (data.get('status') or '').strip()
+    if status not in {'pendente', 'pago', 'token_emitido', 'cancelado'}:
+        return jsonify({'erro': 'Status invalido'}), 400
+    conn = get_conn()
+    conn.execute('UPDATE solicitacoes SET status=? WHERE id=?', (status, sid))
+    conn.commit()
+    row = conn.execute('SELECT * FROM solicitacoes WHERE id=?', (sid,)).fetchone()
+    conn.close()
+    return jsonify(dict(row) if row else {'erro': 'Nao encontrado'})
+
+
+@monetizacao_bp.route('/api/admin/tokens/<token_id>/desativar', methods=['POST'])
+def admin_desativar_token(token_id):
+    err = _check_admin()
+    if err: return err
+    from .db import get_conn
+    conn = get_conn()
+    conn.execute('UPDATE tokens SET ativo=0 WHERE id=?', (token_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'ok': True, 'token': token_id})

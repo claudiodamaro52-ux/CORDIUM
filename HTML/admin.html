@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin | CORDIUM</title>
+  <link rel="stylesheet" href="CSS/estilos.css"/>
+  <style>
+    :root { --azul:#1a73e8; --verde:#34a853; --amarelo:#fbbc04; --vermelho:#ea4335; }
+    body { background:#f4f6fa; font-family:'Segoe UI',sans-serif; margin:0; }
+    #login-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,.6);
+      display:flex; align-items:center; justify-content:center; z-index:999;
+    }
+    #login-box {
+      background:#fff; padding:2.5rem 3rem; border-radius:12px;
+      box-shadow:0 8px 32px rgba(0,0,0,.18); text-align:center; min-width:320px;
+    }
+    #login-box h2 { margin:.5rem 0 1.5rem; color:var(--azul); }
+    #login-box input {
+      width:100%; padding:.7rem 1rem; border:1px solid #ccc;
+      border-radius:8px; font-size:1rem; margin-bottom:.75rem; box-sizing:border-box;
+    }
+    #login-box button {
+      width:100%; padding:.8rem; background:var(--azul); color:#fff;
+      border:none; border-radius:8px; font-size:1rem; cursor:pointer;
+    }
+    #login-error { color:var(--vermelho); font-size:.9rem; margin-top:.5rem; display:none; }
+
+    header.admin-header {
+      background:var(--azul); color:#fff; padding:.75rem 2rem;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    header.admin-header h1 { margin:0; font-size:1.2rem; letter-spacing:.03em; }
+    header.admin-header span { font-size:.85rem; opacity:.8; }
+    #logout-btn {
+      background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.3);
+      color:#fff; padding:.35rem .9rem; border-radius:6px; cursor:pointer; font-size:.85rem;
+    }
+
+    .tabs { display:flex; gap:0; background:#fff; border-bottom:2px solid #e0e0e0; padding:0 1.5rem; }
+    .tab-btn {
+      padding:.75rem 1.25rem; border:none; background:none; cursor:pointer;
+      font-size:.9rem; color:#555; border-bottom:3px solid transparent; margin-bottom:-2px;
+      transition:color .15s,border-color .15s;
+    }
+    .tab-btn.active { color:var(--azul); border-bottom-color:var(--azul); font-weight:600; }
+
+    .tab-content { display:none; padding:1.5rem 2rem; }
+    .tab-content.active { display:block; }
+
+    .kpi-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:1rem; margin-bottom:2rem; }
+    .kpi-card {
+      background:#fff; border-radius:10px; padding:1.25rem 1.5rem;
+      box-shadow:0 2px 8px rgba(0,0,0,.07); text-align:center;
+    }
+    .kpi-card .kpi-val { font-size:2rem; font-weight:700; color:var(--azul); }
+    .kpi-card .kpi-lbl { font-size:.8rem; color:#888; margin-top:.25rem; }
+
+    table { width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+    th,td { padding:.65rem 1rem; text-align:left; border-bottom:1px solid #f0f0f0; font-size:.875rem; }
+    th { background:#f8f9fa; font-weight:600; color:#555; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:#fafafa; }
+
+    .badge {
+      display:inline-block; padding:.2rem .65rem; border-radius:999px; font-size:.75rem; font-weight:600;
+    }
+    .badge-pendente  { background:#fff3cd; color:#856404; }
+    .badge-pago      { background:#d1e7dd; color:#0f5132; }
+    .badge-emitido   { background:#cfe2ff; color:#084298; }
+    .badge-cancelado { background:#f8d7da; color:#842029; }
+    .badge-ativo     { background:#d1e7dd; color:#0f5132; }
+    .badge-inativo   { background:#f8d7da; color:#842029; }
+
+    .btn { padding:.45rem 1rem; border:none; border-radius:6px; cursor:pointer; font-size:.82rem; }
+    .btn-primary { background:var(--azul); color:#fff; }
+    .btn-success { background:var(--verde); color:#fff; }
+    .btn-danger  { background:var(--vermelho); color:#fff; }
+    .btn-sm      { padding:.3rem .7rem; font-size:.78rem; }
+
+    .config-form { display:grid; grid-template-columns:1fr 1fr; gap:1rem 2rem; }
+    .config-item label { display:block; font-size:.8rem; color:#555; margin-bottom:.3rem; }
+    .config-item .desc { font-size:.72rem; color:#aaa; margin-top:.2rem; }
+    .config-item input { width:100%; padding:.5rem .75rem; border:1px solid #ddd; border-radius:6px; font-size:.875rem; box-sizing:border-box; }
+    .config-save { margin-top:1.25rem; }
+
+    .planos-table input { border:1px solid #ddd; border-radius:5px; padding:.3rem .5rem; width:90%; font-size:.85rem; }
+    .planos-table input:focus { outline:2px solid var(--azul); border-color:transparent; }
+
+    #toast {
+      position:fixed; bottom:1.5rem; right:1.5rem;
+      background:#323232; color:#fff; padding:.75rem 1.5rem;
+      border-radius:8px; display:none; z-index:9999; font-size:.9rem;
+    }
+    #refresh-btn {
+      float:right; background:transparent; border:1px solid var(--azul);
+      color:var(--azul); border-radius:6px; padding:.35rem .8rem;
+      cursor:pointer; font-size:.82rem; margin-bottom:.75rem;
+    }
+    .section-title { font-size:1.05rem; font-weight:600; color:#333; margin:.25rem 0 1rem; }
+    .filter-row { display:flex; gap:.75rem; margin-bottom:1rem; align-items:center; }
+    .filter-row select, .filter-row input {
+      padding:.4rem .75rem; border:1px solid #ddd; border-radius:6px; font-size:.85rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay">
+  <div id="login-box">
+    <img src="IMG/Logo_Cordium.webp" alt="CORDIUM" width="48" style="border-radius:8px;margin-bottom:.5rem;"/>
+    <h2>Painel Admin</h2>
+    <input type="password" id="admin-secret-input" placeholder="Senha de acesso" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button onclick="doLogin()">Entrar</button>
+    <div id="login-error">Senha incorreta.</div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="admin-header">
+  <h1>&#9679; CORDIUM Admin</h1>
+  <div style="display:flex;align-items:center;gap:1rem;">
+    <span id="last-refresh-lbl"></span>
+    <button id="logout-btn" onclick="doLogout()">Sair</button>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('visao-geral')">Vis&#227;o Geral</button>
+  <button class="tab-btn" onclick="switchTab('solicitacoes')">Solicita&#231;&#245;es</button>
+  <button class="tab-btn" onclick="switchTab('tokens')">Tokens</button>
+  <button class="tab-btn" onclick="switchTab('assinaturas')">Assinaturas</button>
+  <button class="tab-btn" onclick="switchTab('agenda')">Agenda</button>
+  <button class="tab-btn" onclick="switchTab('planos-tab')">Planos</button>
+  <button class="tab-btn" onclick="switchTab('config-tab')">Configura&#231;&#245;es</button>
+</div>
+
+<!-- VISÃO GERAL -->
+<div id="visao-geral" class="tab-content active">
+  <button id="refresh-btn" onclick="carregarDados()">&#8635; Atualizar</button>
+  <div class="section-title">KPIs</div>
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi-card"><div class="kpi-val" id="kpi-pendentes">—</div><div class="kpi-lbl">Solicita&#231;&#245;es Pendentes</div></div>
+    <div class="kpi-card"><div class="kpi-val" id="kpi-tokens">—</div><div class="kpi-lbl">Tokens Ativos</div></div>
+    <div class="kpi-card"><div class="kpi-val" id="kpi-receita">—</div><div class="kpi-lbl">Receita Estimada (R$)</div></div>
+    <div class="kpi-card"><div class="kpi-val" id="kpi-clientes">—</div><div class="kpi-lbl">Clientes &#218;nicos</div></div>
+    <div class="kpi-card"><div class="kpi-val" id="kpi-solic-total">—</div><div class="kpi-lbl">Total Solicita&#231;&#245;es</div></div>
+    <div class="kpi-card"><div class="kpi-val" id="kpi-assintotal">—</div><div class="kpi-lbl">Assinaturas</div></div>
+  </div>
+</div>
+
+<!-- SOLICITAÇÕES -->
+<div id="solicitacoes" class="tab-content">
+  <div class="filter-row">
+    <span class="section-title" style="margin:0">Solicita&#231;&#245;es</span>
+    <select id="filter-status" onchange="renderSolicitacoes()">
+      <option value="">Todos</option>
+      <option value="pendente">Pendente</option>
+      <option value="pago">Pago</option>
+      <option value="token_emitido">Token Emitido</option>
+      <option value="cancelado">Cancelado</option>
+    </select>
+  </div>
+  <div id="solic-table-wrap"></div>
+</div>
+
+<!-- TOKENS -->
+<div id="tokens" class="tab-content">
+  <div class="section-title">Tokens</div>
+  <div id="tokens-table-wrap"></div>
+</div>
+
+<!-- ASSINATURAS -->
+<div id="assinaturas" class="tab-content">
+  <div class="section-title">Assinaturas</div>
+  <div id="assin-table-wrap"></div>
+</div>
+
+<!-- AGENDA -->
+<div id="agenda" class="tab-content">
+  <div class="section-title">Agenda — pr&#243;ximos 7 dias</div>
+  <div id="agenda-wrap"></div>
+</div>
+
+<!-- PLANOS -->
+<div id="planos-tab" class="tab-content">
+  <div class="section-title">Planos de Assinatura</div>
+  <table class="planos-table" id="planos-tbl">
+    <thead><tr>
+      <th>#</th><th>Nome</th><th>Min/m&#234;s</th><th>Pre&#231;o/m&#234;s</th>
+      <th>Adic/min (R$)</th><th>Destaque</th><th>Ativo</th><th>Ordem</th><th></th>
+    </tr></thead>
+    <tbody id="planos-tbody"></tbody>
+  </table>
+  <button class="btn btn-success" style="margin-top:1rem" onclick="novoPlanoRow()">+ Novo Plano</button>
+</div>
+
+<!-- CONFIGURAÇÕES -->
+<div id="config-tab" class="tab-content">
+  <div class="section-title">Configura&#231;&#245;es do Sistema</div>
+  <div class="config-form" id="config-form"></div>
+  <div class="config-save">
+    <button class="btn btn-primary" onclick="salvarConfig()">Salvar Todas</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let _dados = {};
+const API_BASE = '';
+
+function getSecret() { return sessionStorage.getItem('admin_secret') || ''; }
+
+function doLogin() {
+  const s = document.getElementById('admin-secret-input').value.trim();
+  if (!s) return;
+  sessionStorage.setItem('admin_secret', s);
+  document.getElementById('login-overlay').style.display = 'none';
+  carregarDados();
+}
+
+function doLogout() {
+  sessionStorage.removeItem('admin_secret');
+  location.reload();
+}
+
+async function apiGet(url) {
+  const r = await fetch(url, { headers: { 'X-Admin-Secret': getSecret() } });
+  if (r.status === 403) { mostrarLoginErro(); return null; }
+  return r.json();
+}
+
+async function apiCall(url, method, body) {
+  const r = await fetch(url, {
+    method, headers: { 'X-Admin-Secret': getSecret(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (r.status === 403) { mostrarLoginErro(); return null; }
+  return r.json();
+}
+
+function mostrarLoginErro() {
+  sessionStorage.removeItem('admin_secret');
+  document.getElementById('login-error').style.display = 'block';
+  document.getElementById('login-overlay').style.display = 'flex';
+}
+
+function toast(msg, ok=true) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = ok ? '#1a73e8' : '#ea4335';
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2800);
+}
+
+function switchTab(id) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const idx = ['visao-geral','solicitacoes','tokens','assinaturas','agenda','planos-tab','config-tab'].indexOf(id);
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+}
+
+async function carregarDados() {
+  const d = await apiGet('/api/admin/dados');
+  if (!d) return;
+  _dados = d;
+  document.getElementById('last-refresh-lbl').textContent = 'Atualizado ' + new Date().toLocaleTimeString('pt-BR');
+  renderKPIs(d.kpis);
+  renderSolicitacoes();
+  renderTokens(d.tokens);
+  renderAssinaturas(d.assinaturas);
+  renderAgenda(d.agenda);
+  renderPlanos(d.planos);
+  renderConfig(d.config);
+}
+
+function renderKPIs(k) {
+  document.getElementById('kpi-pendentes').textContent   = k.solicitacoes_pendentes;
+  document.getElementById('kpi-tokens').textContent      = k.tokens_ativos;
+  document.getElementById('kpi-receita').textContent     = k.receita_estimada.toFixed(2);
+  document.getElementById('kpi-clientes').textContent    = k.clientes_unicos;
+  document.getElementById('kpi-solic-total').textContent = k.total_solicitacoes;
+  document.getElementById('kpi-assintotal').textContent  = k.total_assinaturas;
+}
+
+function statusBadge(s) {
+  const map = { pendente:'badge-pendente', pago:'badge-pago',
+    token_emitido:'badge-emitido', cancelado:'badge-cancelado' };
+  return `<span class="badge ${map[s]||''}">${s}</span>`;
+}
+
+function renderSolicitacoes() {
+  const f = document.getElementById('filter-status').value;
+  const lista = (_dados.solicitacoes||[]).filter(s => !f || s.status === f);
+  const rows = lista.map(s => `
+    <tr>
+      <td>${s.id}</td>
+      <td>${s.nome}</td>
+      <td>${s.email}</td>
+      <td>${s.horas_solicitadas || '—'}</td>
+      <td>${statusBadge(s.status)}</td>
+      <td>${s.data_criacao ? s.data_criacao.slice(0,16) : '—'}</td>
+      <td>
+        <select onchange="mudarStatus(${s.id}, this.value)" style="font-size:.78rem;padding:.2rem .4rem;border:1px solid #ddd;border-radius:4px;">
+          <option value="">— alterar —</option>
+          <option value="pendente">pendente</option>
+          <option value="pago">pago</option>
+          <option value="token_emitido">token_emitido</option>
+          <option value="cancelado">cancelado</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="emitirToken(${s.id},'${s.email}',${s.horas_solicitadas||1})">Emitir Token</button>
+      </td>
+    </tr>`).join('');
+  document.getElementById('solic-table-wrap').innerHTML = `
+    <table><thead><tr>
+      <th>#</th><th>Nome</th><th>E-mail</th><th>Horas</th><th>Status</th><th>Data</th><th>A&#231;&#245;es</th>
+    </tr></thead><tbody>${rows||'<tr><td colspan=7>Nenhuma solicita&#231;&#227;o.</td></tr>'}</tbody></table>`;
+}
+
+async function mudarStatus(id, status) {
+  if (!status) return;
+  const r = await apiCall(`/api/admin/solicitacoes/${id}/status`, 'PUT', { status });
+  if (r && !r.erro) { toast('Status atualizado'); await carregarDados(); }
+  else toast(r?.erro || 'Erro', false);
+}
+
+async function emitirToken(solicitacaoId, email, horas) {
+  const r = await apiCall('/api/token/gerar', 'POST', { email, horas_contratadas: horas, solicitacao_id: solicitacaoId });
+  if (r && r.token) { toast('Token emitido: ' + r.token); await carregarDados(); }
+  else toast(r?.erro || 'Erro ao emitir', false);
+}
+
+function renderTokens(lista) {
+  const rows = (lista||[]).map(t => `
+    <tr>
+      <td style="font-family:monospace;font-size:.78rem">${t.id}</td>
+      <td>${t.email}</td>
+      <td>${t.horas_contratadas}</td>
+      <td>${t.minutos_usados || 0}</td>
+      <td>${t.data_expiracao ? t.data_expiracao.slice(0,10) : '—'}</td>
+      <td><span class="badge ${t.ativo ? 'badge-ativo' : 'badge-inativo'}">${t.ativo ? 'Ativo' : 'Inativo'}</span></td>
+      <td>${t.ativo ? `<button class="btn btn-danger btn-sm" onclick="desativarToken('${t.id}')">Desativar</button>` : ''}</td>
+    </tr>`).join('');
+  document.getElementById('tokens-table-wrap').innerHTML = `
+    <table><thead><tr>
+      <th>Token (ID)</th><th>E-mail</th><th>Horas</th><th>Min. Usados</th><th>Expira</th><th>Status</th><th></th>
+    </tr></thead><tbody>${rows||'<tr><td colspan=7>Nenhum token.</td></tr>'}</tbody></table>`;
+}
+
+async function desativarToken(id) {
+  if (!confirm('Desativar token?')) return;
+  const r = await apiCall(`/api/admin/tokens/${id}/desativar`, 'POST', {});
+  if (r?.ok) { toast('Token desativado'); await carregarDados(); }
+  else toast('Erro', false);
+}
+
+function renderAssinaturas(lista) {
+  const rows = (lista||[]).map(a => {
+    const pct = a.minutos_iniciais > 0 ? Math.min(100, Math.round(a.minutos_consumidos*100/a.minutos_iniciais)) : 0;
+    const bar = `<div style="background:#eee;border-radius:4px;height:8px;width:120px;display:inline-block;vertical-align:middle">
+      <div style="background:${pct>90?'#ea4335':pct>70?'#fbbc04':'#34a853'};width:${pct}%;height:100%;border-radius:4px"></div></div>
+      <span style="font-size:.75rem;margin-left:.4rem">${pct}%</span>`;
+    return `<tr>
+      <td>${a.id}</td><td>${a.email}</td><td>${a.plano_nome||a.plano_id}</td>
+      <td>${a.ciclo}</td><td>${a.minutos_iniciais}</td>
+      <td>${bar}</td><td>${a.data_inicio?.slice(0,10)||'—'}</td>
+      <td><span class="badge ${a.ativo?'badge-ativo':'badge-inativo'}">${a.ativo?'Ativa':'Inativa'}</span></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('assin-table-wrap').innerHTML = `
+    <table><thead><tr>
+      <th>#</th><th>E-mail</th><th>Plano</th><th>Ciclo</th><th>Min. Totais</th>
+      <th>Consumo</th><th>In&#237;cio</th><th>Status</th>
+    </tr></thead><tbody>${rows||'<tr><td colspan=8>Nenhuma assinatura.</td></tr>'}</tbody></table>`;
+}
+
+function renderAgenda(lista) {
+  const rows = (lista||[]).map(t => `<tr>
+    <td style="font-family:monospace;font-size:.78rem">${t.id}</td>
+    <td>${t.email}</td>
+    <td>${t.data_expiracao?.slice(0,10)||'—'}</td>
+    <td><strong style="color:${t.dias_para_expirar<=1?'#ea4335':'#856404'}">${t.dias_para_expirar} dia(s)</strong></td>
+  </tr>`).join('');
+  document.getElementById('agenda-wrap').innerHTML = rows
+    ? `<table><thead><tr><th>Token</th><th>E-mail</th><th>Expira em</th><th>Restam</th></tr></thead><tbody>${rows}</tbody></table>`
+    : '<p style="color:#888">Nenhum evento nos pr&#243;ximos 7 dias.</p>';
+}
+
+function renderPlanos(lista) {
+  const rows = (lista||[]).map(p => `
+    <tr data-id="${p.id}">
+      <td>${p.id}</td>
+      <td><input data-f="nome" value="${p.nome||''}"/></td>
+      <td><input data-f="minutos_mensais" type="number" value="${p.minutos_mensais||0}" style="width:70px"/></td>
+      <td><input data-f="preco_mensal" type="number" step="0.01" value="${p.preco_mensal||0}" style="width:80px"/></td>
+      <td><input data-f="preco_aditamento_por_min" type="number" step="0.001" value="${p.preco_aditamento_por_min||0}" style="width:80px"/></td>
+      <td><input type="checkbox" data-f="destaque" ${p.destaque?'checked':''}/></td>
+      <td><input type="checkbox" data-f="ativo" ${p.ativo?'checked':''}/></td>
+      <td><input data-f="ordem" type="number" value="${p.ordem||1}" style="width:55px"/></td>
+      <td><button class="btn btn-primary btn-sm" onclick="salvarPlano(${p.id}, this)">Salvar</button></td>
+    </tr>`).join('');
+  document.getElementById('planos-tbody').innerHTML = rows;
+}
+
+async function salvarPlano(id, btn) {
+  const row = btn.closest('tr');
+  const data = {};
+  row.querySelectorAll('[data-f]').forEach(el => {
+    data[el.dataset.f] = el.type === 'checkbox' ? (el.checked ? 1 : 0) : el.value;
+  });
+  const r = await apiCall(`/api/admin/planos/${id}`, 'PUT', data);
+  if (r && !r.erro) toast('Plano ' + id + ' salvo');
+  else toast(r?.erro || 'Erro', false);
+}
+
+function novoPlanoRow() {
+  const tbody = document.getElementById('planos-tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><em>novo</em></td>
+    <td><input data-f="nome" placeholder="Nome"/></td>
+    <td><input data-f="minutos_mensais" type="number" value="0" style="width:70px"/></td>
+    <td><input data-f="preco_mensal" type="number" step="0.01" value="0" style="width:80px"/></td>
+    <td><input data-f="preco_aditamento_por_min" type="number" step="0.001" value="0" style="width:80px"/></td>
+    <td><input type="checkbox" data-f="destaque"/></td>
+    <td><input type="checkbox" data-f="ativo" checked/></td>
+    <td><input data-f="ordem" type="number" value="99" style="width:55px"/></td>
+    <td><button class="btn btn-success btn-sm" onclick="criarPlano(this)">Criar</button></td>`;
+  tbody.appendChild(tr);
+}
+
+async function criarPlano(btn) {
+  const row = btn.closest('tr');
+  const data = {};
+  row.querySelectorAll('[data-f]').forEach(el => {
+    data[el.dataset.f] = el.type === 'checkbox' ? (el.checked ? 1 : 0) : el.value;
+  });
+  const r = await apiCall('/api/admin/planos', 'POST', data);
+  if (r && !r.erro) { toast('Plano criado'); await carregarDados(); }
+  else toast(r?.erro || 'Erro', false);
+}
+
+function renderConfig(cfg) {
+  const form = document.getElementById('config-form');
+  form.innerHTML = Object.entries(cfg).map(([chave, obj]) => `
+    <div class="config-item">
+      <label for="cfg_${chave}">${chave}</label>
+      <input id="cfg_${chave}" value="${obj.valor||''}" data-chave="${chave}"/>
+      <div class="desc">${obj.descricao||''}</div>
+    </div>`).join('');
+}
+
+async function salvarConfig() {
+  const payload = {};
+  document.querySelectorAll('#config-form input[data-chave]').forEach(el => {
+    payload[el.dataset.chave] = el.value;
+  });
+  const r = await apiCall('/api/admin/config', 'PUT', payload);
+  if (r) toast(`${r.atualizados?.length||0} chave(s) salva(s)`);
+  else toast('Erro', false);
+}
+
+// Checar se já tem secret no sessionStorage
+window.addEventListener('DOMContentLoaded', () => {
+  if (getSecret()) {
+    document.getElementById('login-overlay').style.display = 'none';
+    carregarDados();
+  }
+});
+</script>
+</body>
+</html>

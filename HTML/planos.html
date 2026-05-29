@@ -78,78 +78,117 @@
 <div class="container">
 
     <h1 style="margin-bottom:4px">Planos e Pre&ccedil;os</h1>
-    <p style="color:#555;margin-bottom:20px">Acesso gratuito j&#225; dispon&#237;vel. Plano profissional em implanta&ccedil;&#227;o.</p>
+    <p style="color:#555;margin-bottom:20px">Planos mensais por <strong>minutagem</strong>: pague apenas pelo que precisar, com renova&ccedil;&atilde;o autom&aacute;tica todo m&ecirc;s.</p>
 
-    <div class="notice">
-        &#9888;&#65039; <strong>Sistema de pagamento em fase de implanta&ccedil;&#227;o.</strong>
-        O plano profissional estar&#225; dispon&#237;vel em breve. Enquanto isso, todas as ferramentas funcionam <strong>sem limite</strong> no modo gratuito.
-        <a href="/solicitar" style="color:#856404;font-weight:bold;">Solicitar acesso antecipado &#8594;</a>
+    <!-- FREE -->
+    <div class="card-plano">
+        <h3>&#127381; Plano Gratuito</h3>
+        <div class="preco">R$ 0</div>
+        <div class="preco-sub">sem cadastro</div>
+        <ul>
+            <li>SIM9 at&#233; <strong>1&nbsp;000 registros</strong> por processamento</li>
+            <li>4 n&#237;veis de acur&#225;cia</li>
+            <li>Painel anal&#237;tico completo</li>
+            <li>Exporta&ccedil;&#227;o TXT, CSV, XLSX</li>
+            <li>Busca pontual (1 &#215; N)</li>
+            <li>JSON Tools Pro <strong>sem limite</strong></li>
+            <li>Coletor de Imagens online</li>
+            <li>Sem cadastro ou login</li>
+        </ul>
+        <a class="btn" href="/sim9">Abrir SIM9 agora</a>
     </div>
 
-    <div class="grid-2">
+    <h2 style="margin-top:2rem">Planos Profissionais por Minutagem</h2>
+    <p style="color:#555;margin-bottom:1.5rem">
+        Cada plano inclui uma cota mensal de <strong>minutos de processamento</strong> do SIM9.
+        O contador reseta todo m&ecirc;s. Quando precisar de mais, adicione minutos extras a qualquer momento.
+    </p>
 
+    <div class="grid-2" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">
+
+        <!-- B&Aacute;SICO -->
         <div class="card-plano">
-            <h3>&#127381; Plano Gratuito</h3>
-            <div class="preco">R$ 0</div>
-            <div class="preco-sub">sem cadastro</div>
+            <h3>&#9989; B&aacute;sico</h3>
+            <div class="preco">R$ 9,90<span style="font-size:1rem;font-weight:400;color:#777">/m&ecirc;s</span></div>
+            <div class="preco-sub">10 minutos de processamento/m&ecirc;s</div>
             <ul>
-                <li>SIM9 at&#233; <strong>1&nbsp;000 registros</strong> por processamento</li>
-                <li>4 n&#237;veis de acur&#225;cia</li>
-                <li>Painel anal&#237;tico completo</li>
-                <li>Exporta&ccedil;&#227;o TXT, CSV, XLSX</li>
-                <li>Busca pontual (1 &#215; N)</li>
-                <li>JSON Tools Pro <strong>sem limite</strong></li>
-                <li>Coletor de Imagens online</li>
-                <li>Sem cadastro ou login</li>
+                <li>SIM9 <strong>sem limite de registros</strong></li>
+                <li>10 min de processamento/m&ecirc;s</li>
+                <li>Aditamento: R$ 0,99/min extra</li>
+                <li>Suporte por e-mail</li>
+                <li>Renova&ccedil;&#227;o autom&aacute;tica mensal</li>
             </ul>
-            <a class="btn" href="/sim9">Abrir SIM9 agora</a>
+            <a class="btn-outline" href="/solicitar">Contratar</a>
         </div>
 
-        <div class="card-plano" style="border-color:#8b1400;background:#fff8f0">
-            <h3>&#127381; Plano Profissional <span class="tag-em-breve">em breve</span></h3>
-            <div class="preco">Por hora</div>
-            <div class="preco-sub">a partir de R$ 9,90 / hora de processamento</div>
+        <!-- INTERMITENTE -->
+        <div class="card-plano" style="border-color:#8b1400;background:#fff8f0;position:relative">
+            <span style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#c9820a;color:#fff;font-size:.75rem;font-weight:700;padding:.2rem .9rem;border-radius:999px;white-space:nowrap">&#11088; MAIS POPULAR</span>
+            <h3>&#9989; Intermitente</h3>
+            <div class="preco">R$ 49,90<span style="font-size:1rem;font-weight:400;color:#777">/m&ecirc;s</span></div>
+            <div class="preco-sub">60 minutos de processamento/m&ecirc;s</div>
             <ul>
-                <li>SIM9 <strong>sem limite</strong> de registros</li>
-                <li>Token com validade de <strong>7 dias</strong></li>
-                <li>Processamento priorit&#225;rio</li>
-                <li>Suporte por e-mail</li>
-                <li>Hist&#243;rico de processamentos</li>
-                <li>API REST com autentica&ccedil;&#227;o</li>
+                <li>SIM9 <strong>sem limite de registros</strong></li>
+                <li>60 min de processamento/m&ecirc;s</li>
+                <li>Aditamento: R$ 0,83/min extra</li>
+                <li>Alertas de consumo (50% / 75% / 95%)</li>
+                <li>Suporte por e-mail priorit&#225;rio</li>
+                <li>Renova&ccedil;&#227;o autom&aacute;tica mensal</li>
             </ul>
-            <a class="btn-outline" href="/solicitar">Solicitar acesso antecipado</a>
+            <a class="btn" href="/solicitar">Contratar</a>
+        </div>
+
+        <!-- MASSIVO -->
+        <div class="card-plano" style="border-color:#3d1f00">
+            <h3>&#9989; Massivo</h3>
+            <div class="preco">R$ 249,90<span style="font-size:1rem;font-weight:400;color:#777">/m&ecirc;s</span></div>
+            <div class="preco-sub">360 minutos de processamento/m&ecirc;s</div>
+            <ul>
+                <li>SIM9 <strong>sem limite de registros</strong></li>
+                <li>360 min de processamento/m&ecirc;s</li>
+                <li>Aditamento: R$ 0,69/min extra</li>
+                <li>Alertas de consumo completos</li>
+                <li>Suporte dedicado</li>
+                <li>Renova&ccedil;&#227;o autom&aacute;tica mensal</li>
+            </ul>
+            <a class="btn-outline" href="/solicitar">Contratar</a>
         </div>
 
     </div>
 
-    <div class="secao-destaque">
-        <h3 style="margin-top:0">Como funcionar&#225; o sistema de tokens</h3>
+    <div class="secao-destaque" style="margin-top:2rem">
+        <h3 style="margin-top:0">Como funciona a minutagem</h3>
         <ol style="padding-left:20px;line-height:2.2;color:#333;margin:0">
-            <li>Voc&#234; acessa <a href="/solicitar"><strong>Solicitar Acesso</strong></a> e preenche Nome, CPF/CNPJ e e-mail</li>
-            <li>Informamos o valor e enviamos instru&ccedil;&#245;es de pagamento por e-mail</li>
-            <li>Ap&#243;s confirma&ccedil;&#227;o, voc&#234; recebe um <strong>token com validade de 7 dias</strong></li>
-            <li>O token &#233; inserido no SIM9 antes de processar listas acima do limite gratuito</li>
-            <li>Cada hora consumida desconta do saldo do token</li>
+            <li>Voc&#234; contrata um plano em <a href="/solicitar"><strong>Solicitar Acesso</strong></a></li>
+            <li>Recebe um <strong>token mensal</strong> por e-mail ap&#243;s confirma&ccedil;&#227;o do pagamento</li>
+            <li>Insira o token no SIM9 antes de processar &mdash; minutos s&atilde;o descontados por processamento</li>
+            <li>Alertas autom&aacute;ticos ao atingir 50%, 75%, 95% e 99% da cota</li>
+            <li>Todo dia 1&#186; a cota &eacute; renovada automaticamente</li>
+            <li>Precisou de mais? Solicite um <strong>aditamento</strong> e ganhe minutos extras no mesmo ciclo</li>
         </ol>
     </div>
 
-    <h2>Perguntas frequentes sobre planos</h2>
+    <h2>Perguntas frequentes</h2>
 
     <div style="margin-bottom:16px">
-        <h3 style="margin-bottom:4px">O limite gratuito &#233; por dia ou por processamento?</h3>
-        <p style="color:#444;margin:0">Por processamento. Voc&#234; pode processar quantas vezes quiser at&#233; 1&nbsp;000 registros cada vez, sem custo.</p>
+        <h3 style="margin-bottom:4px">O que &eacute; um minuto de processamento?</h3>
+        <p style="color:#444;margin:0">&#201; o tempo efetivo que o SIM9 gasta comparando suas listas. Uma base com 50&nbsp;000 registros tipicamente consome entre 1 e 5 minutos, dependendo do n&#237;vel de acur&#225;cia escolhido.</p>
+    </div>
+    <div style="margin-bottom:16px">
+        <h3 style="margin-bottom:4px">O que acontece se eu esgotar minha cota?</h3>
+        <p style="color:#444;margin:0">O SIM9 bloqueia novos processamentos acima do limite gratuito at&#233; o pr&#243;ximo ciclo ou at&#233; voc&#234; solicitar um aditamento de minutos.</p>
+    </div>
+    <div style="margin-bottom:16px">
+        <h3 style="margin-bottom:4px">O que &eacute; aditamento?</h3>
+        <p style="color:#444;margin:0">Um pacote avulso de minutos extras comprado fora do ciclo mensal. O valor por minuto &eacute; definido pelo seu plano atual.</p>
+    </div>
+    <div style="margin-bottom:16px">
+        <h3 style="margin-bottom:4px">Os minutos acumulam para o m&ecirc;s seguinte?</h3>
+        <p style="color:#444;margin:0">N&#227;o. A cota mensal &eacute; zerada todo dia 1&#186; do m&ecirc;s e os minutos n&#227;o utilizados n&#227;o s&#227;o acumulados.</p>
     </div>
     <div style="margin-bottom:16px">
         <h3 style="margin-bottom:4px">Preciso criar conta para usar o plano gratuito?</h3>
         <p style="color:#444;margin:0">N&#227;o. As ferramentas funcionam diretamente no navegador, sem cadastro.</p>
-    </div>
-    <div style="margin-bottom:16px">
-        <h3 style="margin-bottom:4px">Quando o plano profissional estiver dispon&#237;vel, serei avisado?</h3>
-        <p style="color:#444;margin:0">Sim. Cadastre sua solicita&ccedil;&#227;o em <a href="/solicitar">Solicitar Acesso</a> e voc&#234; ser&#225; um dos primeiros a ser notificado.</p>
-    </div>
-    <div style="margin-bottom:16px">
-        <h3 style="margin-bottom:4px">O JSON Tools Pro e o Coletor de Imagens ter&#227;o plano pago?</h3>
-        <p style="color:#444;margin:0">Atualmente n&#227;o est&#225; previsto. Essas ferramentas permanecem gratuitas sem limites de uso.</p>
     </div>
 
 </div>

@@ -23,7 +23,9 @@
 | **JSON para CSV** | Converte arquivos JSON em planilha CSV | [abrir](https://cordium.com.br/json-para-csv) |
 | **CSV para JSON** | Converte planilhas CSV em JSON | [abrir](https://cordium.com.br/csv-para-json) |
 | **SIM9** | Detecta registros similares/duplicados em listas (nomes, CPF, CNPJ, e-mail, telefone, texto livre, endereço) | [abrir](https://cordium.com.br/sim9) |
-| **FAQ** | Perguntas frequentes | [abrir](https://cordium.com.br/faq) |
+| **Suporte/FAQ**     | Perguntas frequentes, ajuda e contato               | [abrir](https://cordium.com.br/suporte) |
+| **Planos**          | Planos mensais por minutagem para acesso profissional | [abrir](https://cordium.com.br/planos) |
+| **Admin**           | Painel de administração interno                      | /admin |
 | **Sobre** | Sobre o projeto | [abrir](https://cordium.com.br/sobre) |
 
 ---
@@ -88,6 +90,29 @@ A primeira coluna é o registro de referência; os demais são os similares com 
 
 ---
 
+## 💰 Monetização
+
+O CORDIUM usa um modelo de **minutagem mensal** para acesso profissional ao SIM9.
+
+### Planos disponíveis
+
+| Plano        | Minutos/mês | Preço/mês  | Aditamento (R$/min) |
+|--------------|-------------|------------|---------------------|
+| Básico       | 10 min      | R$ 9,90    | R$ 0,99             |
+| Intermitente | 60 min      | R$ 49,90   | R$ 0,83             |
+| Massivo      | 360 min     | R$ 249,90  | R$ 0,69             |
+
+- Cota renovada todo dia 1º do mês; minutos não utilizados não acumulam.
+- Alertas automáticos ao atingir 50%, 75%, 95% e 99% do consumo.
+- **Aditamento**: compra avulsa de minutos extras no mesmo ciclo.
+
+### Painel Admin
+
+Acesse `/admin` com a senha em `config_monetizacao` (chave `admin_secret`).  
+Exibe KPIs, gerencia tokens, planos, assinaturas, configurações e agenda de expiração.
+
+---
+
 ## ⚙️ Tecnologias
 
 - **Python 3 / Flask** — servidor web e APIs
@@ -127,3 +152,28 @@ O coletor de imagens também está disponível como executável para Windows. Co
   &nbsp;
   <strong> by D'AMARO & COPILOT</strong>
 </p>
+
+## 💰 Monetização
+
+O CORDIUM usa um modelo de **minutagem mensal** para acesso profissional ao SIM9.
+
+### Planos disponíveis
+
+| Plano         | Minutos/mês | Preço/mês   | Aditamento (R$/min) |
+|---------------|-------------|-------------|---------------------|
+| Básico        | 10 min      | R$ 9,90     | R$ 0,99             |
+| Intermitente  | 60 min      | R$ 49,90    | R$ 0,83             |
+| Massivo       | 360 min     | R$ 249,90   | R$ 0,69             |
+
+- A cota é renovada todo dia 1º do mês.
+- Minutos não utilizados não acumulam.
+- Alertas automáticos por e-mail ao atingir 50%, 75%, 95% e 99% do consumo.
+- **Aditamento**: pacote avulso de minutos extras comprado fora do ciclo.
+
+### Painel Admin
+
+Acesse `/admin` com a senha configurada em `config_monetizacao` (chave `admin_secret`).  
+O painel exibe KPIs, gerencia tokens, planos, assinaturas, configurações e agenda.
+
+---
+
