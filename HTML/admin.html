@@ -175,7 +175,37 @@
 
 <!-- ASSINATURAS -->
 <div id="assinaturas" class="tab-content">
-  <div class="section-title">Assinaturas</div>
+  <div class="filter-row" style="margin-bottom:.8rem">
+    <span class="section-title" style="margin:0">Assinaturas</span>
+  </div>
+  <details id="form-nova-assin" style="margin-bottom:1rem;border:1px solid #e0e0e0;border-radius:8px;padding:.75rem 1rem">
+    <summary style="cursor:pointer;font-weight:600;color:#1a73e8">+ Nova Assinatura</summary>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.9rem">
+      <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem">
+        Nome <input id="assin-nome" class="config-input" placeholder="Nome do cliente">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem">
+        E-mail <input id="assin-email" class="config-input" type="email" placeholder="email@exemplo.com">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem">
+        CPF / CNPJ <input id="assin-cpf" class="config-input" placeholder="Somente n&#250;meros">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem">
+        Plano
+        <select id="assin-plano" class="config-input" style="height:2.2rem">
+          <option value="">Carregando...</option>
+        </select>
+      </label>
+      <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem">
+        Status inicial
+        <select id="assin-status" class="config-input" style="height:2.2rem">
+          <option value="ativa">ativa</option>
+          <option value="aguardando_pagamento">aguardando_pagamento</option>
+        </select>
+      </label>
+    </div>
+    <button class="btn btn-success" style="margin-top:1rem" onclick="criarAssinatura()">Criar Assinatura</button>
+  </details>
   <div id="assin-table-wrap"></div>
 </div>
 
@@ -365,18 +395,65 @@ function renderAssinaturas(lista) {
     const bar = `<div style="background:#eee;border-radius:4px;height:8px;width:120px;display:inline-block;vertical-align:middle">
       <div style="background:${pct>90?'#ea4335':pct>70?'#fbbc04':'#34a853'};width:${pct}%;height:100%;border-radius:4px"></div></div>
       <span style="font-size:.75rem;margin-left:.4rem">${pct}%</span>`;
+    const statusBtns = a.status === 'ativa'
+      ? `<button class="btn btn-sm" style="background:#fbbc04;color:#333" onclick="mudarStatusAssin(${a.id},'suspensa')">Suspender</button>
+         <button class="btn btn-danger btn-sm" onclick="mudarStatusAssin(${a.id},'cancelada')">Cancelar</button>`
+      : `<button class="btn btn-success btn-sm" onclick="mudarStatusAssin(${a.id},'ativa')">Ativar</button>`;
     return `<tr>
       <td>${a.id}</td><td>${a.email}</td><td>${a.plano_nome||a.plano_id}</td>
-      <td>${a.ciclo}</td><td>${a.minutos_iniciais}</td>
-      <td>${bar}</td><td>${a.data_inicio?.slice(0,10)||'—'}</td>
-      <td><span class="badge ${a.ativo?'badge-ativo':'badge-inativo'}">${a.ativo?'Ativa':'Inativa'}</span></td>
+      <td>${a.data_inicio_ciclo?.slice(0,10)||'—'}&nbsp;→&nbsp;${a.data_fim_ciclo?.slice(0,10)||'—'}</td>
+      <td>${a.minutos_iniciais + (a.minutos_adicionados||0)}</td>
+      <td>${bar}</td>
+      <td><span class="badge ${a.status==='ativa'?'badge-ativo':a.status==='aguardando_pagamento'?'badge-pendente':'badge-cancelado'}">${a.status||'—'}</span></td>
+      <td style="white-space:nowrap">
+        ${statusBtns}
+        <button class="btn btn-primary btn-sm" onclick="renovarCicloAssin(${a.id})">&#8635; Ciclo</button>
+        <button class="btn btn-primary btn-sm" onclick="adicionarMinutosAssin(${a.id})">+ Min</button>
+      </td>
     </tr>`;
   }).join('');
   document.getElementById('assin-table-wrap').innerHTML = `
     <table><thead><tr>
       <th>#</th><th>E-mail</th><th>Plano</th><th>Ciclo</th><th>Min. Totais</th>
-      <th>Consumo</th><th>In&#237;cio</th><th>Status</th>
+      <th>Consumo</th><th>Status</th><th>A&#231;&#245;es</th>
     </tr></thead><tbody>${rows||'<tr><td colspan=8>Nenhuma assinatura.</td></tr>'}</tbody></table>`;
+}
+
+async function mudarStatusAssin(id, status) {
+  if (!confirm(`Alterar assinatura #${id} para "${status}"?`)) return;
+  const r = await apiCall(`/api/admin/assinaturas/${id}/status`, 'PUT', { status });
+  if (r && !r.erro) { toast('Status atualizado'); await carregarDados(); }
+  else toast(r?.erro || 'Erro', false);
+}
+
+async function renovarCicloAssin(id) {
+  if (!confirm(`Renovar ciclo da assinatura #${id}?\nO consumo ser\u00e1 zerado e o ciclo avan\u00e7ado para o pr\u00f3ximo m\u00eas.`)) return;
+  const r = await apiCall(`/api/admin/assinaturas/${id}/renovar`, 'PUT', { tipo: 'ciclo' });
+  if (r && !r.erro) { toast(`Ciclo renovado \u2014 ${r.novo_inicio?.slice(0,10)} \u2192 ${r.novo_fim?.slice(0,10)}`); await carregarDados(); }
+  else toast(r?.erro || 'Erro', false);
+}
+
+async function adicionarMinutosAssin(id) {
+  const min = parseInt(prompt('Quantos minutos adicionar?', '60') || '0');
+  if (isNaN(min) || min < 1) return;
+  const r = await apiCall(`/api/admin/assinaturas/${id}/renovar`, 'PUT', { tipo: 'minutos', minutos: min });
+  if (r && !r.erro) { toast(`${min} minutos adicionados`); await carregarDados(); }
+  else toast(r?.erro || 'Erro', false);
+}
+
+async function criarAssinatura() {
+  const nome     = document.getElementById('assin-nome').value.trim();
+  const email    = document.getElementById('assin-email').value.trim();
+  const cpf      = document.getElementById('assin-cpf').value.trim();
+  const plano_id = parseInt(document.getElementById('assin-plano').value);
+  const status   = document.getElementById('assin-status').value;
+  if (!nome || !email || !cpf || !plano_id) { toast('Preencha todos os campos', false); return; }
+  const r = await apiCall('/api/admin/assinaturas', 'POST', { nome, email, cpf_cnpj: cpf, plano_id, status });
+  if (r && r.id) {
+    toast(`Assinatura #${r.id} criada`);
+    document.getElementById('form-nova-assin').removeAttribute('open');
+    await carregarDados();
+  } else toast(r?.erro || 'Erro ao criar', false);
 }
 
 function renderAgenda(lista) {
@@ -405,6 +482,12 @@ function renderPlanos(lista) {
       <td><button class="btn btn-primary btn-sm" onclick="salvarPlano(${p.id}, this)">Salvar</button></td>
     </tr>`).join('');
   document.getElementById('planos-tbody').innerHTML = rows;
+  // preenche select de planos no form de nova assinatura
+  const selP = document.getElementById('assin-plano');
+  if (selP) {
+    selP.innerHTML = '<option value="">— selecione —</option>' +
+      (lista||[]).filter(p=>p.ativo).map(p=>`<option value="${p.id}">${p.nome} (${p.minutos_mensais} min/m&#234;s)</option>`).join('');
+  }
 }
 
 async function salvarPlano(id, btn) {

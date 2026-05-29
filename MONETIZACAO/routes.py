@@ -468,3 +468,201 @@ def usuario_conta():
         'assinatura': assinatura,
         'consumos':   consumos,
     })
+
+
+# ── POST /api/admin/assinaturas  ─────────────────────────────────────────────
+
+@monetizacao_bp.route('/api/admin/assinaturas', methods=['POST'])
+def admin_criar_assinatura():
+    err = _check_admin()
+    if err: return err
+    from .db import get_conn
+    from datetime import datetime, timezone
+    import calendar
+
+    data = request.get_json(force=True) or {}
+    nome     = (data.get('nome')     or '').strip()
+    email    = (data.get('email')    or '').strip().lower()
+    cpf_cnpj = re.sub(r'\D', '', data.get('cpf_cnpj') or '')
+    plano_id = data.get('plano_id')
+    status   = (data.get('status') or 'ativa').strip()
+
+    if not all([nome, email, cpf_cnpj, plano_id]):
+        return jsonify({'erro': 'nome, email, cpf_cnpj e plano_id sao obrigatorios'}), 400
+
+    if not re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email):
+        return jsonify({'erro': 'E-mail invalido'}), 400
+
+    conn = get_conn()
+    plano = conn.execute('SELECT * FROM planos WHERE id=? AND ativo=1', (plano_id,)).fetchone()
+    if not plano:
+        conn.close()
+        return jsonify({'erro': 'Plano nao encontrado ou inativo'}), 404
+
+    agora = datetime.now(timezone.utc)
+    # inicio: dia 1 do mês atual, fim: último dia do mês
+    inicio = agora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    ultimo_dia = calendar.monthrange(agora.year, agora.month)[1]
+    fim = agora.replace(day=ultimo_dia, hour=23, minute=59, second=59, microsecond=0)
+
+    cur = conn.execute(
+        """INSERT INTO assinaturas
+           (cliente_nome, cliente_email, cliente_cpf_cnpj, plano_id,
+            minutos_iniciais, minutos_adicionados, minutos_consumidos,
+            data_inicio_ciclo, data_fim_ciclo, renovacao_automatica,
+            status, data_criacao, atualizado_em)
+           VALUES (?,?,?,?,?,0,0,?,?,1,?,?,?)""",
+        (nome, email, cpf_cnpj, plano_id,
+         plano['minutos_mensais'],
+         inicio.isoformat(), fim.isoformat(),
+         status, agora.isoformat(), agora.isoformat())
+    )
+    conn.commit()
+    row = dict(conn.execute('SELECT a.*, p.nome as plano_nome FROM assinaturas a LEFT JOIN planos p ON a.plano_id=p.id WHERE a.id=?', (cur.lastrowid,)).fetchone())
+    conn.close()
+    return jsonify(row), 201
+
+
+# ── PUT /api/admin/assinaturas/<id>/status  ──────────────────────────────────
+
+@monetizacao_bp.route('/api/admin/assinaturas/<int:aid>/status', methods=['PUT'])
+def admin_status_assinatura(aid):
+    err = _check_admin()
+    if err: return err
+    from .db import get_conn
+    from datetime import datetime, timezone
+
+    data   = request.get_json(force=True) or {}
+    status = (data.get('status') or '').strip()
+    VALIDOS = {'ativa', 'aguardando_pagamento', 'suspensa', 'cancelada', 'encerrada'}
+    if status not in VALIDOS:
+        return jsonify({'erro': f'Status invalido. Validos: {", ".join(VALIDOS)}'}), 400
+
+    agora = datetime.now(timezone.utc).isoformat()
+    conn  = get_conn()
+    conn.execute('UPDATE assinaturas SET status=?, atualizado_em=? WHERE id=?', (status, agora, aid))
+    conn.commit()
+    row = conn.execute('SELECT a.*, p.nome as plano_nome FROM assinaturas a LEFT JOIN planos p ON a.plano_id=p.id WHERE a.id=?', (aid,)).fetchone()
+    conn.close()
+    return jsonify(dict(row) if row else {'erro': 'Nao encontrada'})
+
+
+# ── PUT /api/admin/tokens/<id>/renovar ───────────────────────────────────────
+
+@monetizacao_bp.route('/api/admin/tokens/<token_id>/renovar', methods=['PUT'])
+def admin_renovar_token(token_id):
+    err = _check_admin()
+    if err: return err
+    from .db import get_conn
+    from datetime import datetime, timezone, timedelta
+
+    data = request.get_json(force=True) or {}
+    try:
+        horas_extra = int(data.get('horas', 0))
+        dias_extra  = int(data.get('dias',  7))
+    except (TypeError, ValueError):
+        return jsonify({'erro': 'horas e dias devem ser inteiros'}), 400
+
+    if dias_extra < 1:
+        return jsonify({'erro': 'dias deve ser >= 1'}), 400
+
+    conn = get_conn()
+    row  = conn.execute('SELECT * FROM tokens WHERE id=?', (token_id,)).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({'erro': 'Token nao encontrado'}), 404
+
+    agora    = datetime.now(timezone.utc)
+    exp_atual = datetime.fromisoformat(row['data_expiracao'])
+    if exp_atual.tzinfo is None:
+        exp_atual = exp_atual.replace(tzinfo=timezone.utc)
+
+    # Se já expirou, conta a partir de agora; se ainda válido, estende a partir da expiração atual
+    base_exp  = agora if agora > exp_atual else exp_atual
+    nova_exp  = base_exp + timedelta(days=dias_extra)
+    novas_h   = row['horas_contratadas'] + horas_extra
+
+    conn.execute(
+        'UPDATE tokens SET horas_contratadas=?, data_expiracao=?, ativo=1 WHERE id=?',
+        (novas_h, nova_exp.isoformat(), token_id)
+    )
+    conn.commit()
+    row = dict(conn.execute('SELECT * FROM tokens WHERE id=?', (token_id,)).fetchone())
+    conn.close()
+    return jsonify({**row, 'renovado': True, 'nova_expiracao': nova_exp.isoformat()})
+
+
+# ── PUT /api/admin/assinaturas/<id>/renovar ──────────────────────────────────
+
+@monetizacao_bp.route('/api/admin/assinaturas/<int:aid>/renovar', methods=['PUT'])
+def admin_renovar_assinatura(aid):
+    err = _check_admin()
+    if err: return err
+    from .db import get_conn
+    from datetime import datetime, timezone
+    import calendar
+
+    data = request.get_json(force=True) or {}
+    tipo = (data.get('tipo') or 'ciclo').strip()   # 'ciclo' ou 'minutos'
+
+    conn = get_conn()
+    assin = conn.execute('SELECT * FROM assinaturas WHERE id=?', (aid,)).fetchone()
+    if not assin:
+        conn.close()
+        return jsonify({'erro': 'Assinatura nao encontrada'}), 404
+
+    agora = datetime.now(timezone.utc)
+
+    if tipo == 'minutos':
+        try:
+            minutos_extra = int(data.get('minutos', 0))
+        except (TypeError, ValueError):
+            conn.close()
+            return jsonify({'erro': 'minutos deve ser inteiro'}), 400
+        if minutos_extra < 1:
+            conn.close()
+            return jsonify({'erro': 'minutos deve ser >= 1'}), 400
+
+        novos_min = assin['minutos_iniciais'] + assin['minutos_adicionados'] + minutos_extra
+        conn.execute(
+            'UPDATE assinaturas SET minutos_adicionados=minutos_adicionados+?, atualizado_em=? WHERE id=?',
+            (minutos_extra, agora.isoformat(), aid)
+        )
+        conn.commit()
+        row = dict(conn.execute('SELECT a.*, p.nome as plano_nome FROM assinaturas a LEFT JOIN planos p ON a.plano_id=p.id WHERE a.id=?', (aid,)).fetchone())
+        conn.close()
+        return jsonify({**row, 'renovado': True, 'tipo': 'minutos', 'minutos_adicionados': minutos_extra})
+
+    else:  # tipo == 'ciclo'
+        # Novo ciclo: mês seguinte (ou mês atual se já passou), zera consumo
+        if agora.month == 12:
+            ano_novo, mes_novo = agora.year + 1, 1
+        else:
+            ano_novo, mes_novo = agora.year, agora.month + 1
+
+        inicio = agora.replace(year=ano_novo, month=mes_novo, day=1,
+                               hour=0, minute=0, second=0, microsecond=0)
+        ultimo_dia = calendar.monthrange(ano_novo, mes_novo)[1]
+        fim = inicio.replace(day=ultimo_dia, hour=23, minute=59, second=59)
+
+        # Obtém minutos do plano para o ciclo renovado
+        plano = conn.execute('SELECT * FROM planos WHERE id=?', (assin['plano_id'],)).fetchone()
+        min_ciclo = plano['minutos_mensais'] if plano else assin['minutos_iniciais']
+
+        conn.execute(
+            """UPDATE assinaturas SET
+               minutos_iniciais=?, minutos_adicionados=0, minutos_consumidos=0,
+               data_inicio_ciclo=?, data_fim_ciclo=?,
+               status='ativa',
+               alerta_50_enviado=0, alerta_75_enviado=0, alerta_95_enviado=0,
+               alerta_99_enviado=0, alerta_5d_enviado=0, alerta_1d_enviado=0,
+               atualizado_em=?
+               WHERE id=?""",
+            (min_ciclo, inicio.isoformat(), fim.isoformat(), agora.isoformat(), aid)
+        )
+        conn.commit()
+        row = dict(conn.execute('SELECT a.*, p.nome as plano_nome FROM assinaturas a LEFT JOIN planos p ON a.plano_id=p.id WHERE a.id=?', (aid,)).fetchone())
+        conn.close()
+        return jsonify({**row, 'renovado': True, 'tipo': 'ciclo',
+                        'novo_inicio': inicio.isoformat(), 'novo_fim': fim.isoformat()})
+
