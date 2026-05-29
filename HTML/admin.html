@@ -409,6 +409,7 @@ function renderAssinaturas(lista) {
         ${statusBtns}
         <button class="btn btn-primary btn-sm" onclick="renovarCicloAssin(${a.id})">&#8635; Ciclo</button>
         <button class="btn btn-primary btn-sm" onclick="adicionarMinutosAssin(${a.id})">+ Min</button>
+        <button class="btn btn-sm" style="background:#6c757d;color:#fff" onclick="abrirEditarAssin(${a.id})">&#9998; Editar</button>
       </td>
     </tr>`;
   }).join('');
@@ -555,6 +556,132 @@ window.addEventListener('DOMContentLoaded', () => {
     carregarDados();
   }
 });
+
+let _editAssinId = null;
+
+function abrirEditarAssin(id) {
+  const a = (_dados.assinaturas||[]).find(x => x.id === id);
+  if (!a) { toast('Dados nao carregados', false); return; }
+  _editAssinId = id;
+  document.getElementById('edit-assin-id-lbl').textContent = '#' + id;
+  document.getElementById('ea-nome').value     = a.cliente_nome  || '';
+  document.getElementById('ea-email').value    = a.cliente_email || a.email || '';
+  document.getElementById('ea-cpf').value      = a.cliente_cpf_cnpj || '';
+  document.getElementById('ea-status').value   = a.status || 'ativa';
+  document.getElementById('ea-renovauto').value = String(a.renovacao_automatica ?? 1);
+  document.getElementById('ea-inicio').value   = (a.data_inicio_ciclo||'').slice(0,10);
+  document.getElementById('ea-fim').value      = (a.data_fim_ciclo   ||'').slice(0,10);
+  document.getElementById('ea-min-ini').value  = a.minutos_iniciais    ?? 0;
+  document.getElementById('ea-min-add').value  = a.minutos_adicionados ?? 0;
+  document.getElementById('ea-min-cons').value = a.minutos_consumidos  ?? 0;
+  const sel = document.getElementById('ea-plano');
+  sel.innerHTML = (_dados.planos||[])
+    .filter(p => p.ativo || p.id === a.plano_id)
+    .map(p => `<option value="${p.id}"${p.id === a.plano_id ? ' selected' : ''}>${p.nome}</option>`)
+    .join('');
+  document.getElementById('ea-senha').value = '';
+  document.getElementById('modal-editar-assin').style.display = 'flex';
+}
+
+function fecharEditarAssin() {
+  document.getElementById('modal-editar-assin').style.display = 'none';
+  _editAssinId = null;
+}
+
+async function salvarEditarAssin() {
+  if (_editAssinId === null) return;
+  const get = id => document.getElementById(id);
+  const body = {
+    nome:                 get('ea-nome').value.trim(),
+    email:                get('ea-email').value.trim(),
+    cpf_cnpj:             get('ea-cpf').value.trim(),
+    plano_id:             parseInt(get('ea-plano').value),
+    status:               get('ea-status').value,
+    renovacao_automatica: parseInt(get('ea-renovauto').value),
+    data_inicio_ciclo:    get('ea-inicio').value,
+    data_fim_ciclo:       get('ea-fim').value,
+    minutos_iniciais:     parseInt(get('ea-min-ini').value),
+    minutos_adicionados:  parseInt(get('ea-min-add').value),
+    minutos_consumidos:   parseFloat(get('ea-min-cons').value),
+    senha:                get('ea-senha').value,
+  };
+  if (!body.nome || !body.email) { toast('Nome e e-mail obrigatorios', false); return; }
+  const r = await apiCall(`/api/admin/assinaturas/${_editAssinId}`, 'PUT', body);
+  if (r && !r.erro) {
+    toast(`Assinatura #${_editAssinId} salva`);
+    fecharEditarAssin();
+    await carregarDados();
+  } else toast(r?.erro || 'Erro ao salvar', false);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const m = document.getElementById('modal-editar-assin');
+  if (m) m.addEventListener('click', e => { if (e.target === m) fecharEditarAssin(); });
+});
 </script>
+
+<!-- MODAL EDITAR ASSINATURA -->
+<div id="modal-editar-assin" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;padding:1.5rem 2rem;width:min(680px,95vw);max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.25)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
+      <strong style="font-size:1.05rem">Editar Assinatura <span id="edit-assin-id-lbl"></span></strong>
+      <button onclick="fecharEditarAssin()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#888">&times;</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem">
+      <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem">
+        Nome<input id="ea-nome" class="config-input">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem">
+        E-mail<input id="ea-email" class="config-input" type="email">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem">
+        CPF / CNPJ<input id="ea-cpf" class="config-input" placeholder="somente n&#250;meros">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem">
+        Plano<select id="ea-plano" class="config-input" style="height:2.2rem"></select>
+      </label>
+      <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem">
+        Status
+        <select id="ea-status" class="config-input" style="height:2.2rem">
+          <option value="ativa">ativa</option>
+          <option value="aguardando_pagamento">aguardando_pagamento</option>
+          <option value="suspensa">suspensa</option>
+          <option value="cancelada">cancelada</option>
+          <option value="encerrada">encerrada</option>
+        </select>
+      </label>
+      <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem">
+        Renova&#231;&#227;o autom&#225;tica
+        <select id="ea-renovauto" class="config-input" style="height:2.2rem">
+          <option value="1">Sim</option>
+          <option value="0">N&#227;o</option>
+        </select>
+      </label>
+      <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem">
+        In&#237;cio do ciclo<input id="ea-inicio" class="config-input" type="date">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem">
+        Fim do ciclo<input id="ea-fim" class="config-input" type="date">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem">
+        Min. iniciais<input id="ea-min-ini" class="config-input" type="number" min="0">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem">
+        Min. adicionados<input id="ea-min-add" class="config-input" type="number" min="0">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem">
+        Min. consumidos (zerar = 0)<input id="ea-min-cons" class="config-input" type="number" min="0" step="0.01">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem;grid-column:1/-1">
+        Nova senha <small style="color:#888;font-weight:400">(deixe em branco para manter a atual)</small>
+        <input id="ea-senha" class="config-input" type="password" placeholder="m&#237;nimo 6 caracteres" autocomplete="new-password">
+      </label>
+    </div>
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.4rem">
+      <button class="btn" style="background:#e9ecef;color:#333" onclick="fecharEditarAssin()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEditarAssin()">Salvar altera&#231;&#245;es</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

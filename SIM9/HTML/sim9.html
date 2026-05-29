@@ -96,6 +96,7 @@ textarea:focus{outline:none;border-color:#8b1400}
 .busca-item:last-child{border-bottom:none}
 .busca-score{color:#c9820a;font-weight:bold;margin-left:8px;white-space:nowrap}
 @media(max-width:720px){.main{grid-template-columns:1fr;grid-template-rows:auto 1fr}}
+.user-area{display:flex;align-items:center;gap:8px;margin-left:18px}.btn-login{background:#c9820a;color:#fff;border:none;border-radius:5px;padding:5px 14px;cursor:pointer;font-size:12px;font-weight:bold}.btn-login:hover{background:#a06808}.user-badge{display:inline-flex;align-items:center;gap:6px;background:#3d1f00;border:1px solid #c9820a;border-radius:14px;padding:3px 12px}.u-nome{color:#f0c060;font-size:12px;font-weight:bold}.u-min{color:#8fd48f;font-size:11px;font-weight:bold}.u-min.sem-saldo{color:#f08080}.btn-sair{background:none;border:1px solid #888;color:#ccc;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:11px}.btn-sair:hover{border-color:#f08080;color:#f08080}.aviso-saldo{background:#fff3cd;border-left:4px solid #ffc107;padding:8px 14px;font-size:12px;color:#7d5800;display:none}#modal-login{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);z-index:3000;align-items:center;justify-content:center}.ml-box{background:#faf6f0;border-radius:10px;padding:28px 28px 22px;max-width:340px;width:92%;box-shadow:0 4px 24px rgba(0,0,0,.3)}.ml-box h3{color:#1a0a02;margin-bottom:16px;font-size:17px}.ml-box label{font-size:12px;color:#5a3a20;font-weight:bold;display:block;margin-bottom:3px}.ml-box input{width:100%;padding:7px 9px;border:1px solid #c9820a;border-radius:4px;font-size:13px;margin-bottom:12px}.ml-box input:focus{outline:none;border-color:#8b1400}.ml-btn-ok{background:#c9820a;color:#fff;border:none;border-radius:5px;padding:8px 22px;cursor:pointer;font-size:14px;font-weight:bold;width:100%;margin-top:2px}.ml-btn-ok:hover{background:#a06808}.ml-btn-ok:disabled{opacity:.6;cursor:default}.ml-err{color:#c0392b;font-size:12px;margin-top:6px;min-height:14px}.ml-close{position:absolute;top:10px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:#888}
 </style>
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
@@ -111,8 +112,13 @@ textarea:focus{outline:none;border-color:#8b1400}
         <a href="/sobre-sim9">SIM9</a>
         <a href="/planos">Planos</a>
         <a href="/suporte">Suporte</a>
+        <a href="/minha-conta">Minha Conta</a>
     </nav>
+  <div id="user-area" class="user-area">
+    <button class="btn-login" onclick="abrirLogin()">Entrar</button>
+  </div>
 </header>
+<div id="aviso-saldo" class="aviso-saldo">&#9888; <strong>Saldo insuficiente</strong> &mdash; voc&ecirc; est&aacute; no plano gratuito. Registros limitados a 1&nbsp;000 e n&iacute;vel m&aacute;ximo&nbsp;3. <a href="/planos">Ver planos &rarr;</a></div>
 <nav class="nav-tools">
   <span class="tools-label">&#128736;</span>
   <a href="/baixar-imagens">baixar imagens automaticamente</a>
@@ -164,7 +170,7 @@ textarea:focus{outline:none;border-color:#8b1400}
         <option value="1">1 &mdash; Basico</option>
         <option value="2">2 &mdash; Profissional</option>
         <option value="3">3 &mdash; Auditoria</option>
-        <option value="4">4 &mdash; Premium</option>
+        <option value="4" id="opt-premium">4 &mdash; Premium</option>
       </select>
       </div>
 
@@ -337,7 +343,17 @@ textarea:focus{outline:none;border-color:#8b1400}
         <li><strong>1 &mdash; B&aacute;sico:</strong> similaridade quase absoluta. Inscri&ccedil;&otilde;es e cadastros simples.</li>
         <li><strong>2 &mdash; Profissional:</strong> similaridade pr&oacute;xima. Cadastros corporativos sens&iacute;veis.</li>
         <li><strong>3 &mdash; Auditoria:</strong> similaridade remota. C&oacute;digos, e-mails, auditorias.</li>
-        <li><strong>4 &mdash; Premium:</strong> integra&ccedil;&atilde;o total. Analistas, auditores e pesquisadores de datamining.</li>
+        <li><strong>4 &mdash; Premium &#128274;:</strong> integra&ccedil;&atilde;o total &mdash; exige assinatura com saldo ativo.</li>
+      </ul>
+    </div>
+
+    <div class="ajuda-section" style="background:#fff8ee;border-left:3px solid #ffc107;padding:8px 12px;border-radius:0 6px 6px 0">
+      <h4>&#127381; Planos e limites de acesso</h4>
+      <ul style="margin:0">
+        <li><strong>Plano gratuito (sem login):</strong> at&eacute; <strong>1&nbsp;000 registros</strong>; n&iacute;vel m&aacute;ximo&nbsp;3 (Auditoria).</li>
+        <li><strong>Assinante com saldo:</strong> registros ilimitados; todos os n&iacute;veis, incluindo Premium &#128274;.</li>
+        <li><strong>Assinante sem saldo:</strong> registros ilimitados; n&iacute;vel m&aacute;ximo&nbsp;3 (Auditoria).</li>
+        <li>Para ampliar sua capacidade, acesse <a href="/planos">Planos</a> ou fa&ccedil;a login em <em>Entrar</em>.</li>
       </ul>
     </div>
 
@@ -355,7 +371,7 @@ textarea:focus{outline:none;border-color:#8b1400}
 </div>
 
 <div id="stats-bar">
-  <span>&copy; 2026 Cordium &mdash; Todos os direitos reservados. &nbsp;|&nbsp; Autor: Claudio D'Amaro &nbsp;|&nbsp; Powered by Copilot &nbsp;|&nbsp; contato: <a href="mailto:claudio@damaro.com.br" style="color:#c9820a">claudio@damaro.com.br</a></span>
+  <span>&copy; 2026 Cordium &mdash; Todos os direitos reservados. &nbsp;|&nbsp; Autor: Claudio D'Amaro &nbsp;|&nbsp; Powered by Copilot &nbsp;|&nbsp; contato: <a href="mailto:claudio@damaro.com.br" style="color:#c9820a">claudio@damaro.com.br</a>&nbsp;|&nbsp; <a href="/admin" style="color:#555;opacity:.5;font-size:.85em" title="Admin">&#9881;</a></span>
   <span>&#128065; <span onclick="abrirStats()" style="cursor:pointer;text-decoration:underline dotted">Acessos</span>: <strong id="count-acessos">...</strong> &nbsp; <button id="btn-like" onclick="darLike()">&#10084; Like <span id="count-likes">...</span></button></span>
 </div>
 
@@ -1184,6 +1200,92 @@ function abrirStats(){
     g('popup-tabela').innerHTML = h;
   }).catch(function(){ g('popup-tabela').innerHTML='<p style="color:#888;text-align:center">Erro ao carregar historico.</p>'; });
 }
+</script>
+
+<!-- Modal Login -->
+<div id="modal-login" onclick="if(event.target===this)fecharLogin()" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);z-index:3000;align-items:center;justify-content:center">
+  <div class="ml-box" style="position:relative">
+    <button class="ml-close" onclick="fecharLogin()">&#10005;</button>
+    <h3>&#128274; Entrar</h3>
+    <label for="ml-email">E-mail</label>
+    <input type="email" id="ml-email" placeholder="seu@email.com" autocomplete="email">
+    <label for="ml-senha">Senha</label>
+    <input type="password" id="ml-senha" placeholder="sua senha" autocomplete="current-password">
+    <button class="ml-btn-ok" id="ml-btn-ok" onclick="fazerLogin()">Entrar</button>
+    <div class="ml-err" id="ml-err"></div>
+    <p style="font-size:11px;color:#888;margin-top:10px;text-align:center">Sem cadastro? <a href="/planos">Ver planos</a></p>
+  </div>
+</div>
+
+<script>
+function g(id){return document.getElementById(id);}
+function abrirLogin(){
+  g('modal-login').style.display='flex';
+  setTimeout(function(){g('ml-email').focus();},80);
+}
+function fecharLogin(){g('modal-login').style.display='none';}
+
+function _atualizarPremium(temSaldo){
+  var opt = g('opt-premium');
+  if(!opt) return;
+  if(temSaldo){
+    opt.disabled = false;
+    opt.textContent = '4 — Premium';
+  } else {
+    opt.disabled = true;
+    opt.textContent = '4 — Premium (bloqueado)';
+    if(g('nivel') && g('nivel').value === '4') g('nivel').value = '3';
+  }
+  // aviso-saldo: mostrar se sem saldo
+  var av = g('aviso-saldo');
+  if(av) av.style.display = temSaldo ? 'none' : 'block';
+}
+
+function _renderBadge(d){
+  var temSaldo = !!d.tem_saldo;
+  var minCls   = temSaldo ? 'u-min' : 'u-min sem-saldo';
+  var min = (d.minutos_disponiveis!=null)
+    ? ' <span class="'+minCls+'">'+(temSaldo ? d.minutos_disponiveis+' min' : 'sem saldo')+'</span>' : '';
+  g('user-area').innerHTML =
+    '<span class="user-badge"><span class="u-nome">'+d.nome+'</span>'+min+'</span>'
+    +'<button class="btn-sair" onclick="fazerLogout()">Sair</button>';
+  _atualizarPremium(temSaldo);
+}
+
+function fazerLogin(){
+  var email=g('ml-email').value.trim();
+  var senha=g('ml-senha').value;
+  if(!email||!senha){g('ml-err').textContent='Preencha e-mail e senha.';return;}
+  g('ml-btn-ok').disabled=true;
+  fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email:email,senha:senha})})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    g('ml-btn-ok').disabled=false;
+    if(d.erro){g('ml-err').textContent=d.erro;return;}
+    _renderBadge(d);
+    fecharLogin();
+  }).catch(function(){
+    g('ml-btn-ok').disabled=false;
+    g('ml-err').textContent='Erro de conexao.';
+  });
+}
+function fazerLogout(){
+  fetch('/api/logout',{method:'POST'}).then(function(){
+    g('user-area').innerHTML='<button class="btn-login" onclick="abrirLogin()">Entrar</button>';
+    _atualizarPremium(false);
+  });
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')fecharLogin();});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&g('modal-login')&&g('modal-login').style.display==='flex') fazerLogin();
+});
+// Inicializar: Premium bloqueado por padrao
+_atualizarPremium(false);
+// Verificar sessao ativa ao carregar
+fetch('/api/me').then(function(r){return r.json();}).then(function(d){
+  if(d.logado) _renderBadge(d);
+}).catch(function(){});
 </script>
 
 </body>

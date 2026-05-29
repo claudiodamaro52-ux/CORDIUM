@@ -6,6 +6,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from MONETIZACAO import init_db, monetizacao_bp
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'cordium-local-dev-secret-2026')
 init_db()
 app.register_blueprint(monetizacao_bp)
 
@@ -390,12 +391,28 @@ def baixar_selecionadas():
 
 # ── SIM9 ─────────────────────────────────────────────────────────
 
+LIMITE_LINHAS_FREE = 1000  # linhas max para não logados (plano gratuito)
+
 @app.route('/api/sim9/processar', methods=['POST'])
 def sim9_processar():
+    from flask import session as _sess
     import queue as _q
     data   = request.json or {}
-    lista  = str(data.get('lista',  ''))[:500000]
+    lista_raw = str(data.get('lista', ''))[:500000]
+    # Regras de acesso por perfil
+    logado    = bool(_sess.get('assinatura_id'))
+    tem_saldo = bool(_sess.get('tem_saldo'))
+    linhas    = lista_raw.splitlines()
+    truncado  = False
+    # Não logado (plano gratuito) → limite de 1000 linhas
+    if not logado and len(linhas) > LIMITE_LINHAS_FREE:
+        linhas   = linhas[:LIMITE_LINHAS_FREE]
+        truncado = True
+    lista  = "\n".join(linhas)
     nivel  = int(data.get('nivel',  1))
+    # Sem saldo (logado ou não) → bloquear nível 4 Premium
+    if not tem_saldo and nivel > 3:
+        nivel = 3
     tipo   = str(data.get('tipo',   'nome'))[:20]
     padrao = str(data.get('padrao', ''))[:200]
     rm_num  = bool(data.get('rm_num', False))
@@ -408,7 +425,7 @@ def sim9_processar():
         def _cb(i, n):
             fila.put({'progress': round(i / n * 100), 'i': i, 'n': n})
         resultado = _sim9.processar(lista, nivel, padrao, rm_num, on_progress=_cb, tipo=tipo, min_sim=min_sim)
-        fila.put({'done': True, 'result': resultado})
+        fila.put({'done': True, 'result': resultado, 'truncado': truncado, 'limite_free': LIMITE_LINHAS_FREE})
 
     threading.Thread(target=_run, daemon=True).start()
 

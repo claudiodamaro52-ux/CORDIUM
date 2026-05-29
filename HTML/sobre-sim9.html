@@ -205,8 +205,39 @@ Content-Type: application/json
 
 # Retorna JSON com lista de similares e scores</div>
 
-    <h2>Plano gratuito e limites</h2>
-    <p>O SIM9 processa listas de at&#233; <strong>1&nbsp;000 registros</strong> gratuitamente, sem cadastro. Para listas maiores, utilize o <a href="/planos">Plano Profissional</a> (em breve) ou o modo <strong>&#9889; Preview</strong> (amostra dos primeiros 300 registros) dispon&#237;vel na barra de opera&ccedil;&#245;es da ferramenta.</p>
+    <h2>Planos e limites de acesso</h2>
+    <p>O SIM9 possui tr&ecirc;s perfis de acesso, com regras claras de uso:</p>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0">
+      <thead>
+        <tr style="background:#1a0a02;color:#faf6f0">
+          <th style="padding:8px 12px;text-align:left">Perfil</th>
+          <th style="padding:8px 12px;text-align:center">Limite de registros</th>
+          <th style="padding:8px 12px;text-align:center">N&iacute;vel m&aacute;ximo</th>
+          <th style="padding:8px 12px;text-align:center">Premium</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:#fdf9f5">
+          <td style="padding:8px 12px"><strong>Sem login</strong> <span style="font-size:12px;color:#888">(plano gratuito)</span></td>
+          <td style="padding:8px 12px;text-align:center">at&eacute; 1&nbsp;000</td>
+          <td style="padding:8px 12px;text-align:center">N3 &mdash; Auditoria</td>
+          <td style="padding:8px 12px;text-align:center;color:#c0392b">&#10006; Bloqueado</td>
+        </tr>
+        <tr style="background:#fff">
+          <td style="padding:8px 12px"><strong>Assinante com saldo</strong> <span style="font-size:12px;color:#888">(login ativo)</span></td>
+          <td style="padding:8px 12px;text-align:center">Ilimitado</td>
+          <td style="padding:8px 12px;text-align:center">N4 &mdash; Premium</td>
+          <td style="padding:8px 12px;text-align:center;color:#27ae60">&#10004; Dispon&iacute;vel</td>
+        </tr>
+        <tr style="background:#fdf9f5">
+          <td style="padding:8px 12px"><strong>Assinante sem saldo</strong> <span style="font-size:12px;color:#888">(login expirado)</span></td>
+          <td style="padding:8px 12px;text-align:center">Ilimitado</td>
+          <td style="padding:8px 12px;text-align:center">N3 &mdash; Auditoria</td>
+          <td style="padding:8px 12px;text-align:center;color:#c0392b">&#10006; Bloqueado</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:13px;color:#5a3a20">O login &eacute; feito com <strong>e-mail e senha</strong> diretamente no SIM9 (bot&atilde;o <em>Entrar</em> no cabe&ccedil;alho) &mdash; sem necessidade de token. O token, quando ativo, d&aacute; acesso em <a href="/minha-conta">Minha Conta</a>.</p>
 
     <div style="text-align:center;margin:32px 0">
         <a class="btn" href="/sim9" style="font-size:18px;padding:16px 36px">Abrir SIM9 agora &rarr;</a>

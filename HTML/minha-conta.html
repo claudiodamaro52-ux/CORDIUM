@@ -93,13 +93,36 @@ table tr:last-child td { border-bottom: none; }
     <h1>Minha Conta</h1>
     <p style="color:#555;margin-bottom:28px">Consulte o saldo, consumo e validade do seu token de acesso.</p>
 
+    <!-- Modo token -->
     <div class="form-group">
-        <label for="campo-token">Token de acesso</label>
+        <label for="campo-token">Token de acesso <span style="font-weight:normal;color:#888">(opcional)</span></label>
         <input type="text" id="campo-token" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off" spellcheck="false">
     </div>
-    <button class="btn-consultar" id="btn-consultar" onclick="consultar()">Consultar</button>
+    <button class="btn-consultar" id="btn-consultar" onclick="consultar()">Consultar com token</button>
+
+    <div style="display:flex;align-items:center;gap:10px;margin:18px 0 4px">
+        <hr style="flex:1;border:none;border-top:1px solid #e0d0b0">
+        <span style="color:#888;font-size:13px">ou entre com e-mail e senha</span>
+        <hr style="flex:1;border:none;border-top:1px solid #e0d0b0">
+    </div>
+
+    <!-- Modo senha (config mínima) -->
+    <div id="form-senha" style="background:#fff8ee;border:1.5px solid #ffd080;border-radius:8px;padding:18px 20px;margin-bottom:4px">
+        <p style="margin:0 0 14px;color:#7d5800;font-size:13px">&#128274; Acesso com configuração mínima — consulte seus dados de assinatura.</p>
+        <div class="form-group" style="margin-bottom:12px">
+            <label for="campo-email" style="font-size:13px">E-mail</label>
+            <input type="email" id="campo-email" placeholder="seu@email.com" autocomplete="email" style="font-family:Arial">
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+            <label for="campo-senha" style="font-size:13px">Senha</label>
+            <input type="password" id="campo-senha" placeholder="sua senha" autocomplete="current-password" style="font-family:Arial">
+        </div>
+        <button class="btn-consultar" id="btn-login" onclick="consultarComSenha()" style="font-size:14px;padding:10px 24px">Entrar</button>
+        <button class="btn-consultar" id="btn-sair-conta" onclick="sairConta()" style="display:none;font-size:13px;padding:8px 18px;background:#555;margin-left:8px">Sair</button>
+    </div>
 
     <div id="msg-erro"></div>
+    <div id="aviso-config-min" style="display:none;background:#fff3cd;border-left:4px solid #ffc107;border-radius:6px;padding:12px 16px;color:#7d5800;margin-top:16px;font-size:13px">&#9888; <strong>Configuração mínima</strong> — Seu token expirou ou não foi informado. Você está visualizando os dados da sua assinatura. Para acesso completo ao SIM9, <a href="/planos">renove sua assinatura</a>.</div>
 
     <div id="resultado">
 
@@ -158,12 +181,13 @@ table tr:last-child td { border-bottom: none; }
 <script>
 async function consultar() {
     const token = document.getElementById('campo-token').value.trim();
-    if (!token) { mostrarErro('Informe o token.'); return; }
+    if (!token) { mostrarErro('Informe o token ou use e-mail e senha abaixo.'); return; }
 
     const btn = document.getElementById('btn-consultar');
     btn.disabled = true; btn.textContent = 'Consultando…';
     ocultarErro();
     document.getElementById('resultado').style.display = 'none';
+    document.getElementById('aviso-config-min').style.display = 'none';
 
     try {
         const r = await fetch('/api/usuario/conta', {
@@ -173,13 +197,101 @@ async function consultar() {
         });
         const d = await r.json();
         if (!r.ok) { mostrarErro(d.erro || 'Erro ao consultar.'); return; }
+        // Token expirado ou desativado → aviso + oferecer config mínima
+        if (!d.token.ativo || d.token.expirado) {
+            document.getElementById('aviso-config-min').style.display = 'block';
+            document.getElementById('aviso-config-min').innerHTML =
+                '&#9888; <strong>' + (!d.token.ativo ? 'Token desativado' : 'Token expirado') + '</strong>'
+                + ' — Acesso com configuração mínima. Para acesso completo, <a href="/planos">renove sua assinatura</a>.';
+        }
         renderizar(d);
     } catch (e) {
         mostrarErro('Falha de conexão. Tente novamente.');
     } finally {
-        btn.disabled = false; btn.textContent = 'Consultar';
+        btn.disabled = false; btn.textContent = 'Consultar com token';
     }
 }
+
+async function consultarComSenha() {
+    const email = document.getElementById('campo-email').value.trim();
+    const senha = document.getElementById('campo-senha').value;
+    if (!email || !senha) { mostrarErro('Informe e-mail e senha.'); return; }
+    const btn = document.getElementById('btn-login');
+    btn.disabled = true; btn.textContent = 'Entrando…';
+    ocultarErro();
+    document.getElementById('resultado').style.display = 'none';
+    document.getElementById('aviso-config-min').style.display = 'none';
+    try {
+        const r = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, senha })
+        });
+        const d = await r.json();
+        if (!r.ok || d.erro) { mostrarErro(d.erro || 'E-mail ou senha inválidos.'); return; }
+        // Buscar dados completos da assinatura via sessão
+        const r2 = await fetch('/api/usuario/minha-assinatura');
+        const d2 = await r2.json();
+        if (!r2.ok || d2.erro) { mostrarErro(d2.erro || 'Erro ao carregar conta.'); return; }
+        document.getElementById('aviso-config-min').style.display = 'block';
+        document.getElementById('btn-sair-conta').style.display = 'inline-block';
+        renderizarAssinatura(d2);
+    } catch(e) {
+        mostrarErro('Falha de conexão. Tente novamente.');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Entrar';
+    }
+}
+
+async function sairConta() {
+    await fetch('/api/logout', { method: 'POST' });
+    document.getElementById('btn-sair-conta').style.display = 'none';
+    document.getElementById('resultado').style.display = 'none';
+    document.getElementById('aviso-config-min').style.display = 'none';
+    document.getElementById('campo-email').value = '';
+    document.getElementById('campo-senha').value = '';
+}
+
+function renderizarAssinatura(d) {
+    // Monta estrutura compatível com renderizar() para o bloco de assinatura
+    const a = d.assinatura;
+    if (!a) { mostrarErro('Nenhuma assinatura encontrada.'); return; }
+    document.getElementById('bloco-assinatura').style.display = 'block';
+    document.getElementById('r-plano-nome').textContent     = a.plano_nome || '—';
+    document.getElementById('r-min-mensais').textContent    = a.minutos_mensais || (a.minutos_iniciais || '—');
+    document.getElementById('r-min-consumidos').textContent = (a.minutos_consumidos || 0) + ' min';
+    const di = a.data_inicio_ciclo ? new Date(a.data_inicio_ciclo).toLocaleDateString('pt-BR') : '—';
+    const df = a.data_fim_ciclo ? new Date(a.data_fim_ciclo).toLocaleDateString('pt-BR') : '—';
+    document.getElementById('r-periodo').textContent = di + ' → ' + df;
+    const sc = a.status === 'ativa' ? 'badge-ok' : (a.status === 'suspensa' ? 'badge-warn' : 'badge-erro');
+    document.getElementById('r-assin-status').innerHTML = '<span class="badge '+sc+'">'+(a.status||'—')+'</span>';
+    // Consumos
+    if (d.consumos && d.consumos.length > 0) {
+        const tbody = document.getElementById('r-consumos-tbody');
+        tbody.innerHTML = d.consumos.map(c => {
+            const dt = new Date(c.data).toLocaleString('pt-BR');
+            return '<tr><td>'+dt+'</td><td>'+c.minutos_consumidos+' min</td><td>'+(c.detalhes||'—')+'</td></tr>';
+        }).join('');
+        document.getElementById('bloco-consumos').style.display = 'block';
+    }
+    // Ocultar bloco de token (não disponível no modo senha)
+    document.getElementById('resultado').querySelectorAll('h2, .card').forEach(function(el, i) {
+        if (i < 4) el.style.display = 'none'; // oculta seção Token e Horas
+    });
+    document.getElementById('resultado').style.display = 'block';
+}
+
+// Ao carregar: verificar se já tem sessão ativa
+window.addEventListener('load', async function() {
+    try {
+        const r = await fetch('/api/me');
+        const d = await r.json();
+        if (d.logado) {
+            document.getElementById('campo-email').value = d.email || '';
+            document.getElementById('btn-sair-conta').style.display = 'inline-block';
+        }
+    } catch(e) {}
+});
 
 function renderizar(d) {
     const t = d.token;
@@ -246,9 +358,8 @@ function ocultarErro() {
     document.getElementById('msg-erro').style.display = 'none';
 }
 
-document.getElementById('campo-token').addEventListener('keydown', e => {
-    if (e.key === 'Enter') consultar();
-});
+document.getElementById('campo-token').addEventListener('keydown', e => { if (e.key === 'Enter') consultar(); });
+document.getElementById('campo-senha').addEventListener('keydown', e => { if (e.key === 'Enter') consultarComSenha(); });
 </script>
 </body>
 </html>

@@ -666,3 +666,189 @@ def admin_renovar_assinatura(aid):
         return jsonify({**row, 'renovado': True, 'tipo': 'ciclo',
                         'novo_inicio': inicio.isoformat(), 'novo_fim': fim.isoformat()})
 
+
+
+# ── PUT /api/admin/assinaturas/<id>  (edicao completa) ───────────────────────
+
+@monetizacao_bp.route("/api/admin/assinaturas/<int:aid>", methods=["PUT"])
+def admin_editar_assinatura(aid):
+    err = _check_admin()
+    if err: return err
+    data = request.get_json(force=True) or {}
+    STATUS_VALIDOS = {"ativa","aguardando_pagamento","suspensa","cancelada","encerrada"}
+    CAMPOS = {
+        "nome":                ("cliente_nome",        lambda v: str(v).strip() or (_ for _ in ()).throw(ValueError("vazio"))),
+        "email":               ("cliente_email",       lambda v: str(v).strip().lower()),
+        "cpf_cnpj":            ("cliente_cpf_cnpj",    lambda v: re.sub(r"\D", "", str(v))),
+        "plano_id":            ("plano_id",            int),
+        "status":              ("status",              str),
+        "minutos_iniciais":    ("minutos_iniciais",    int),
+        "minutos_adicionados": ("minutos_adicionados", int),
+        "minutos_consumidos":  ("minutos_consumidos",  float),
+        "data_inicio_ciclo":   ("data_inicio_ciclo",   str),
+        "data_fim_ciclo":      ("data_fim_ciclo",      str),
+        "renovacao_automatica":("renovacao_automatica",lambda v: 1 if v else 0),
+    }
+    campos = {}
+    for chave, (col, fn) in CAMPOS.items():
+        if chave not in data:
+            continue
+        try:
+            v = fn(data[chave])
+        except Exception:
+            return jsonify({"erro": f"{chave} invalido"}), 400
+        if chave == "email" and not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", v):
+            return jsonify({"erro": "E-mail invalido"}), 400
+        if chave == "status" and v not in STATUS_VALIDOS:
+            return jsonify({"erro": "Status invalido"}), 400
+        campos[col] = v
+    # Senha: se enviada e não vazia, hash e inclui no update
+    senha_raw = (data.get("senha") or "").strip()
+    if senha_raw:
+        if len(senha_raw) < 6:
+            return jsonify({"erro": "Senha deve ter ao menos 6 caracteres"}), 400
+        from werkzeug.security import generate_password_hash
+        campos["cliente_senha_hash"] = generate_password_hash(senha_raw)
+
+    if not campos:
+        return jsonify({"erro": "Nenhum campo enviado"}), 400
+    from .db import get_conn
+    from datetime import datetime, timezone
+    campos["atualizado_em"] = datetime.now(timezone.utc).isoformat()
+    set_clause = ", ".join(f"{k}=?" for k in campos)
+    values     = list(campos.values()) + [aid]
+    conn = get_conn()
+    if not conn.execute("SELECT id FROM assinaturas WHERE id=?", (aid,)).fetchone():
+        conn.close()
+        return jsonify({"erro": "Assinatura nao encontrada"}), 404
+    conn.execute(f"UPDATE assinaturas SET {set_clause} WHERE id=?", values)
+    conn.commit()
+    row = dict(conn.execute(
+        "SELECT a.*, p.nome as plano_nome FROM assinaturas a LEFT JOIN planos p ON a.plano_id=p.id WHERE a.id=?",
+        (aid,)
+    ).fetchone())
+    conn.close()
+    return jsonify(row)
+
+
+# ── Autenticação de clientes ──────────────────────────────────────────────────
+@monetizacao_bp.route("/api/login", methods=["POST"])
+def cliente_login():
+    from flask import session
+    from werkzeug.security import check_password_hash
+    data  = request.get_json(force=True) or {}
+    email = (data.get("email") or "").strip().lower()
+    senha = (data.get("senha") or "").strip()
+    if not email or not senha:
+        return jsonify({"erro": "E-mail e senha obrigatórios"}), 400
+    conn = get_conn()
+    row  = conn.execute(
+        "SELECT id, cliente_nome, cliente_email, cliente_senha_hash, status, "
+        "minutos_iniciais, minutos_adicionados, minutos_consumidos, data_fim_ciclo "
+        "FROM assinaturas WHERE LOWER(cliente_email)=? AND status='ativa'",
+        (email,)
+    ).fetchone()
+    conn.close()
+    if not row:
+        return jsonify({"erro": "E-mail ou senha inválidos"}), 401
+    if not row["cliente_senha_hash"] or not check_password_hash(row["cliente_senha_hash"], senha):
+        return jsonify({"erro": "E-mail ou senha inválidos"}), 401
+    minutos_disp = round(
+        (row["minutos_iniciais"] or 0) +
+        (row["minutos_adicionados"] or 0) -
+        (row["minutos_consumidos"] or 0), 2
+    )
+    session.clear()
+    session["assinatura_id"]       = row["id"]
+    session["cliente_nome"]        = row["cliente_nome"]
+    session["cliente_email"]       = row["cliente_email"]
+    session["minutos_disponiveis"] = minutos_disp
+    tem_saldo = minutos_disp > 0
+    session["tem_saldo"] = tem_saldo
+    return jsonify({
+        "logado":              True,
+        "nome":                row["cliente_nome"],
+        "email":               row["cliente_email"],
+        "minutos_disponiveis": minutos_disp,
+        "tem_saldo":           tem_saldo,
+        "data_fim_ciclo":      row["data_fim_ciclo"],
+    })
+
+
+@monetizacao_bp.route("/api/logout", methods=["POST"])
+def cliente_logout():
+    from flask import session
+    session.clear()
+    return jsonify({"ok": True})
+
+
+@monetizacao_bp.route("/api/me")
+def cliente_me():
+    from flask import session
+    if not session.get("assinatura_id"):
+        return jsonify({"logado": False})
+    # Atualiza minutos em tempo real do banco
+    conn = get_conn()
+    row  = conn.execute(
+        "SELECT cliente_nome, cliente_email, minutos_iniciais, "
+        "minutos_adicionados, minutos_consumidos, data_fim_ciclo FROM assinaturas WHERE id=?",
+        (session["assinatura_id"],)
+    ).fetchone()
+    conn.close()
+    if not row:
+        from flask import session as _s; _s.clear()
+        return jsonify({"logado": False})
+    minutos_disp = round(
+        (row["minutos_iniciais"] or 0) +
+        (row["minutos_adicionados"] or 0) -
+        (row["minutos_consumidos"] or 0), 2
+    )
+    tem_saldo = minutos_disp > 0
+    session["minutos_disponiveis"] = minutos_disp
+    session["tem_saldo"] = tem_saldo
+    return jsonify({
+        "logado":              True,
+        "nome":                row["cliente_nome"],
+        "email":               row["cliente_email"],
+        "minutos_disponiveis": minutos_disp,
+        "tem_saldo":           tem_saldo,
+        "data_fim_ciclo":      row["data_fim_ciclo"],
+    })
+
+
+# ── GET /api/usuario/minha-assinatura (requer sessão via /api/login) ───────────
+@monetizacao_bp.route("/api/usuario/minha-assinatura")
+def usuario_minha_assinatura():
+    from flask import session
+    aid = session.get("assinatura_id")
+    if not aid:
+        return jsonify({"erro": "Nao autenticado"}), 401
+    conn = get_conn()
+    row = conn.execute(
+        "SELECT a.*, p.nome as plano_nome, p.minutos_mensais, p.preco_mensal "
+        "FROM assinaturas a LEFT JOIN planos p ON a.plano_id=p.id WHERE a.id=?",
+        (aid,)
+    ).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({"erro": "Assinatura nao encontrada"}), 404
+    assinatura = dict(row)
+    consumos = [dict(r) for r in conn.execute(
+        "SELECT * FROM consumos WHERE assinatura_id=? ORDER BY data DESC LIMIT 10",
+        (aid,)
+    ).fetchall()]
+    conn.close()
+    minutos_disp = round(
+        (assinatura.get("minutos_iniciais") or 0) +
+        (assinatura.get("minutos_adicionados") or 0) -
+        (assinatura.get("minutos_consumidos") or 0), 2
+    )
+    return jsonify({
+        "nome":             assinatura["cliente_nome"],
+        "email":            assinatura["cliente_email"],
+        "assinatura":       assinatura,
+        "consumos":         consumos,
+        "minutos_disp":     minutos_disp,
+        "tem_saldo":        minutos_disp > 0,
+        "config_minima":    True,
+    })
