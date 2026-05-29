@@ -404,3 +404,67 @@ def admin_desativar_token(token_id):
     conn.commit()
     conn.close()
     return jsonify({'ok': True, 'token': token_id})
+
+
+# ── POST /api/usuario/conta ────────────────────────────────────────────────────
+
+@monetizacao_bp.route('/api/usuario/conta', methods=['POST'])
+def usuario_conta():
+    data     = request.get_json(force=True) or {}
+    token_id = (data.get('token') or '').strip()
+
+    if not token_id:
+        return jsonify({'erro': 'Token obrigatorio'}), 400
+
+    conn = get_conn()
+    row  = conn.execute('SELECT * FROM tokens WHERE id = ?', (token_id,)).fetchone()
+
+    if not row:
+        conn.close()
+        return jsonify({'erro': 'Token nao encontrado'}), 404
+
+    token_data = dict(row)
+    email = token_data['email']
+
+    # Assinatura associada ao email (novo modelo)
+    assinatura_row = conn.execute(
+        'SELECT a.*, p.nome as plano_nome, p.minutos_mensais, p.preco_mensal '
+        'FROM assinaturas a LEFT JOIN planos p ON a.plano_id = p.id '
+        'WHERE a.cliente_email = ? ORDER BY a.data_criacao DESC LIMIT 1',
+        (email,)
+    ).fetchone()
+    assinatura = dict(assinatura_row) if assinatura_row else None
+
+    # Ultimos 10 consumos da assinatura
+    consumos = []
+    if assinatura:
+        consumos = [dict(r) for r in conn.execute(
+            'SELECT * FROM consumos WHERE assinatura_id = ? ORDER BY data DESC LIMIT 10',
+            (assinatura['id'],)
+        ).fetchall()]
+
+    conn.close()
+
+    agora     = _agora()
+    expiracao = datetime.fromisoformat(token_data['data_expiracao'])
+    if expiracao.tzinfo is None:
+        expiracao = expiracao.replace(tzinfo=timezone.utc)
+
+    dias_restantes  = max(0, (expiracao - agora).days)
+    horas_restantes = max(0.0, round(token_data['horas_contratadas'] - token_data['horas_consumidas'], 2))
+
+    return jsonify({
+        'token': {
+            'prefixo':           token_data['id'][:8] + '…',
+            'email':             token_data['email'],
+            'ativo':             bool(token_data['ativo']),
+            'horas_contratadas': token_data['horas_contratadas'],
+            'horas_consumidas':  round(token_data['horas_consumidas'], 2),
+            'horas_restantes':   horas_restantes,
+            'data_expiracao':    token_data['data_expiracao'],
+            'dias_para_expirar': dias_restantes,
+            'expirado':          agora > expiracao,
+        },
+        'assinatura': assinatura,
+        'consumos':   consumos,
+    })

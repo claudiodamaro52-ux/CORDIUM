@@ -560,6 +560,11 @@ if GITHUB_TOKEN and os.environ.get('WERKZEUG_RUN_MAIN', 'true') == 'true':
     atexit.register(lambda: _scheduler.shutdown())
 
 
+
+@app.route('/minha-conta')
+def minha_conta():
+    return send_from_directory(HTML_DIR, 'minha-conta.html')
+
 @app.route('/admin')
 def admin_dashboard():
     return send_from_directory(HTML_DIR, 'admin.html')

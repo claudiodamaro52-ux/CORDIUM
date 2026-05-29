@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Consulte o saldo, consumo e status do seu token Cordium.">
+<link rel="canonical" href="https://cordium.com.br/minha-conta">
+<meta property="og:title" content="Minha Conta | Cordium">
+<meta property="og:description" content="Consulte o saldo, consumo e status do seu token Cordium.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cordium.com.br/minha-conta">
+<meta property="og:image" content="https://cordium.com.br/img/Logo_Cordium.webp">
+<meta property="og:site_name" content="Cordium">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/img/Logo_Cordium.webp" type="image/webp">
+<title>Minha Conta | Cordium</title>
+<style>
+body { font-family: Arial, sans-serif; background: #faf6f0; margin: 0; padding: 0; }
+header { background: #1a0a02; color: white; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; }
+header .brand { display: flex; align-items: center; gap: 12px; }
+header .brand img { height: 50px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+header .brand-name { color: white; font-size: 22px; font-weight: bold; text-decoration: none; margin: 0; }
+header .nav-info a { color: white; margin-left: 20px; text-decoration: none; font-weight: bold; }
+header .nav-info a:hover, header .nav-info a.ativo { color: #c9820a; }
+.nav-tools { background: #3d1f00; padding: 8px 30px; display: flex; align-items: center; gap: 8px; font-size: 14px; border-top: 1px solid #d4af37; border-bottom: 1px solid #d4af37; }
+.nav-tools .tools-label { color: #c9820a; font-weight: bold; margin-right: 6px; }
+.nav-tools a { color: white; text-decoration: none; font-weight: bold; padding: 4px 14px; border-radius: 4px; transition: background 0.2s; }
+.nav-tools a:hover { background: #c9820a; }
+.nav-tools .tools-sep { color: #c9820a; margin: 0 2px; }
+.container { max-width: 760px; margin: 40px auto 80px; background: white; padding: 36px; border-radius: 12px; box-shadow: 0 0 18px rgba(0,0,0,0.09); }
+h1 { color: #1a0a02; margin-bottom: 4px; font-size: 26px; }
+h2 { color: #c9820a; font-size: 18px; margin: 28px 0 10px; }
+a { color: #c9820a; }
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; font-weight: bold; color: #3d1f00; margin-bottom: 6px; font-size: 14px; }
+.form-group input {
+    width: 100%; padding: 11px 14px; border: 1.5px solid #c9820a; border-radius: 6px;
+    font-size: 14px; background: #fffdf8; color: #222; box-sizing: border-box; font-family: monospace; letter-spacing: .03em;
+}
+.form-group input:focus { outline: none; border-color: #8b1400; box-shadow: 0 0 0 2px rgba(201,130,10,.15); }
+.btn-consultar { background: #c9820a; color: white; border: none; border-radius: 8px; padding: 13px 32px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background .2s; }
+.btn-consultar:hover { background: #8b1400; }
+.btn-consultar:disabled { opacity: .6; cursor: default; }
+#resultado { display: none; margin-top: 28px; }
+.card { border: 1.5px solid #e0d0b0; border-radius: 10px; padding: 22px; background: #fdf9f5; margin-bottom: 18px; }
+.card-title { font-size: 13px; font-weight: bold; color: #888; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
+.kpi { background: #1a0a02; color: white; border-radius: 8px; padding: 14px 16px; text-align: center; }
+.kpi .val { font-size: 26px; font-weight: bold; color: #d4af37; }
+.kpi .lbl { font-size: 11px; color: #bbb; margin-top: 3px; }
+.badge { display: inline-block; border-radius: 12px; padding: 3px 10px; font-size: 12px; font-weight: bold; }
+.badge-ok    { background: #d4edda; color: #155724; }
+.badge-warn  { background: #fff3cd; color: #856404; }
+.badge-erro  { background: #f8d7da; color: #721c24; }
+.progress-bar-wrap { background: #f0e6d2; border-radius: 8px; height: 12px; overflow: hidden; margin: 10px 0 4px; }
+.progress-bar-fill { height: 100%; background: #c9820a; border-radius: 8px; transition: width .4s; }
+.progress-bar-fill.danger { background: #dc3545; }
+.info-row { display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-bottom: 6px; }
+.info-row strong { color: #222; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+table th { background: #3d1f00; color: white; padding: 8px 12px; text-align: left; }
+table td { padding: 8px 12px; border-bottom: 1px solid #f0e6d2; color: #333; }
+table tr:last-child td { border-bottom: none; }
+#msg-erro { display:none; background: #f8d7da; border-left: 4px solid #dc3545; border-radius: 6px; padding: 14px 18px; color: #721c24; margin-top: 16px; font-size: 14px; }
+#stats-bar{position:fixed;bottom:0;left:0;right:0;background:#1a0a02;color:#faf6f0;display:flex;align-items:center;justify-content:space-between;padding:8px 24px;font-size:.85rem;z-index:999;border-top:1px solid #d4af37}
+</style>
+</head>
+<body>
+
+<header>
+    <div class="brand">
+        <a href="/"><img src="/img/Logo_Cordium.webp" alt="CORDIUM ferramentas online de automa&#231;&#227;o"></a>
+        <a class="brand-name" href="/">Cordium</a>
+    </div>
+    <nav class="nav-info">
+        <a href="/sobre">Sobre</a>
+        <a href="/sobre-sim9">SIM9</a>
+        <a href="/planos">Planos</a>
+        <a href="/suporte">Suporte</a>
+        <a href="/minha-conta" class="ativo">Minha Conta</a>
+    </nav>
+</header>
+<nav class="nav-tools">
+    <span class="tools-label">&#128736;</span>
+    <a href="/baixar-imagens">baixar imagens automaticamente</a>
+    <span class="tools-sep">|</span>
+    <a href="/formatar-json">JSON Tools Pro</a>
+    <span class="tools-sep">|</span>
+    <a href="/sim9">SIM9</a>
+</nav>
+
+<div class="container">
+    <h1>Minha Conta</h1>
+    <p style="color:#555;margin-bottom:28px">Consulte o saldo, consumo e validade do seu token de acesso.</p>
+
+    <div class="form-group">
+        <label for="campo-token">Token de acesso</label>
+        <input type="text" id="campo-token" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off" spellcheck="false">
+    </div>
+    <button class="btn-consultar" id="btn-consultar" onclick="consultar()">Consultar</button>
+
+    <div id="msg-erro"></div>
+
+    <div id="resultado">
+
+        <h2>&#128274; Token</h2>
+        <div class="card">
+            <div class="card-title">Informa&#231;&#245;es do token</div>
+            <div class="info-row"><span>Identificador</span><strong id="r-prefixo">—</strong></div>
+            <div class="info-row"><span>E-mail</span><strong id="r-email">—</strong></div>
+            <div class="info-row"><span>Status</span><span id="r-status-badge">—</span></div>
+            <div class="info-row"><span>Expira&#231;&#227;o</span><strong id="r-expiracao">—</strong></div>
+        </div>
+
+        <h2>&#9203; Cota de uso (horas)</h2>
+        <div class="card">
+            <div class="kpi-grid">
+                <div class="kpi"><div class="val" id="r-horas-total">—</div><div class="lbl">Contratadas</div></div>
+                <div class="kpi"><div class="val" id="r-horas-consumidas">—</div><div class="lbl">Consumidas</div></div>
+                <div class="kpi"><div class="val" id="r-horas-restantes">—</div><div class="lbl">Restantes</div></div>
+            </div>
+            <div class="progress-bar-wrap" style="margin-top:18px">
+                <div class="progress-bar-fill" id="r-barra"></div>
+            </div>
+            <div style="text-align:right;font-size:12px;color:#888" id="r-pct-txt">0% utilizado</div>
+        </div>
+
+        <div id="bloco-assinatura" style="display:none">
+            <h2>&#128196; Assinatura</h2>
+            <div class="card">
+                <div class="card-title">Plano ativo</div>
+                <div class="info-row"><span>Plano</span><strong id="r-plano-nome">—</strong></div>
+                <div class="info-row"><span>Minutos mensais</span><strong id="r-min-mensais">—</strong></div>
+                <div class="info-row"><span>Minutos consumidos</span><strong id="r-min-consumidos">—</strong></div>
+                <div class="info-row"><span>Per&#237;odo</span><strong id="r-periodo">—</strong></div>
+                <div class="info-row"><span>Status</span><span id="r-assin-status">—</span></div>
+            </div>
+        </div>
+
+        <div id="bloco-consumos" style="display:none">
+            <h2>&#128203; &#218;ltimos consumos</h2>
+            <div class="card" style="padding:0;overflow:hidden">
+                <table>
+                    <thead><tr><th>Data</th><th>Minutos</th><th>Detalhes</th></tr></thead>
+                    <tbody id="r-consumos-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="stats-bar">
+    <span>&copy; 2026 Cordium &mdash; Todos os direitos reservados. &nbsp;|&nbsp; contato: <a href="mailto:claudio@damaro.com.br" style="color:#c9820a">claudio@damaro.com.br</a>&nbsp;|&nbsp; <a href="/admin" style="color:#555;opacity:.7;font-size:.85em" title="Admin">&#9881;</a></span>
+    <span><a href="/planos" style="color:#c9820a">Ver planos</a></span>
+</div>
+
+<script>
+async function consultar() {
+    const token = document.getElementById('campo-token').value.trim();
+    if (!token) { mostrarErro('Informe o token.'); return; }
+
+    const btn = document.getElementById('btn-consultar');
+    btn.disabled = true; btn.textContent = 'Consultando…';
+    ocultarErro();
+    document.getElementById('resultado').style.display = 'none';
+
+    try {
+        const r = await fetch('/api/usuario/conta', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token })
+        });
+        const d = await r.json();
+        if (!r.ok) { mostrarErro(d.erro || 'Erro ao consultar.'); return; }
+        renderizar(d);
+    } catch (e) {
+        mostrarErro('Falha de conexão. Tente novamente.');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Consultar';
+    }
+}
+
+function renderizar(d) {
+    const t = d.token;
+
+    document.getElementById('r-prefixo').textContent   = t.prefixo;
+    document.getElementById('r-email').textContent     = t.email;
+    document.getElementById('r-horas-total').textContent     = t.horas_contratadas + 'h';
+    document.getElementById('r-horas-consumidas').textContent = t.horas_consumidas + 'h';
+    document.getElementById('r-horas-restantes').textContent  = t.horas_restantes + 'h';
+
+    // Status badge
+    let badge;
+    if (!t.ativo)   badge = '<span class="badge badge-erro">Desativado</span>';
+    else if (t.expirado) badge = '<span class="badge badge-warn">Expirado</span>';
+    else            badge = '<span class="badge badge-ok">Ativo</span>';
+    document.getElementById('r-status-badge').innerHTML = badge;
+
+    // Expiracao
+    const exp = new Date(t.data_expiracao);
+    const fmt = exp.toLocaleDateString('pt-BR') + ' às ' + exp.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) + ' UTC';
+    const diasStr = t.expirado ? ' (expirado)' : ` (${t.dias_para_expirar}d restantes)`;
+    document.getElementById('r-expiracao').textContent = fmt + diasStr;
+
+    // Barra de progresso
+    const total = t.horas_contratadas || 1;
+    const pct   = Math.min(100, Math.round((t.horas_consumidas / total) * 100));
+    const barra = document.getElementById('r-barra');
+    barra.style.width = pct + '%';
+    barra.classList.toggle('danger', pct >= 90);
+    document.getElementById('r-pct-txt').textContent = pct + '% utilizado';
+
+    // Assinatura
+    if (d.assinatura) {
+        const a = d.assinatura;
+        document.getElementById('r-plano-nome').textContent     = a.plano_nome || '—';
+        document.getElementById('r-min-mensais').textContent    = a.minutos_mensais || '—';
+        document.getElementById('r-min-consumidos').textContent = (a.minutos_consumidos || 0) + ' min';
+        const di = new Date(a.data_inicio_ciclo).toLocaleDateString('pt-BR');
+        const df = new Date(a.data_fim_ciclo).toLocaleDateString('pt-BR');
+        document.getElementById('r-periodo').textContent = di + ' → ' + df;
+        document.getElementById('r-assin-status').innerHTML =
+            `<span class="badge badge-ok">${a.status || '—'}</span>`;
+        document.getElementById('bloco-assinatura').style.display = 'block';
+    }
+
+    // Consumos
+    if (d.consumos && d.consumos.length > 0) {
+        const tbody = document.getElementById('r-consumos-tbody');
+        tbody.innerHTML = d.consumos.map(c => {
+            const dt = new Date(c.data).toLocaleString('pt-BR');
+            return `<tr><td>${dt}</td><td>${c.minutos_consumidos} min</td><td>${c.detalhes || '—'}</td></tr>`;
+        }).join('');
+        document.getElementById('bloco-consumos').style.display = 'block';
+    }
+
+    document.getElementById('resultado').style.display = 'block';
+}
+
+function mostrarErro(msg) {
+    const el = document.getElementById('msg-erro');
+    el.textContent = msg; el.style.display = 'block';
+}
+function ocultarErro() {
+    document.getElementById('msg-erro').style.display = 'none';
+}
+
+document.getElementById('campo-token').addEventListener('keydown', e => {
+    if (e.key === 'Enter') consultar();
+});
+</script>
+</body>
+</html>
