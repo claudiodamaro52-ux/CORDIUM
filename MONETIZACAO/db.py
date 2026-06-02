@@ -175,6 +175,7 @@ def init_db():
     # ── seed: planos (só se a tabela estiver vazia) ──────────────────────────
     if c.execute("SELECT COUNT(*) FROM planos").fetchone()[0] == 0:
         from datetime import datetime, timezone
+from .seed_inicial import seed_usuarios_iniciais
         agora = datetime.now(timezone.utc).isoformat()
         c.executemany("""
             INSERT INTO planos
@@ -186,12 +187,14 @@ def init_db():
 
     # ── seed: config (INSERT OR IGNORE, nunca sobrescreve valor editado) ─────
     from datetime import datetime, timezone
+from .seed_inicial import seed_usuarios_iniciais
     agora = datetime.now(timezone.utc).isoformat()
     c.executemany("""
         INSERT OR IGNORE INTO config_monetizacao (chave, valor, descricao, atualizado_em)
         VALUES (?, ?, ?, ?)
     """, [(row[0], row[1], row[2], agora) for row in _CONFIG_SEED])
     conn.commit()
+    seed_usuarios_iniciais(conn)
     conn.close()
 
 
