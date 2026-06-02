@@ -63,10 +63,19 @@ def imagem(filename):
 
 @app.route('/layout/<filename>')
 def layout_file(filename):
-    """Serve arquivos de layout (header.html, nav-tools.html, layout.js)"""
     if filename not in ['header.html', 'nav-tools.html', 'layout.js']:
-        return 'Not found', 404
-    return send_from_directory(os.path.join(HTML_DIR, 'layout'), filename)
+        return "Not found", 404
+    try:
+        path = os.path.join(HTML_DIR, 'layout', filename)
+        with open(path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        mime = {'js': 'application/javascript', 'html': 'text/html'}
+        ext = filename.split('.')[-1]
+        ct = mime.get(ext, 'text/plain')
+        return content, 200, {'Content-Type': ct}
+    except Exception as e:
+        return f"Error: {e}", 500
+
 
 
 
