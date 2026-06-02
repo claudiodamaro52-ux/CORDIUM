@@ -59,6 +59,16 @@ def favicon():
 @app.route('/img/<filename>')
 def imagem(filename):
     return send_from_directory(IMG_DIR, filename)
+# ── Layout Reutilizável ───────────────────────────────────────────────────
+
+@app.route('/layout/<filename>')
+def layout_file(filename):
+    """Serve arquivos de layout (header.html, nav-tools.html, layout.js)"""
+    if filename not in ['header.html', 'nav-tools.html', 'layout.js']:
+        return 'Not found', 404
+    return send_from_directory(os.path.join(HTML_DIR, 'layout'), filename)
+
+
 
 
 @app.route('/')

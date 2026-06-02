@@ -102,32 +102,6 @@ textarea:focus{outline:none;border-color:#8b1400}
 </head>
 <body>
 
-<header>
-  <div class="brand">
-    <a href="/"><img src="/img/Logo_Cordium.webp" alt="CORDIUM ferramentas online de automacao"></a>
-    <a class="brand-name" href="/">Cordium</a>
-  </div>
-      <nav class="nav-info">
-        <a href="/sobre">Sobre</a>
-        <a href="/sobre-sim9">SIM9</a>
-        <a href="/planos">Planos</a>
-        <a href="/suporte">Suporte</a>
-        <a href="/minha-conta">Minha Conta</a>
-    </nav>
-  <div id="user-area" class="user-area">
-    <button class="btn-login" onclick="abrirLogin()">Entrar</button>
-  </div>
-</header>
-<div id="aviso-saldo" class="aviso-saldo">&#9888; <strong>Saldo insuficiente</strong> &mdash; voc&ecirc; est&aacute; no plano gratuito. Registros limitados a 1&nbsp;000 e n&iacute;vel m&aacute;ximo&nbsp;3. <a href="/planos">Ver planos &rarr;</a></div>
-<nav class="nav-tools">
-  <span class="tools-label">&#128736;</span>
-  <a href="/baixar-imagens">baixar imagens automaticamente</a>
-  <span class="tools-sep">|</span>
-  <a href="/formatar-json">JSON Tools Pro</a>
-  <span class="tools-sep">|</span>
-  <a class="ativo" href="/sim9">SIM9</a>
-</nav>
-
 <section class="seo-intro">
   <h1>SIM9 — Identificacao de Similaridade Textual</h1>
   <p>Cole uma lista no formato <strong>ID;TEXTO</strong> ou <strong>ID TEXTO</strong> (ID numérico + espaço) — uma linha por registro — e identifique registros duplicados ou similares em segundos. Quatro niveis de acuracidade para diferentes necessidades.</p>
@@ -1288,5 +1262,6 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(d){
 }).catch(function(){});
 </script>
 
+  <script src="/layout/layout.js"></script>
 </body>
 </html>

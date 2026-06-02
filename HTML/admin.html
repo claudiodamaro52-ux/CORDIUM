@@ -254,8 +254,12 @@ function doLogin() {
 }
 
 function doLogout() {
+  // Limpar sessão do usuário no backend
+  fetch('/api/logout', { method: 'POST' }).catch(() => {});
+  // Limpar token admin
   sessionStorage.removeItem('admin_secret');
-  location.reload();
+  // Redirecionar para SIM9
+  window.location.href = '/sim9';
 }
 
 async function apiGet(url) {
@@ -683,5 +687,6 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   </div>
 </div>
+  <script src="/layout/layout.js"></script>
 </body>
 </html>

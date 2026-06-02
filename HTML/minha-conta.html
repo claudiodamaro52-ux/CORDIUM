@@ -67,28 +67,6 @@ table tr:last-child td { border-bottom: none; }
 </head>
 <body>
 
-<header>
-    <div class="brand">
-        <a href="/"><img src="/img/Logo_Cordium.webp" alt="CORDIUM ferramentas online de automa&#231;&#227;o"></a>
-        <a class="brand-name" href="/">Cordium</a>
-    </div>
-    <nav class="nav-info">
-        <a href="/sobre">Sobre</a>
-        <a href="/sobre-sim9">SIM9</a>
-        <a href="/planos">Planos</a>
-        <a href="/suporte">Suporte</a>
-        <a href="/minha-conta" class="ativo">Minha Conta</a>
-    </nav>
-</header>
-<nav class="nav-tools">
-    <span class="tools-label">&#128736;</span>
-    <a href="/baixar-imagens">baixar imagens automaticamente</a>
-    <span class="tools-sep">|</span>
-    <a href="/formatar-json">JSON Tools Pro</a>
-    <span class="tools-sep">|</span>
-    <a href="/sim9">SIM9</a>
-</nav>
-
 <div class="container">
     <h1>Minha Conta</h1>
     <p style="color:#555;margin-bottom:28px">Consulte o saldo, consumo e validade do seu token de acesso.</p>
@@ -361,5 +339,6 @@ function ocultarErro() {
 document.getElementById('campo-token').addEventListener('keydown', e => { if (e.key === 'Enter') consultar(); });
 document.getElementById('campo-senha').addEventListener('keydown', e => { if (e.key === 'Enter') consultarComSenha(); });
 </script>
+  <script src="/layout/layout.js"></script>
 </body>
 </html>
