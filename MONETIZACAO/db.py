@@ -193,6 +193,12 @@ def init_db():
     """, [(row[0], row[1], row[2], agora) for row in _CONFIG_SEED])
     conn.commit()
     
+    # ── migrações: adiciona colunas novas em bancos existentes ───────────────
+    colunas = {row[1] for row in c.execute("PRAGMA table_info(assinaturas)")}
+    if "cliente_senha_hash" not in colunas:
+        c.execute("ALTER TABLE assinaturas ADD COLUMN cliente_senha_hash TEXT")
+        conn.commit()
+
     # ── seed: usuarios iniciais (só na primeira execução) ──────────────────────
     seed_usuarios_iniciais(conn)
     conn.close()
